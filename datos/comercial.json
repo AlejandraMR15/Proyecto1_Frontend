@@ -1,0 +1,24 @@
+[
+  {
+    "costo": 2000,
+    "id": "com-001",
+    "nombre": "Tienda",
+    "costoMantenimiento": 80,
+    "consumoElectricidad": 8,
+    "esActivo": true,
+    "empleo": 5,
+    "empleados": [],
+    "ingresoPorTurno": 200
+  },
+  {
+    "costo": 8000,
+    "id": "com-002",
+    "nombre": "Centro Comercial",
+    "costoMantenimiento": 300,
+    "consumoElectricidad": 25,
+    "esActivo": true,
+    "empleo": 20,
+    "empleados": [],
+    "ingresoPorTurno": 800
+  }
+]

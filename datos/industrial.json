@@ -1,0 +1,24 @@
+[
+  {
+    "costo": 5000,
+    "id": "ind-001",
+    "nombre": "Fábrica",
+    "costoMantenimiento": 200,
+    "consumoElectricidad": 40,
+    "esActivo": true,
+    "empleo": 15,
+    "empleados": [],
+    "montonDeProduccion": 500
+  },
+  {
+    "costo": 3000,
+    "id": "ind-002",
+    "nombre": "Granja",
+    "costoMantenimiento": 100,
+    "consumoElectricidad": 10,
+    "esActivo": true,
+    "empleo": 8,
+    "empleados": [],
+    "montonDeProduccion": 60
+  }
+]

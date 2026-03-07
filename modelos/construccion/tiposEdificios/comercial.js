@@ -1,6 +1,6 @@
 class Comercial extends Edificio {
-    constructor(costo, id, nombre, costoMantenimiento, consumoElectricidad, consumoAgua, esActivo, empleo, empleados, ingresoPorTurno) {
-        super(costo, id, nombre, costoMantenimiento, consumoElectricidad, consumoAgua, esActivo);
+    constructor(costo, id, nombre, costoMantenimiento, consumoElectricidad, esActivo, empleo, empleados, ingresoPorTurno) {
+        super(costo, id, nombre, costoMantenimiento, consumoElectricidad, 0, esActivo);
         // Máximo de puestos de trabajo disponibles
         this.empleo = empleo;
         // Array de objetos Ciudadano empleados aquí

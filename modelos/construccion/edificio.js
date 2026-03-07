@@ -2,7 +2,7 @@ class Edificio extends Construccion {
     constructor(costo, id, nombre, costoMantenimiento, consumoElectricidad, consumoAgua, esActivo) {
         super(costo);
         this.id = id;
-        this.nombre = nombre;
+        this.nombre = nombre.toLowerCase();
         this.costoMantenimiento = costoMantenimiento;
         this.consumoElectricidad = consumoElectricidad;
         this.consumoAgua = consumoAgua;

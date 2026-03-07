@@ -1,0 +1,24 @@
+[
+  {
+    "costo": 10000,
+    "id": "util-001",
+    "nombre": "Planta Eléctrica",
+    "costoMantenimiento": 250,
+    "consumoElectricidad": 0,
+    "consumoAgua": 0,
+    "esActivo": true,
+    "tipoDeUtilidad": "electrica",
+    "produccionPorTurno": 200
+  },
+  {
+    "costo": 8000,
+    "id": "util-002",
+    "nombre": "Planta de Agua",
+    "costoMantenimiento": 150,
+    "consumoElectricidad": 20,
+    "consumoAgua": 0,
+    "esActivo": true,
+    "tipoDeUtilidad": "agua",
+    "produccionPorTurno": 150
+  }
+]

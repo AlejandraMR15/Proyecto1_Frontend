@@ -1,6 +1,9 @@
 class PlantasDeUtilidad extends Edificio {
-    constructor(costo, id, nombre, costoMantenimiento, consumoElectricidad, consumoAgua, esActivo, tipoDeUtilidad, produccionPorTurno) {
-        super(costo, id, nombre, costoMantenimiento, consumoElectricidad, consumoAgua, esActivo);
+    constructor(costo, id, nombre, costoMantenimiento, esActivo, tipoDeUtilidad, produccionPorTurno) {
+        // Planta eléctrica: consumoElectricidad=0, consumoAgua=0
+        // Planta de agua:   consumoElectricidad=20, consumoAgua=0
+        const consumoElectricidad = tipoDeUtilidad === 'electrica' ? 0 : 20;
+        super(costo, id, nombre, costoMantenimiento, consumoElectricidad, 0, esActivo);
         // 'electrica' | 'agua'
         this.tipoDeUtilidad = tipoDeUtilidad;
         // Cantidad de recurso producida por turno

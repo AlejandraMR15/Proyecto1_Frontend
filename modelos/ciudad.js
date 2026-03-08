@@ -77,4 +77,24 @@ class Ciudad {
             }
         }
     }
+
+    toJSON() {
+        return {
+            nombre: this.nombre,
+            alcalde: this.alcalde,
+            recursos: this.recursos,
+            construcciones: this.construcciones.map(c => c.toJSON ? c.toJSON() : c)
+        };
+    }
+
+    static fromJSON(json) {
+        const ciudad = new Ciudad(json.nombre, json.alcalde);
+        ciudad.recursos = json.recursos;
+        ciudad.construcciones = json.construcciones.map(c => {
+            // Aquí necesitaríamos lógica para recrear las instancias correctas
+            // Por simplicidad, asumir que son objetos planos
+            return c;
+        });
+        return ciudad;
+    }
 }

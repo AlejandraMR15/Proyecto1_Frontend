@@ -117,4 +117,20 @@ export default class Ciudadano {
             return acc + (servicio.felicidad || 0);
         }, 0);
     }
+
+    toJSON() {
+        return {
+            id: this.id,
+            felicidad: this.felicidad,
+            residencia: this.residencia, // Asumir que residencia tiene id o algo serializable
+            empleo: this.empleo,
+            serviciosCercanos: this.serviciosCercanos
+        };
+    }
+
+    static fromJSON(json) {
+        const ciudadano = new Ciudadano(json.id, json.felicidad, json.residencia, json.empleo);
+        ciudadano.serviciosCercanos = json.serviciosCercanos;
+        return ciudadano;
+    }
 }

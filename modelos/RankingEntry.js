@@ -1,4 +1,18 @@
+/**
+ * Representa una entrada individual en el ranking de ciudades.
+ * Almacena métricas de una ciudad en un momento específico.
+ */
 export default class RankingEntry {
+    /**
+     * Crea una entrada de ranking.
+     * @param {string} nombreCiudad - Nombre de la ciudad.
+     * @param {string} alcalde - Nombre del alcalde.
+     * @param {number} puntuacion - Puntuación obtenida.
+     * @param {number} poblacion - Población de la ciudad.
+     * @param {number} felicidad - Felicidad promedio.
+     * @param {number} turno - Número de turno alcanzado.
+     * @param {Date} [fecha=new Date()] - Fecha de la entrada.
+     */
     constructor(nombreCiudad, alcalde, puntuacion, poblacion, felicidad, turno, fecha = new Date()) {
         this.nombreCiudad = nombreCiudad;
         this.alcalde = alcalde;
@@ -9,6 +23,10 @@ export default class RankingEntry {
         this.fecha = fecha;
     }
 
+    /**
+     * Serializa la entrada a un objeto JSON.
+     * @returns {object} Objeto serializable.
+     */
     toJSON() {
         return {
             nombreCiudad: this.nombreCiudad,

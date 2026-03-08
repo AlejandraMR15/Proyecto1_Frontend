@@ -1,9 +1,12 @@
 class Ciudad {
-    constructor(nombre, alcalde) {
+    constructor(nombre, alcalde, ancho = 15, alto = 15, coordenadas = null,
+                dineroInicial = 50000, electricidadInicial = 0, aguaInicial = 0, comidaInicial = 0) {
         this.nombre = nombre;
         this.alcalde = alcalde;
-        this.recursos = new Recursos();
+        this.recursos = new Recursos(dineroInicial, electricidadInicial, aguaInicial, comidaInicial);
         this.construcciones = [];
+        this.mapa = new Mapa(ancho, alto); // Agregar mapa visual
+        this.coordenadas = coordenadas;
     }
 
     /**
@@ -83,18 +86,20 @@ class Ciudad {
             nombre: this.nombre,
             alcalde: this.alcalde,
             recursos: this.recursos,
-            construcciones: this.construcciones.map(c => c.toJSON ? c.toJSON() : c)
+            construcciones: this.construcciones.map(c => c.toJSON ? c.toJSON() : c),
+            mapa: this.mapa.toJSON ? this.mapa.toJSON() : this.mapa,
+            coordenadas: this.coordenadas
         };
     }
 
     static fromJSON(json) {
-        const ciudad = new Ciudad(json.nombre, json.alcalde);
+        const ciudad = new Ciudad(json.nombre, json.alcalde, json.mapa.ancho, json.mapa.alto, json.coordenadas);
         ciudad.recursos = json.recursos;
         ciudad.construcciones = json.construcciones.map(c => {
-            // Aquí necesitaríamos lógica para recrear las instancias correctas
-            // Por simplicidad, asumir que son objetos planos
+            // Lógica para recrear construcciones
             return c;
         });
+        ciudad.mapa.matriz = json.mapa.matriz;
         return ciudad;
     }
 }

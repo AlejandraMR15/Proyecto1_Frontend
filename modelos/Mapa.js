@@ -227,4 +227,16 @@ export default class Mapa {
         if (matriz.length !== this.alto) return false;
         return matriz.every(fila => Array.isArray(fila) && fila.length === this.ancho);
     }
+
+    /**
+     * Serializa el mapa a un objeto JSON.
+     * @returns {object} Objeto serializable con ancho, alto y matriz.
+     */
+    toJSON() {
+        return {
+            ancho: this.ancho,
+            alto: this.alto,
+            matriz: this.matriz
+        };
+    }
 }

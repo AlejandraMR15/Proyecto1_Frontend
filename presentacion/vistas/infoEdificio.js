@@ -17,6 +17,7 @@ const ETIQUETAS = {
     ingresoPorTurno:             'Ingreso por turno',
     tipoDeProduccion:            'Tipo de producción',
     produccionPorTurno:          'Producción por turno',
+    
     montonDeProduccion:          'Producción por turno',
     tipoDeUtilidad:              'Tipo de utilidad',
     tipoDeServicio:              'Tipo de servicio',

@@ -1,0 +1,423 @@
+/* ============================================================
+ñ   Pixel Art City Builder — Variables y reset
+   ============================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  image-rendering: pixelated;
+}
+
+:root {
+  /* Paleta pixel art oscura */
+  --bg-page:        #080818;
+  --bg-sidebar:     #0f0f2a;
+  --bg-header:      #08081c;
+  --bg-cat:         #14144a;
+  --bg-cat-hover:   #1e1e6a;
+  --bg-item:        #0c0c24;
+  --bg-item-hover:  #181848;
+  --bg-item-active: #20208a;
+
+  /* Bordes pixel */
+  --border:         #3a3a9a;
+  --border-hi:      #6868cc;
+  --border-dk:      #06061a;
+
+  /* Textos */
+  --text-primary:   #c8d8ff;
+  --text-secondary: #6878a8;
+  --text-dim:       #383868;
+
+  /* Acento dorado retro */
+  --accent:         #ffd700;
+  --accent-dim:     #aa8800;
+  --accent-bg:      rgba(255, 215, 0, 0.10);
+  --accent-border:  rgba(255, 215, 0, 0.28);
+
+  /* Sidebar */
+  --sb-width:       272px;
+  --header-h:       50px;
+  --transition:     0.14s steps(4);
+}
+
+body {
+  background-color: var(--bg-page);
+  color: var(--text-primary);
+  font-family: 'Press Start 2P', 'Courier New', monospace;
+  min-height: 100vh;
+  overflow-x: hidden;
+  cursor: default;
+}
+
+/* ============================================================
+   Sidebar — estilo panel de videojuego pixel art
+   ============================================================ */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: var(--sb-width);
+  height: 100vh;
+  background: var(--bg-sidebar);
+  display: flex;
+  flex-direction: column;
+  z-index: 200;
+  transform: translateX(0);
+  transition: transform var(--transition);
+
+  /* Borde pixel art: 3 capas de sombra para efecto elevado */
+  border-right: 3px solid var(--border);
+  box-shadow:
+    3px 0 0 0 var(--border-hi),
+    6px 0 0 0 var(--border-dk),
+    inset -2px 0 0 0 var(--border-dk),
+    inset 0 2px 0 0 var(--border-hi);
+}
+
+/* Efecto scanlines sutiles sobre todo el panel */
+.sidebar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 3px,
+    rgba(0, 0, 0, 0.06) 3px,
+    rgba(0, 0, 0, 0.06) 4px
+  );
+  z-index: 10;
+}
+
+/* Estado cerrado */
+.sidebar[data-open="false"] {
+  transform: translateX(calc(-1 * var(--sb-width) - 8px));
+  box-shadow: none;
+}
+
+/* ---- Cabecera del panel ---- */
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  height: var(--header-h);
+  background: var(--bg-header);
+  border-bottom: 3px solid var(--border);
+  box-shadow: 0 2px 0 var(--border-dk);
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.sidebar-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sidebar-icon {
+  font-size: 16px;
+  line-height: 1;
+  filter: drop-shadow(0 0 5px rgba(104, 104, 204, 0.8));
+}
+
+.sidebar-title {
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: 0.09em;
+  color: var(--accent);
+  /* Sombra pixel doble — efecto retro */
+  text-shadow:
+    2px 2px 0 var(--accent-dim),
+    0 0 10px rgba(255, 215, 0, 0.25);
+}
+
+.sidebar-close {
+  background: var(--bg-item);
+  border: 2px solid var(--border);
+  color: var(--text-secondary);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  cursor: pointer;
+  padding: 5px 7px;
+  line-height: 1;
+  transition: color var(--transition), background var(--transition);
+  /* Borde biselado pixel */
+  box-shadow:
+    inset 1px 1px 0 var(--border-hi),
+    inset -1px -1px 0 var(--border-dk);
+}
+
+.sidebar-close:hover {
+  color: var(--accent);
+  background: var(--bg-item-hover);
+  border-color: var(--accent-dim);
+}
+
+.sidebar-close:active {
+  box-shadow:
+    inset -1px -1px 0 var(--border-hi),
+    inset 1px 1px 0 var(--border-dk);
+  transform: translate(1px, 1px);
+}
+
+/* ---- Cuerpo con scroll ---- */
+.sidebar-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 4px 0 12px;
+  position: relative;
+  z-index: 1;
+}
+
+.sidebar-body::-webkit-scrollbar {
+  width: 8px;
+  background: var(--bg-header);
+}
+.sidebar-body::-webkit-scrollbar-track {
+  background: var(--bg-header);
+  border-left: 2px solid var(--border-dk);
+}
+.sidebar-body::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-left: 2px solid var(--border-hi);
+  border-right: 2px solid var(--border-dk);
+}
+.sidebar-body::-webkit-scrollbar-thumb:hover {
+  background: var(--border-hi);
+}
+
+/* ============================================================
+   Categorías (acordeón pixel art)
+   ============================================================ */
+.category {
+  border-bottom: 2px solid var(--border-dk);
+}
+
+/* Botón de cabecera de categoría */
+.cat-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 12px;
+  background: var(--bg-cat);
+  border: none;
+  border-top: 2px solid var(--border);
+  border-bottom: 1px solid var(--border-dk);
+  cursor: pointer;
+  color: var(--text-primary);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  letter-spacing: 0.05em;
+  text-align: left;
+  transition: background var(--transition);
+  user-select: none;
+  position: relative;
+}
+
+/* Barra de color izquierda — efecto game UI */
+.cat-header::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--border-hi);
+}
+
+.cat-header:hover {
+  background: var(--bg-cat-hover);
+}
+
+.cat-header:hover .cat-name {
+  color: var(--accent);
+  text-shadow: 1px 1px 0 var(--accent-dim);
+}
+
+.cat-icon {
+  font-size: 14px;
+  flex-shrink: 0;
+  line-height: 1;
+  filter: drop-shadow(1px 1px 0 rgba(0, 0, 0, 0.9));
+}
+
+.cat-name {
+  flex: 1;
+  transition: color var(--transition), text-shadow var(--transition);
+}
+
+.cat-arrow {
+  font-size: 7px;
+  color: var(--border-hi);
+  transition: transform 0.12s steps(3);
+  line-height: 1;
+}
+
+/* Flecha apunta abajo (abierto) / derecha (cerrado) */
+.category[data-open="true"]  .cat-arrow { transform: rotate(0deg); }
+.category[data-open="false"] .cat-arrow { transform: rotate(-90deg); }
+
+/* ---- Lista de edificios ---- */
+.cat-items {
+  list-style: none;
+  max-height: 600px;
+  overflow: hidden;
+  transition: max-height 0.18s steps(8);
+  background: var(--bg-item);
+  border-left: 3px solid var(--border);
+}
+
+.category[data-open="false"] .cat-items {
+  max-height: 0;
+}
+
+/* ---- Ítem de edificio ---- */
+.build-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  background: var(--bg-item);
+  cursor: pointer;
+  border-bottom: 1px solid rgba(58, 58, 154, 0.3);
+  transition: background var(--transition);
+  position: relative;
+}
+
+/* Barra de acento dorada al hacer hover */
+.build-item::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 0;
+  background: var(--accent);
+  transition: width 0.1s steps(3);
+}
+
+.build-item:last-child { border-bottom: none; }
+
+.build-item:hover {
+  background: var(--bg-item-hover);
+}
+
+.build-item:hover::before { width: 3px; }
+
+.build-item:active { background: var(--bg-item-active); }
+
+/* Icono del edificio */
+.build-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(58, 58, 154, 0.25);
+  border: 2px solid var(--border);
+  box-shadow:
+    inset 1px 1px 0 var(--border-hi),
+    inset -1px -1px 0 var(--border-dk);
+  filter: drop-shadow(1px 1px 0 rgba(0, 0, 0, 0.9));
+}
+
+/* Contenedor de nombre + costo apilados */
+.build-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1;
+  min-width: 0;
+}
+
+.build-name {
+  font-size: 6.5px;
+  color: var(--text-primary);
+  line-height: 1.4;
+  transition: color var(--transition);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.build-item:hover .build-name { color: #ffffff; }
+
+.build-cost {
+  font-size: 6px;
+  color: var(--accent);
+  white-space: nowrap;
+  background: var(--accent-bg);
+  border: 2px solid var(--accent-border);
+  padding: 2px 5px;
+  align-self: flex-start;
+  /* Sombra texto dorada pixel */
+  text-shadow: 1px 1px 0 var(--accent-dim);
+  box-shadow: inset 1px 1px 0 rgba(255, 215, 0, 0.12);
+  transition: background var(--transition), border-color var(--transition);
+}
+
+.build-item:hover .build-cost {
+  background: rgba(255, 215, 0, 0.18);
+  border-color: rgba(255, 215, 0, 0.55);
+  box-shadow:
+    inset 1px 1px 0 rgba(255, 215, 0, 0.25),
+    0 0 6px rgba(255, 215, 0, 0.12);
+}
+
+/* ============================================================
+   Pestaña flotante para reabrir el panel
+   ============================================================ */
+.sidebar-tab {
+  position: fixed;
+  bottom: 32px;
+  left: 0;
+  transform: translateX(-6px);
+  z-index: 199;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+
+  background: var(--bg-cat);
+  border: 3px solid var(--border);
+  border-left: none;
+  color: var(--text-primary);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 6px;
+  letter-spacing: 0.05em;
+  padding: 14px 8px;
+  cursor: pointer;
+
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.1s steps(2), background var(--transition),
+              transform 0.14s steps(3);
+
+  /* Bisel pixel art */
+  box-shadow:
+    inset 0 2px 0 var(--border-hi),
+    inset -2px 0 0 var(--border-dk),
+    3px 0 0 0 var(--border-dk);
+}
+
+.sidebar[data-open="false"] ~ .sidebar-tab {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(0);
+}
+
+.sidebar-tab:hover {
+  background: var(--bg-cat-hover);
+  color: var(--accent);
+}
+
+.sidebar-tab > span {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  line-height: 1;
+}

@@ -1,24 +1,21 @@
 import ApiExternos from './ApiExternos.js';
+import { OPENWEATHER_KEY } from '../../keys.js';
 
 export default class ApiClima extends ApiExternos {
     constructor(temperatura = 0, condicionClimatica = '', humedad = 0, velocidadViento = 0) {
         super('https://api.openweathermap.org');
-        this.apiKey = this.leerApiKeyDesdeEnv();
+        this.apiKey = this.leerApiKey();
         this.temperatura = temperatura;
         this.condicionClimatica = condicionClimatica;
         this.humedad = humedad;
         this.velocidadViento = velocidadViento;
     }
 
-    // Lee la API key directamente desde el archivo .env expuesto por Vite.
-    leerApiKeyDesdeEnv() {
-        const apiKey = import.meta.env?.VITE_OPENWEATHER_API_KEY;
-
-        if (!apiKey) {
-            throw new Error('No se encontro VITE_OPENWEATHER_API_KEY en el archivo .env');
+    leerApiKey() {
+        if (!OPENWEATHER_KEY) {
+            throw new Error('No se encontro OPENWEATHER_KEY en keys.js');
         }
-
-        return apiKey;
+        return OPENWEATHER_KEY;
     }
 
     // Metodo principal: obtiene coordenadas por ciudad y luego consulta el clima.

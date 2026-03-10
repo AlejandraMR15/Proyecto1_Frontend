@@ -1,14 +1,21 @@
 import ApiExternos from './ApiExternos.js';
+import { NEWS_KEY } from '../../keys.js';
 
 export default class ApiNoticias extends ApiExternos {
     static CANTIDAD_NOTICIAS = 5;
 
     constructor(ultimasNoticias = []) {
         super('https://newsapi.org');
-        this.apiKey = this.leerApiKeyDesdeEnv();
+        this.apiKey = this.leerApiKey();
         this.ultimasNoticias = ultimasNoticias; 
     }
 
+    leerApiKey() {
+        if (!NEWS_KEY) {
+            throw new Error('No se encontro NEWS_KEY en keys.js');
+        }
+        return NEWS_KEY;
+    }
     // Metodo principal: consulta noticias y retorna solo los campos requeridos.
     async obtenerInformacion(pais = 'co') {
         const datosNoticias = await this.obtenerDatosNoticias(pais);
@@ -38,17 +45,6 @@ export default class ApiNoticias extends ApiExternos {
             pageSize: ApiNoticias.CANTIDAD_NOTICIAS,
             apiKey: this.apiKey
         };
-    }
-
-    // Lee la API key directamente desde el archivo .env expuesto por Vite.
-    leerApiKeyDesdeEnv() {
-        const apiKey = import.meta.env?.VITE_NEWS_API_KEY;
-
-        if (!apiKey) {
-            throw new Error('No se encontro VITE_NEWS_API_KEY en el archivo .env');
-        }
-
-        return apiKey;
     }
 
     // Mapea cada articulo al formato JSON solicitado por la capa de presentacion.

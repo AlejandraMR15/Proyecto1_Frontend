@@ -191,7 +191,7 @@ export default class Mapa {
 
         // 0 para vías ('r'), 1 para cualquier otra etiqueta.
         return this.matriz.map(fila =>
-            fila.map(celda => (this._esVia(celda) ? 0 : 1))
+            fila.map(celda => (this._esVia(celda) ? 1 : 0))
         );
     }
 

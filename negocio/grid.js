@@ -168,9 +168,20 @@ import GridRenderer from './GridRenderer.js';
     ============================================================ */
     document.addEventListener('DOMContentLoaded', function () {
 
-        // 1. Crear el modelo lógico
-        const mapa = new Mapa(15, 15);
-        mapa.generarMatriz();   // llena toda la matriz con 'g'
+        // 1. Leer configuración guardada por el menú
+        let config = {};
+        try {
+            const raw = localStorage.getItem('config-nueva-partida');
+            if (raw) config = JSON.parse(raw);
+        } catch { config = {}; }
+
+        const tamano = (config.ancho && config.ancho >= 15 && config.ancho <= 30)
+            ? config.ancho
+            : 15;
+
+    // 2. Crear el modelo lógico con el tamaño correcto
+    const mapa = new Mapa(tamano, tamano);
+    mapa.generarMatriz();
 
         // 2. Crear el renderer y pasarle el modelo
         const renderer = new GridRenderer(mapa, {

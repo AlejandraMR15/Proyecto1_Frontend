@@ -14,12 +14,12 @@ export default class Ciudadano {
      * @param {object|null} [residencia=null] Referencia al edificio residencial asignado.
      * @param {object|null} [empleo=null] Referencia al edificio laboral asignado.
      */
-    constructor(id = null, felicidad = 100, residencia = null, empleo = null) {
+    constructor(id = null, felicidad = 100, residencia = null, empleo = null, servicios = 0) {
         this.id = id;
         this.felicidad = felicidad;
         this.residencia = residencia;
         this.empleo = empleo;
-        this.serviciosCercanos = [];
+        this.servicios = servicios; // Suma total de felicidad aportada por servicios cercanos
     }
 
     /**
@@ -56,7 +56,7 @@ export default class Ciudadano {
      * Reglas:
      * - Tener vivienda: +20, no tener: -20
      * - Tener empleo: +15, no tener: -15
-     * - Servicios cercanos: suma de `servicio.felicidad`
+     * - Servicios cercanos: suma del atributo `servicios`
      * - Resultado final acotado al rango [0, 100]
      *
      * @returns {number} Nuevo valor de felicidad calculado.
@@ -77,7 +77,7 @@ export default class Ciudadano {
             negativos += 15;
         }
 
-        // sumar el valor de cada servicio cercano (parques, hospitales, policía, etc.)
+        // sumar el valor de servicios (suma de felicidad de parques, hospitales, policía, etc.)
         positivos += this._valorServicios();
 
         let total = positivos - negativos;
@@ -104,17 +104,28 @@ export default class Ciudadano {
     }
 
     /**
-     * Suma el aporte de felicidad de todos los servicios cercanos.
+     * Retorna el aporte de felicidad de los servicios cercanos.
      *
-     * Cada elemento de `serviciosCercanos` puede exponer la propiedad
-     * `felicidad`. Si no existe, se toma como 0.
+     * El valor ya está pre-calculado en el atributo `servicios`.
      * @private
      * @returns {number} Suma total de felicidad aportada por servicios.
      */
     _valorServicios() {
-        if (!Array.isArray(this.serviciosCercanos)) return 0;
-        return this.serviciosCercanos.reduce((acc, servicio) => {
-            return acc + (servicio.felicidad || 0);
-        }, 0);
+        return this.servicios || 0;
+    }
+
+    toJSON() {
+        return {
+            id: this.id,
+            felicidad: this.felicidad,
+            residencia: this.residencia, // Asumir que residencia tiene id o algo serializable
+            empleo: this.empleo,
+            servicios: this.servicios
+        };
+    }
+
+    static fromJSON(json) {
+        const ciudadano = new Ciudadano(json.id, json.felicidad, json.residencia, json.empleo, json.servicios);
+        return ciudadano;
     }
 }

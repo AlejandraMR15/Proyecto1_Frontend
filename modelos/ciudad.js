@@ -43,10 +43,55 @@ class Ciudad {
     }
 
     /**
+     * Obtiene la lista de edificios residenciales de la ciudad.
+     *
+     * Se considera residencial todo edificio con capacidad de residentes.
+     * @returns {Array<object>} Edificios residenciales.
+     */
+    obtenerEdificiosResidenciales() {
+        return this.construcciones.filter(construccion => {
+            return typeof construccion.capacidad === 'number'
+                && Array.isArray(construccion.residentes)
+                && typeof construccion.añadirResidentes === 'function';
+        });
+    }
+
+    /**
+     * Obtiene la lista de edificios laborales de la ciudad.
+     *
+     * Se considera laboral todo edificio que permite añadir empleados.
+     * @returns {Array<object>} Edificios laborales.
+     */
+    obtenerEdificiosLaborales() {
+        return this.construcciones.filter(construccion => {
+            return typeof construccion.añadirEmpleado === 'function'
+                && Array.isArray(construccion.empleados)
+                && (typeof construccion.empleo === 'number' || typeof construccion.empleos === 'number');
+        });
+    }
+
+    /**
+     * Calcula la suma de felicidad aportada por servicios de ciudad activos.
+     *
+     * Reglas:
+     * - Se considera todo edificio con propiedad numérica `felicidad`.
+     * - Si el edificio tiene `esActivo`, solo suma cuando está activo.
+     * @returns {number} Suma total de felicidad aportada por servicios.
+     */
+    obtenerValorServicios() {
+        return this.construcciones
+            .filter(construccion => {
+                const tieneFelicidad = typeof construccion.felicidad === 'number';
+                const activo = typeof construccion.esActivo === 'undefined' || construccion.esActivo;
+                return tieneFelicidad && activo;
+            })
+            .reduce((acumulado, construccion) => acumulado + construccion.felicidad, 0);
+    }
+
+    /**
      * Ejecuta un ciclo de turno completo:
      * 1. Primero las plantas de utilidad producen recursos.
      * 2. Luego cada construcción aplica sus consumos y producción.
-     * 3. Los parques y servicios aplican felicidad a los ciudadanos (si se provee array).
      * @param {Ciudadano[]} [ciudadanos=[]]  - Array con todos los ciudadanos de la ciudad.
      */
     procesarTurno(ciudadanos = []) {
@@ -63,18 +108,25 @@ class Ciudad {
                 edificio.procesarTurno(this.recursos);
             }
         }
+    }
 
-        // Paso 3: efectos de felicidad sobre ciudadanos
-        if (ciudadanos.length > 0) {
-            const parques = this.construcciones.filter(c => c instanceof Parques);
-            for (const parque of parques) {
-                parque.aplicarFelicidad(ciudadanos);
-            }
+    toJSON() {
+        return {
+            nombre: this.nombre,
+            alcalde: this.alcalde,
+            recursos: this.recursos,
+            construcciones: this.construcciones.map(c => c.toJSON ? c.toJSON() : c)
+        };
+    }
 
-            const servicios = this.construcciones.filter(c => c instanceof Servicio);
-            for (const servicio of servicios) {
-                servicio.aplicarFelicidad(ciudadanos);
-            }
-        }
+    static fromJSON(json) {
+        const ciudad = new Ciudad(json.nombre, json.alcalde);
+        ciudad.recursos = json.recursos;
+        ciudad.construcciones = json.construcciones.map(c => {
+            // Aquí necesitaríamos lógica para recrear las instancias correctas
+            // Por simplicidad, asumir que son objetos planos
+            return c;
+        });
+        return ciudad;
     }
 }

@@ -48,6 +48,22 @@ export default class GestorCiudadano {
     }
 
     /**
+     * Recalcula la felicidad de todos los ciudadanos segun el estado actual.
+     *
+     * Se actualiza el valor de servicios de cada ciudadano y luego
+     * se ejecuta `calcularFelicidad()` para evitar acumulaciones por turno.
+     *
+     * @param {number} [valorServicios=0] Suma de felicidad aportada por servicios activos.
+     * @returns {void}
+     */
+    recalcularFelicidadCiudadanos(valorServicios = 0) {
+        this.ciudadanos.forEach(ciudadano => {
+            ciudadano.servicios = valorServicios;
+            ciudadano.calcularFelicidad();
+        });
+    }
+
+    /**
      * Obtiene edificios residenciales con capacidad disponible.
      *
      * Criterio: `residentes < capacidad`.
@@ -89,7 +105,7 @@ export default class GestorCiudadano {
             if (typeof edificio.tieneEmpleoDisponible === 'function') {
                 return edificio.tieneEmpleoDisponible();
             }
-            const empleos = edificio.empleos || 0;
+            const empleos = edificio.empleo || 0;
             const empleados = edificio.empleados ? edificio.empleados.length : 0;
             return empleos - empleados > 0;
         });
@@ -105,15 +121,16 @@ export default class GestorCiudadano {
      *
      * @param {Array<object>} edificiosResidenciales Edificios residenciales del turno.
      * @param {Array<object>|object|null} edificiosLaborales Edificios laborales del turno.
+     * @param {number} [valorServicios=0] Suma de felicidad aportada por servicios (parques, hospitales, policía, etc.).
      * @returns {void}
      */
-    procesarCrecimientoPoblacional(edificiosResidenciales, edificiosLaborales) {
+    procesarCrecimientoPoblacional(edificiosResidenciales, edificiosLaborales, valorServicios = 0) {
         if (!this._puedeCrecer(edificiosResidenciales, edificiosLaborales)) {
             return; // no se cumplen condiciones de crecimiento
         }
 
         const cantidad = this._calcularCiudadanosACrear();
-        this._crearYAsignarCiudadanos(cantidad, edificiosResidenciales, edificiosLaborales);
+        this._crearYAsignarCiudadanos(cantidad, edificiosResidenciales, edificiosLaborales, valorServicios);
     }
 
     /**
@@ -207,17 +224,19 @@ export default class GestorCiudadano {
      * - intenta asignar primer empleo disponible
      * - actualiza contadores del edificio si existen metodos `añadirResidente`
      *   y `añadirEmpleado`
+     * - asigna el valor de servicios (suma de felicidad de parques, hospitales, policía, etc.)
      * - calcula felicidad inicial y lo agrega al gestor
      *
      * @private
      * @param {number} cantidad Numero de ciudadanos a crear.
      * @param {Array<object>} edificiosResidenciales
      * @param {Array<object>|object|null} edificiosLaborales
+     * @param {number} [valorServicios=0] Suma de felicidad aportada por servicios.
      * @returns {void}
      */
-    _crearYAsignarCiudadanos(cantidad, edificiosResidenciales, edificiosLaborales) {
+    _crearYAsignarCiudadanos(cantidad, edificiosResidenciales, edificiosLaborales, valorServicios = 0) {
         for (let i = 0; i < cantidad; i++) {
-            const nuevoCiudadano = new Ciudadano(this._generarNuevoId());
+            const nuevoCiudadano = new Ciudadano(this._generarNuevoId(), 100, null, null, valorServicios);
             
             // obtiene listas de viviendas y empleos disponibles
             const viviendasLibres = this.obtenerViviendaDisponible(edificiosResidenciales);
@@ -227,7 +246,7 @@ export default class GestorCiudadano {
             if (viviendasLibres.length > 0) {
                 const residencia = viviendasLibres[0];
                 nuevoCiudadano.asignarVivienda(residencia);
-                residencia.añadirResidente(nuevoCiudadano);
+                residencia.añadirResidentes(nuevoCiudadano);
                 
             }
             
@@ -238,7 +257,7 @@ export default class GestorCiudadano {
                 empleo.añadirEmpleado(nuevoCiudadano);
             }
             
-            // calcula felicidad inicial basada en asignaciones
+            // calcula felicidad inicial basada en asignaciones y servicios
             nuevoCiudadano.calcularFelicidad();
             
             // Agrega el nuevo ciudadano al gestor

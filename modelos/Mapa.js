@@ -189,7 +189,7 @@ export default class Mapa {
     generarMatriz01() {
         if (!Array.isArray(this.matriz) || this.matriz.length === 0) return [];
 
-        // 0 para vías ('r'), 1 para cualquier otra etiqueta.
+        // 1 para vías ('r'), 0 para cualquier otra etiqueta.
         return this.matriz.map(fila =>
             fila.map(celda => (this._esVia(celda) ? 1 : 0))
         );

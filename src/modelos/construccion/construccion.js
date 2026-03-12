@@ -1,0 +1,33 @@
+export default class Construccion {
+    constructor(costo) {
+        this.costo = costo;
+    }
+
+    puedeConstruirse(ciudad) {
+        return ciudad.recursos.dinero >= this.costo;
+    }
+
+    ejecutar(ciudad) {
+        if (this.puedeConstruirse(ciudad)) {
+            ciudad.recursos.dinero -= this.costo;
+            ciudad.construcciones.push(this);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Serializa la construcción a un objeto plano.
+     * Las subclases deben sobreescribir este método e incluir
+     * `...super.toJSON()` para heredar los campos base.
+     * El campo `tipo` identifica la clase concreta para el factory
+     * de reconstrucción en Ciudad.fromJSON().
+     * @returns {object}
+     */
+    toJSON() {
+        return {
+            tipo:  this.constructor.name,
+            costo: this.costo
+        };
+    }
+}

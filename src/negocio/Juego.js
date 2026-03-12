@@ -6,9 +6,9 @@ import Ciudad from "../modelos/ciudad.js";
 import Puntuacion from "./Puntuacion.js";
 import StorageManager from "../acceso_datos/StorageManager.js";
 import Ciudadano from "../modelos/Ciudadano.js";
-import Residencial from "../modelos/construccion/Residencial.js";
-import Comercial from "../modelos/construccion/Comercial.js";
-import Industrial from "../modelos/construccion/Industrial.js";
+import Residencial from "../modelos/construccion/tiposEdificios/residencial.js";
+import Comercial from "../modelos/construccion/tiposEdificios/comercial.js";
+import Industrial from "../modelos/construccion/tiposEdificios/industrial.js";
 
 /**
  * Clase principal que gestiona la lógica del juego.

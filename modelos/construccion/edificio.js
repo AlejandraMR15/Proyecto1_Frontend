@@ -1,4 +1,4 @@
-class Edificio extends Construccion {
+export default class Edificio extends Construccion {
     constructor(costo, id, nombre, costoMantenimiento, consumoElectricidad, consumoAgua, esActivo) {
         super(costo);
         this.id = id;
@@ -50,6 +50,23 @@ class Edificio extends Construccion {
             consumoElectricidad: this.consumoElectricidad,
             consumoAgua: this.consumoAgua,
             esActivo: this.esActivo
+        };
+    }
+
+    /**
+     * Serializa el edificio a un objeto plano.
+     * Las subclases deben llamar `...super.toJSON()` para incluir estos campos.
+     * @returns {object}
+     */
+    toJSON() {
+        return {
+            ...super.toJSON(),
+            id:                 this.id,
+            nombre:             this.nombre,
+            costoMantenimiento: this.costoMantenimiento,
+            consumoElectricidad:this.consumoElectricidad,
+            consumoAgua:        this.consumoAgua,
+            esActivo:           this.esActivo
         };
     }
 }

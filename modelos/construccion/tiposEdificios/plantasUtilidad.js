@@ -1,4 +1,4 @@
-class PlantasDeUtilidad extends Edificio {
+export default class PlantasDeUtilidad extends Edificio {
     constructor(costo, id, nombre, costoMantenimiento, consumoElectricidad, consumoAgua, esActivo, tipoDeUtilidad, produccionPorTurno) {
         super(costo, id, nombre, costoMantenimiento, consumoElectricidad, consumoAgua, esActivo);
         // 'electrica' | 'agua'
@@ -37,6 +37,14 @@ class PlantasDeUtilidad extends Edificio {
         return {
             ...super.getInformacion(),
             tipoDeUtilidad: this.tipoDeUtilidad,
+            produccionPorTurno: this.produccionPorTurno
+        };
+    }
+
+    toJSON() {
+        return {
+            ...super.toJSON(),
+            tipoDeUtilidad:    this.tipoDeUtilidad,
             produccionPorTurno: this.produccionPorTurno
         };
     }

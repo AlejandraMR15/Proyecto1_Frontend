@@ -1,4 +1,4 @@
-class Industrial extends Edificio {
+export default class Industrial extends Edificio {
     constructor(costo, id, nombre, costoMantenimiento, consumoElectricidad, consumoAgua, esActivo, empleo, empleados, tipoDeProduccion, produccion) {
         super(costo, id, nombre, costoMantenimiento, consumoElectricidad, consumoAgua, esActivo);
         // Máximo de puestos de trabajo disponibles
@@ -66,6 +66,16 @@ class Industrial extends Edificio {
             empleadosActuales: this.empleados.length,
             tipoDeProduccion: this.tipoDeProduccion,
             produccionPorTurno: this.produccion
+        };
+    }
+
+    toJSON() {
+        return {
+            ...super.toJSON(),
+            empleo:           this.empleo,
+            empleados:        this.empleados.map(e => e.toJSON ? e.toJSON() : e),
+            tipoDeProduccion: this.tipoDeProduccion,
+            produccion:       this.produccion
         };
     }
 }

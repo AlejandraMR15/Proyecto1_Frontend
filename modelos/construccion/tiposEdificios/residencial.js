@@ -1,4 +1,4 @@
-class Residencial extends Edificio {
+export default class Residencial extends Edificio {
     constructor(costo, id, nombre, costoMantenimiento, consumoElectricidad, consumoAgua, esActivo, capacidad, residentes) {
         super(costo, id, nombre, costoMantenimiento, consumoElectricidad, consumoAgua, esActivo);
         this.capacidad = capacidad;
@@ -40,6 +40,14 @@ class Residencial extends Edificio {
             capacidad: this.capacidad,
             ocupacion: this.ocupacion(),
             tieneCarpacidadDisponible: this.tieneCarpacidadDisponible()
+        };
+    }
+
+    toJSON() {
+        return {
+            ...super.toJSON(),
+            capacidad:   this.capacidad,
+            residentes:  this.residentes.map(r => r.toJSON ? r.toJSON() : r)
         };
     }
 }

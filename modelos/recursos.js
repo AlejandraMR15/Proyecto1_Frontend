@@ -1,4 +1,4 @@
-class Recursos {
+export default class Recursos {
     constructor() {
         this.dinero = 50000;
         this.electricidad = 0;

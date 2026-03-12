@@ -1,4 +1,4 @@
-class Servicio extends Edificio {
+export default class Servicio extends Edificio {
     constructor(costo, id, nombre, costoMantenimiento, consumoElectricidad, consumoAgua, esActivo, tipoDeServicio, felicidad, radio) {
         super(costo, id, nombre, costoMantenimiento, consumoElectricidad, consumoAgua, esActivo);
         // 'policia' | 'bomberos' | 'hospital'
@@ -28,6 +28,15 @@ class Servicio extends Edificio {
             tipoDeServicio: this.tipoDeServicio,
             felicidadAportada: this.felicidad,
             radio: this.radio
+        };
+    }
+
+    toJSON() {
+        return {
+            ...super.toJSON(),
+            tipoDeServicio: this.tipoDeServicio,
+            felicidad:      this.felicidad,
+            radio:          this.radio
         };
     }
 }

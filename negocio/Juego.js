@@ -6,6 +6,9 @@ import Ciudad from "../modelos/ciudad.js";
 import Puntuacion from "./Puntuacion.js";
 import StorageManager from "../acceso_datos/StorageManager.js";
 import Ciudadano from "../modelos/Ciudadano.js";
+import Residencial from "../modelos/construccion/Residencial.js";
+import Comercial from "../modelos/construccion/Comercial.js";
+import Industrial from "../modelos/construccion/Industrial.js";
 
 /**
  * Clase principal que gestiona la lógica del juego.
@@ -18,10 +21,10 @@ export default class Juego {
      */
     constructor() {
         this.ciudad = null;
-        this.sistemaDeTurnos = new SistemaTurnos(10000);
+        this.SistemaDeTurnos = new SistemaTurnos(10000);
         this.administrarPuntaje = new Puntuacion();
         this.StorageManager = new StorageManager();
-        this.estadoDeJuego = new EstadoDeJuego();
+        this.EstadoDeJuego = new EstadoDeJuego();
         this.gestorCiudadanos = new GestorCiudadano();
         this.numeroTurno = 0;
     }
@@ -34,8 +37,8 @@ export default class Juego {
             console.error("No hay ciudad creada");
             return;
         }
-        this.estadoJuego.cambiarEstado(ESTADOS.JUGANDO);
-        this.sistemaTurnos.iniciar(() => this.ejecutarTurno());
+        this.EstadoDeJuego.cambiarEstado(ESTADOS.JUGANDO);
+        this.SistemaDeTurnos.iniciar(() => this.ejecutarTurno());
         console.log("Juego iniciado");
     }
 
@@ -43,23 +46,23 @@ export default class Juego {
      * Pausa el juego si está jugando.
      */
     pausarJuego() {
-        if (this.estadoJuego.estaJugando()) {
-            this.estadoJuego.cambiarEstado(ESTADOS.PAUSA);
-            this.sistemaTurnos.detener();
+        if (this.EstadoDeJuego.estaJugando()) {
+            this.EstadoDeJuego.cambiarEstado(ESTADOS.PAUSA);
+            this.SistemaDeTurnos.detener();
             console.log("Juego en pausa");
         }
     }
 
     reanudarJuego() {
-        if (this.estadoJuego.estaEnPausa()) {
-            this.estadoJuego.cambiarEstado(ESTADOS.JUGANDO);
-            this.sistemaTurnos.iniciar(() => this.ejecutarTurno());
+        if (this.EstadoDeJuego.estaEnPausa()) {
+            this.EstadoDeJuego.cambiarEstado(ESTADOS.JUGANDO);
+            this.SistemaDeTurnos.iniciar(() => this.ejecutarTurno());
             console.log("Juego reanudado");
         }
     }
 
     ejecutarTurno() {
-        if (!this.estadoDeJuego.estaJugando()) return;
+        if (!this.EstadoDeJuego.estaJugando()) return;
         this.numeroTurno++;
         console.log("Turno:", this.numeroTurno);
         if (this.ciudad) {
@@ -75,12 +78,15 @@ export default class Juego {
             this.gestorCiudadanos.procesarCrecimientoPoblacional(edificiosResidenciales, edificiosLaborales);
         }
         let puntaje = 0;
-        if (this.administrarPuntaje) {
-            // Asumir que calcular toma la ciudad y quizás ciudadanos
+        if (this.administrarPuntaje && this.ciudad) {
+            const recursos = this.ciudad.recursos;
             puntaje = this.administrarPuntaje.calcular({
-                poblacion: this.gestorCiudadanos.calcularTotalCiudadanos(),
-                felicidad: this.gestorCiudadanos.calcularFelicidadPromedio(),
-                dinero: this.ciudad ? this.ciudad.recursos.dinero : 0
+                poblacion:    this.gestorCiudadanos.calcularTotalCiudadanos(),
+                felicidad:    this.gestorCiudadanos.calcularFelicidadPromedio(),
+                dinero:       recursos.dinero,
+                numEdificios: this.ciudad.construcciones.length,
+                electricidad: recursos.electricidad,
+                agua:         recursos.agua
             });
         }
         console.log("Puntaje:", puntaje);
@@ -116,7 +122,7 @@ export default class Juego {
 
         this.ciudad = new Ciudad(nombre, alcalde, ancho, alto, coordenadas,
                                  dineroInicial, electricidadInicial, aguaInicial, comidaInicial);
-        this.sistemaDeTurnos.cambiarDuracion(duracionTurno);
+        this.SistemaDeTurnos.cambiarDuracion(duracionTurno);
         return this.ciudad;
     }
 

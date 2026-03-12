@@ -1,14 +1,14 @@
-class Industrial extends Edificio {
-    constructor(costo, id, nombre, costoMantenimiento, consumoElectricidad, consumoAgua, esActivo, empleo, empleados, montonDeProduccion) {
+export default class Industrial extends Edificio {
+    constructor(costo, id, nombre, costoMantenimiento, consumoElectricidad, consumoAgua, esActivo, empleo, empleados, tipoDeProduccion, produccion) {
         super(costo, id, nombre, costoMantenimiento, consumoElectricidad, consumoAgua, esActivo);
         // Máximo de puestos de trabajo disponibles
         this.empleo = empleo;
         // Array de objetos Ciudadano empleados aquí
         this.empleados = empleados ?? [];
-        // Se define según el nombre: granja = 'comida', cualquier otro = 'dinero'
-        this.tipoDeProduccion = nombre.toLowerCase().includes('granja') ? 'comida' : 'dinero';
+        // 'fabrica' genera dinero; 'granja' genera comida
+        this.tipoDeProduccion = tipoDeProduccion;
         // Cantidad producida por turno (dinero o comida según tipoDeProduccion)
-        this.montonDeProduccion = montonDeProduccion;
+        this.produccion = produccion;
     }
 
     // Contrata a un ciudadano si hay vacantes. Retorna true si fue contratado.
@@ -30,7 +30,7 @@ class Industrial extends Edificio {
     // Las granjas no generan dinero directamente, retornan 0.
     ingresosPorTurno() {
         if (!this.esActivo) return 0;
-        return this.tipoDeProduccion === 'dinero' ? this.montonDeProduccion : 0;
+        return this.tipoDeProduccion === 'fabrica' ? this.produccion : 0;
     }
 
     /**
@@ -45,10 +45,10 @@ class Industrial extends Edificio {
         const faltanRecursos = recursos.electricidad < 0 || recursos.agua < 0;
         const factor = faltanRecursos ? 0.5 : 1;
 
-        if (this.tipoDeProduccion === 'dinero') {
-            recursos.dinero += Math.floor(this.montonDeProduccion * factor);
-        } else if (this.tipoDeProduccion === 'comida') {
-            recursos.actualizarComida(Math.floor(this.montonDeProduccion * factor));
+        if (this.tipoDeProduccion === 'fabrica') {
+            recursos.dinero += Math.floor(this.produccion * factor);
+        } else if (this.tipoDeProduccion === 'granja') {
+            recursos.actualizarComida(Math.floor(this.produccion * factor));
         }
     }
 
@@ -65,7 +65,17 @@ class Industrial extends Edificio {
             empleo: this.empleo,
             empleadosActuales: this.empleados.length,
             tipoDeProduccion: this.tipoDeProduccion,
-            produccionPorTurno: this.montonDeProduccion
+            produccionPorTurno: this.produccion
+        };
+    }
+
+    toJSON() {
+        return {
+            ...super.toJSON(),
+            empleo:           this.empleo,
+            empleados:        this.empleados.map(e => e.toJSON ? e.toJSON() : e),
+            tipoDeProduccion: this.tipoDeProduccion,
+            produccion:       this.produccion
         };
     }
 }

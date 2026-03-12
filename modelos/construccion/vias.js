@@ -1,4 +1,4 @@
-class Vias extends Construccion {
+export default class Vias extends Construccion {
     constructor(costo) {
         super(costo);
         // Las vías no consumen recursos operativos
@@ -11,5 +11,12 @@ class Vias extends Construccion {
      */
     esTransitable() {
         return true;
+    }
+
+    toJSON() {
+        return {
+            ...super.toJSON()
+            // Vias no tiene propiedades adicionales
+        };
     }
 }

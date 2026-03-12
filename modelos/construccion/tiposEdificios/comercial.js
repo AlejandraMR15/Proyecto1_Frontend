@@ -1,6 +1,6 @@
-class Comercial extends Edificio {
-    constructor(costo, id, nombre, costoMantenimiento, consumoElectricidad, esActivo, empleo, empleados, ingresoPorTurno) {
-        super(costo, id, nombre, costoMantenimiento, consumoElectricidad, 0, esActivo);
+export default class Comercial extends Edificio {
+    constructor(costo, id, nombre, costoMantenimiento, consumoElectricidad, consumoAgua, esActivo, empleo, empleados, ingresoPorTurno) {
+        super(costo, id, nombre, costoMantenimiento, consumoElectricidad, consumoAgua, esActivo);
         // Máximo de puestos de trabajo disponibles
         this.empleo = empleo;
         // Array de objetos Ciudadano empleados aquí
@@ -57,6 +57,15 @@ class Comercial extends Edificio {
             empleadosActuales: this.empleados.length,
             ingresoPorTurno: this.ingresoPorTurno,
             tieneCapacidadDisponible: this.tieneCapacidadDisponible()
+        };
+    }
+
+    toJSON() {
+        return {
+            ...super.toJSON(),
+            empleo:          this.empleo,
+            empleados:       this.empleados.map(e => e.toJSON ? e.toJSON() : e),
+            ingresoPorTurno: this.ingresoPorTurno
         };
     }
 }

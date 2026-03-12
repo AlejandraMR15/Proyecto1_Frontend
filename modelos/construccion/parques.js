@@ -1,4 +1,4 @@
-class Parques extends Construccion {
+export default class Parques extends Construccion {
     constructor(costo, felicidad)  {
         super(costo);
         // Puntos de felicidad que aporta a todos los ciudadanos (+5 según spec)
@@ -13,5 +13,12 @@ class Parques extends Construccion {
         for (const ciudadano of ciudadanos) {
             ciudadano.felicidad = Math.min(100, ciudadano.felicidad + this.felicidad);
         }
+    }
+
+    toJSON() {
+        return {
+            ...super.toJSON(),
+            felicidad: this.felicidad
+        };
     }
 }

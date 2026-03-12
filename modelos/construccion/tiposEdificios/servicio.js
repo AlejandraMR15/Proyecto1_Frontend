@@ -1,14 +1,12 @@
-class Servicio extends Edificio {
-    constructor(costo, id, nombre, costoMantenimiento, esActivo, tipoDeServicio, felicidad) {
-        // policia y bomberos: electricidad=15, agua=0
-        // hospital:           electricidad=20, agua=10
-        const consumoElectricidad = tipoDeServicio === 'hospital' ? 20 : 15;
-        const consumoAgua = tipoDeServicio === 'hospital' ? 10 : 0;
+export default class Servicio extends Edificio {
+    constructor(costo, id, nombre, costoMantenimiento, consumoElectricidad, consumoAgua, esActivo, tipoDeServicio, felicidad, radio) {
         super(costo, id, nombre, costoMantenimiento, consumoElectricidad, consumoAgua, esActivo);
         // 'policia' | 'bomberos' | 'hospital'
         this.tipoDeServicio = tipoDeServicio;
         // Puntos de felicidad que aporta a todos los ciudadanos
         this.felicidad = felicidad;
+        // Radio de influencia en celdas (no usado en felicidad global, reservado para futuras mecánicas)
+        this.radio = radio;
     }
 
     /**
@@ -28,7 +26,17 @@ class Servicio extends Edificio {
         return {
             ...super.getInformacion(),
             tipoDeServicio: this.tipoDeServicio,
-            felicidadAportada: this.felicidad
+            felicidadAportada: this.felicidad,
+            radio: this.radio
+        };
+    }
+
+    toJSON() {
+        return {
+            ...super.toJSON(),
+            tipoDeServicio: this.tipoDeServicio,
+            felicidad:      this.felicidad,
+            radio:          this.radio
         };
     }
 }

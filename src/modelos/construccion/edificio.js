@@ -1,3 +1,4 @@
+import Construccion from './construccion.js';
 export default class Edificio extends Construccion {
     constructor(costo, id, nombre, costoMantenimiento, consumoElectricidad, consumoAgua, esActivo) {
         super(costo);

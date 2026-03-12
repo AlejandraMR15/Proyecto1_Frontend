@@ -1,3 +1,4 @@
+import Construccion from './construccion.js';
 export default class Parques extends Construccion {
     constructor(costo, felicidad)  {
         super(costo);

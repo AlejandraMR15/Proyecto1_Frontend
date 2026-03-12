@@ -1,3 +1,4 @@
+import Edificio from '../edificio.js';
 export default class Industrial extends Edificio {
     constructor(costo, id, nombre, costoMantenimiento, consumoElectricidad, consumoAgua, esActivo, empleo, empleados, tipoDeProduccion, produccion) {
         super(costo, id, nombre, costoMantenimiento, consumoElectricidad, consumoAgua, esActivo);

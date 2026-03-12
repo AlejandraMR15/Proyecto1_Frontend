@@ -1,3 +1,4 @@
+import Edificio from '../edificio.js';
 export default class Residencial extends Edificio {
     constructor(costo, id, nombre, costoMantenimiento, consumoElectricidad, consumoAgua, esActivo, capacidad, residentes) {
         super(costo, id, nombre, costoMantenimiento, consumoElectricidad, consumoAgua, esActivo);
@@ -57,6 +58,7 @@ export default class Residencial extends Edificio {
 
     // Sobrescribe getInformacion para incluir datos residenciales.
     getInformacion() {
+        const consumo = this.calcularConsumoActual();
         return {
             ...super.getInformacion(),
             capacidad: this.capacidad,

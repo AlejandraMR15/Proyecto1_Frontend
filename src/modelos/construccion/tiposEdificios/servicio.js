@@ -1,3 +1,4 @@
+import Edificio from '../edificio.js';
 export default class Servicio extends Edificio {
     constructor(costo, id, nombre, costoMantenimiento, consumoElectricidad, consumoAgua, esActivo, tipoDeServicio, felicidad, radio) {
         super(costo, id, nombre, costoMantenimiento, consumoElectricidad, consumoAgua, esActivo);

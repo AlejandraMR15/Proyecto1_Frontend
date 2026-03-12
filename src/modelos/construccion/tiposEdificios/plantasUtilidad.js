@@ -1,3 +1,4 @@
+import Edificio from '../edificio.js';
 export default class PlantasDeUtilidad extends Edificio {
     constructor(costo, id, nombre, costoMantenimiento, consumoElectricidad, consumoAgua, esActivo, tipoDeUtilidad, produccionPorTurno) {
         super(costo, id, nombre, costoMantenimiento, consumoElectricidad, consumoAgua, esActivo);

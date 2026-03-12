@@ -1,3 +1,4 @@
+import Construccion from './construccion.js';
 export default class Vias extends Construccion {
     constructor(costo) {
         super(costo);

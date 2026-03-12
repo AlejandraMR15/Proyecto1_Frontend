@@ -260,6 +260,10 @@
     });
   </script>
 
+  <!-- Modelos base (deben ir primero) -->
+  <script src="../../modelos/recursos.js"></script>
+  <script src="../../modelos/Ciudadano.js"></script>
+
   <!-- Clase base Construccion -->
   <script src="../../modelos/construccion/construccion.js"></script>
 
@@ -275,8 +279,8 @@
   <script src="../../modelos/construccion/tiposEdificios/servicio.js"></script>
   <script src="../../modelos/construccion/tiposEdificios/plantasUtilidad.js"></script>
 
-  <!-- Lógica principal del grid -->
-  <script src="../../negocio/grid.js"></script>
+  <!-- grid.js usa import/export → necesita type="module" -->
+  <script type="module" src="../../negocio/grid.js"></script>
 
 </body>
 </html>

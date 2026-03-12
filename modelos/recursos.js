@@ -1,9 +1,9 @@
 class Recursos {
-    constructor() {
-        this.dinero = 50000;
-        this.electricidad = 0;
-        this.agua = 0;
-        this.comida = 0;
+    constructor(dinero= 50000, electricidad= 0, agua= 0, comida= 0) {
+        this.dinero = dinero;
+        this.electricidad = electricidad;
+        this.agua = agua;
+        this.comida = comida;
     }
 
     // Descuenta una cantidad de dinero. Retorna false si no hay suficiente saldo.

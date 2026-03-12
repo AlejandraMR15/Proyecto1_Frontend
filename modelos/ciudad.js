@@ -1,4 +1,4 @@
-class Ciudad {
+export default class Ciudad {
     constructor(nombre, alcalde, ancho = 15, alto = 15, coordenadas = null,
                 dineroInicial = 50000, electricidadInicial = 0, aguaInicial = 0, comidaInicial = 0) {
         this.nombre = nombre;

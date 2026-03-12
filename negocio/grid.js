@@ -1,52 +1,41 @@
 /**
- * CIUDAD VIRTUAL — Cuadrícula Isométrica
- * grid.js
+ * CIUDAD VIRTUAL — grid.js  (refactorizado)
  *
  * Responsabilidades:
- *  - Renderizar la cuadrícula isométrica
- *  - Manejar zoom y pan
- *  - Leer los JSONs de edificios al iniciar
- *  - Crear objetos JS al construir en una celda
- *  - Guardar los objetos en la matrizLogica
- *  - Mostrar panel de info al hacer click en celda ocupada
+ *  1. Zoom + pan sobre el viewport.
+ *  2. Cargar los JSONs de edificios al iniciar.
+ *  3. Leer la acción del menú desde localStorage y arrancar el juego:
+ *       - 'config-nueva-partida' → instancia Juego, llama crearCiudad(), construye el mapa.
+ *       - 'accion-inicio: continuar' → instancia Juego, llama cargarPartida(), reconstruye el mapa.
+ *  4. Guardar la partida automáticamente cada vez que cambia el mapa.
+ *  5. Conectar el tooltip con los eventos de GridRenderer.
+ *  6. En onCeldaClick:
+ *       - Celda ocupada → mostrar panel de info del objeto.
+ *       - Celda vacía + edificio seleccionado → validar dinero → construir.
  */
+
+import Mapa        from '../modelos/Mapa.js';
+import GridRenderer from './GridRenderer.js';
+import Juego        from './Juego.js';
 
 (function () {
     "use strict";
 
     /* ============================================================
-       CONFIGURACIÓN
+       CLAVES localStorage
     ============================================================ */
-    const GRID_COLS = 15;
-    const GRID_ROWS = 15;
-
-    const TW     = 64;
-    const TH     = TW / 2;   // 32
-    const TD     = 20;
-    const STEP_X = TW / 2;   // 32
-    const STEP_Y = TH / 2;   // 16
+    const CLAVE_CONFIG_NUEVA = 'config-nueva-partida';
+    const CLAVE_ACCION       = 'accion-inicio';
 
     /* ============================================================
-       MATRIZ LÓGICA
-       Paralela a la visual. Cada celda guarda:
-         - null        → celda vacía
-         - objeto JS   → edificio construido (Residencial, Comercial, etc.)
-    ============================================================ */
-    const matrizLogica = Array.from(
-        { length: GRID_ROWS },
-        () => Array(GRID_COLS).fill(null)
-    );
-
-    /* ============================================================
-       CARGA DE JSONs
-       Se hace UNA sola vez al inicio (DOMContentLoaded).
+       CACHE DE JSONs
+       Se cargan UNA sola vez al iniciar antes de construir la grilla.
        datosEdificios['comercial'] = [{tienda...}, {centroComercial...}]
     ============================================================ */
     const datosEdificios = {};
 
     async function cargarJSONs() {
-        // Ajusta la ruta si tus JSONs están en otra carpeta
-        const BASE = '../../datos/'; // Proyecto1_Frontend/datos/
+        const BASE = '../../datos/';
         const archivos = {
             residencial:     'residencial.json',
             comercial:       'comercial.json',
@@ -56,7 +45,6 @@
             parques:         'parques.json',
             vias:            'vias.json'
         };
-
         for (const [clave, archivo] of Object.entries(archivos)) {
             const res = await fetch(BASE + archivo);
             datosEdificios[clave] = await res.json();
@@ -64,124 +52,11 @@
     }
 
     /* ============================================================
-       MAPA: data-id del menú → qué JSON usar y qué índice
+       PANEL DE INFORMACIÓN DE EDIFICIO
+       Se muestra al hacer click en una celda ya construida.
+       Llama a getInformacion() del objeto guardado en ciudad.construcciones.
     ============================================================ */
-    const MAPA_EDIFICIOS = {
-        'res-001':    { json: 'residencial',     indice: 0 },
-        'res-002':    { json: 'residencial',     indice: 1 },
-        'com-001':    { json: 'comercial',       indice: 0 },
-        'com-002':    { json: 'comercial',       indice: 1 },
-        'ind-001':    { json: 'industrial',      indice: 0 },
-        'ind-002':    { json: 'industrial',      indice: 1 },
-        'serv-001':   { json: 'servicio',        indice: 0 },
-        'serv-002':   { json: 'servicio',        indice: 1 },
-        'serv-003':   { json: 'servicio',        indice: 2 },
-        'util-001':   { json: 'plantasUtilidad', indice: 0 },
-        'util-002':   { json: 'plantasUtilidad', indice: 1 },
-        'parque-001': { json: 'parques',         indice: 0 },
-        'via-001':    { json: 'vias',            indice: 0 },
-    };
-
-    /* ============================================================
-       FÁBRICA DE EDIFICIOS
-       Lee los datos del JSON ya cargado y crea el objeto JS correcto.
-       El id único combina el id base + coordenadas (ej: "com-001_3_5")
-    ============================================================ */
-    function crearEdificio(menuId, col, row) {
-        const config = MAPA_EDIFICIOS[menuId];
-        if (!config) return null;
-
-        const d   = datosEdificios[config.json][config.indice];
-        const uid = `${d.id ?? menuId}_${col}_${row}`;
-
-        switch (config.json) {
-            case 'residencial':
-                return new Residencial(
-                    d.costo, uid, d.nombre,
-                    d.costoMantenimiento, d.consumoElectricidad, d.consumoAgua,
-                    d.esActivo, d.capacidad, []
-                );
-
-            case 'comercial':
-                return new Comercial(
-                    d.costo, uid, d.nombre,
-                    d.costoMantenimiento, d.consumoElectricidad,
-                    d.esActivo, d.empleo, [], d.ingresoPorTurno
-                );
-
-            case 'industrial':
-                return new Industrial(
-                    d.costo, uid, d.nombre,
-                    d.costoMantenimiento, d.consumoElectricidad, d.consumoAgua ?? 0,
-                    d.esActivo, d.empleo, [], d.montonDeProduccion
-                );
-
-            case 'servicio':
-                return new Servicio(
-                    d.costo, uid, d.nombre,
-                    d.costoMantenimiento, d.esActivo,
-                    d.tipoDeServicio, d.felicidad
-                );
-
-            case 'plantasUtilidad':
-                return new PlantasDeUtilidad(
-                    d.costo, uid, d.nombre,
-                    d.costoMantenimiento, d.esActivo,
-                    d.tipoDeUtilidad, d.produccionPorTurno
-                );
-
-            case 'parques':
-                return new Parques(d.costo, d.felicidad);
-
-            case 'vias':
-                return new Vias(d.costo);
-
-            default:
-                return null;
-        }
-    }
-
-    /* ============================================================
-       COLORES POR TIPO DE EDIFICIO
-    ============================================================ */
-    const COLORES_EDIFICIO = {
-        'res-001':    { top: '#f9d342', left: '#c8a400', right: '#a07800' },
-        'res-002':    { top: '#f9d342', left: '#c8a400', right: '#a07800' },
-        'com-001':    { top: '#5bc8f5', left: '#2a9ed4', right: '#1a7aaa' },
-        'com-002':    { top: '#5bc8f5', left: '#2a9ed4', right: '#1a7aaa' },
-        'ind-001':    { top: '#b0b0b0', left: '#808080', right: '#606060' },
-        'ind-002':    { top: '#a8d45a', left: '#6aaa1a', right: '#4a8a00' },
-        'serv-001':   { top: '#6699ff', left: '#3366cc', right: '#1a44aa' },
-        'serv-002':   { top: '#ff6633', left: '#cc3300', right: '#aa1100' },
-        'serv-003':   { top: '#ff99cc', left: '#cc5588', right: '#aa2266' },
-        'util-001':   { top: '#ffee44', left: '#ccaa00', right: '#aa8800' },
-        'util-002':   { top: '#44ccff', left: '#0099cc', right: '#006699' },
-        'parque-001': { top: '#55dd55', left: '#229922', right: '#116611' },
-        'via-001':    { top: '#aaaaaa', left: '#666666', right: '#444444' },
-    };
-
-    /* ============================================================
-       PINTAR EDIFICIO EN EL CUBO VISUAL
-    ============================================================ */
-    function pintarEdificio(cube, menuId) {
-        const colores = COLORES_EDIFICIO[menuId];
-        if (!colores) return;
-        cube.querySelector('.poly-top').setAttribute('fill',   colores.top);
-        cube.querySelector('.poly-left').setAttribute('fill',  colores.left);
-        cube.querySelector('.poly-right').setAttribute('fill', colores.right);
-        // Guardar el menuId en el cubo para poder leerlo después si hace falta
-        cube.dataset.menuId = menuId;
-    }
-
-    /* ============================================================
-       PANEL DE INFORMACIÓN DEL EDIFICIO
-       Se muestra al hacer click en una celda ocupada.
-       Usa getInformacion() de cada clase para obtener los datos.
-    ============================================================ */
-
-    // Nombres legibles para las claves de getInformacion()
-    const ETIQUETAS = {
-        id:                        'ID',
+    const ETIQUETAS_INFO = {
         nombre:                    'Nombre',
         costo:                     'Costo',
         costoMantenimiento:        'Mantenimiento',
@@ -189,7 +64,7 @@
         consumoAgua:               'Consumo agua',
         esActivo:                  'Activo',
         capacidad:                 'Capacidad',
-        ocupacion:                 'Ocupación actual',
+        ocupacion:                 'Ocupación',
         tieneCapacidadDisponible:  'Tiene espacio',
         consumoActualElectricidad: 'Consumo eléc. actual',
         consumoActualAgua:         'Consumo agua actual',
@@ -203,14 +78,13 @@
         tipoDeUtilidad:            'Tipo de utilidad',
     };
 
-    function mostrarPanelInfo(edificio) {
-        // Eliminar panel previo si existe
-        const previo = document.getElementById('panel-info');
-        if (previo) previo.remove();
+    function mostrarPanelInfo(objeto) {
+        document.getElementById('panel-info')?.remove();
 
-        const info = edificio.getInformacion
-            ? edificio.getInformacion()
-            : { nombre: 'Sin info' };
+        // Parques y Vias no tienen getInformacion()
+        const info = typeof objeto.getInformacion === 'function'
+            ? objeto.getInformacion()
+            : { nombre: objeto.constructor.name, costo: objeto.costo };
 
         const panel = document.createElement('div');
         panel.id = 'panel-info';
@@ -221,7 +95,6 @@
             background: #0d1b2a;
             border: 2px solid #2a9ed4;
             border-radius: 8px;
-            padding: 0;
             min-width: 260px;
             max-width: 320px;
             z-index: 9999;
@@ -229,9 +102,9 @@
             font-size: 0.6rem;
             color: #e0f0ff;
             box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+            overflow: hidden;
         `;
 
-        // Header del panel
         const header = document.createElement('div');
         header.style.cssText = `
             display: flex;
@@ -239,49 +112,31 @@
             align-items: center;
             background: #1a3a5c;
             padding: 10px 14px;
-            border-radius: 6px 6px 0 0;
             border-bottom: 1px solid #2a9ed4;
         `;
         header.innerHTML = `
-            <span style="color:#f9d342; font-size:0.65rem">${info.nombre ?? 'Edificio'}</span>
+            <span style="color:#f9d342">${info.nombre ?? 'Edificio'}</span>
             <button id="btn-cerrar-panel" style="
-                background: none;
-                border: none;
-                color: #e0f0ff;
-                cursor: pointer;
-                font-size: 1rem;
-                line-height: 1;
-                padding: 0 4px;
+                background:none; border:none; color:#e0f0ff;
+                cursor:pointer; font-size:1rem; line-height:1; padding:0 4px;
             ">✕</button>
         `;
 
-        // Tabla de datos
         const tabla = document.createElement('table');
-        tabla.style.cssText = `
-            width: 100%;
-            border-collapse: collapse;
-            padding: 8px;
-        `;
+        tabla.style.cssText = 'width:100%; border-collapse:collapse;';
 
         Object.entries(info).forEach(([clave, valor]) => {
-            // Omitir el id porque ya está en el header
             if (clave === 'id') return;
-
             const fila = document.createElement('tr');
             fila.style.borderBottom = '1px solid #1a3a5c';
 
             const tdClave = document.createElement('td');
-            tdClave.style.cssText = 'padding: 6px 10px; color: #7ecfe6;';
-            tdClave.textContent = ETIQUETAS[clave] ?? clave;
+            tdClave.style.cssText = 'padding:6px 10px; color:#7ecfe6;';
+            tdClave.textContent = ETIQUETAS_INFO[clave] ?? clave;
 
             const tdValor = document.createElement('td');
-            tdValor.style.cssText = 'padding: 6px 10px; text-align: right;';
-            // Formato especial para booleanos
-            if (typeof valor === 'boolean') {
-                tdValor.textContent = valor ? '✅' : '❌';
-            } else {
-                tdValor.textContent = valor;
-            }
+            tdValor.style.cssText = 'padding:6px 10px; text-align:right;';
+            tdValor.textContent = typeof valor === 'boolean' ? (valor ? '✅' : '❌') : valor;
 
             fila.appendChild(tdClave);
             fila.appendChild(tdValor);
@@ -292,10 +147,40 @@
         panel.appendChild(tabla);
         document.body.appendChild(panel);
 
-        // Cerrar panel
-        document.getElementById('btn-cerrar-panel').addEventListener('click', () => {
-            panel.remove();
-        });
+        document.getElementById('btn-cerrar-panel')
+            .addEventListener('click', () => panel.remove());
+    }
+
+    /* ============================================================
+       NOTIFICACIONES FLOTANTES
+       Se muestran brevemente (3s) para confirmar o rechazar una acción.
+    ============================================================ */
+    function mostrarNotificacion(texto, tipo = 'info') {
+        const colores = {
+            exito: '#27ae60',
+            error: '#e74c3c',
+            info:  '#2a9ed4'
+        };
+
+        const notif = document.createElement('div');
+        notif.style.cssText = `
+            position: fixed;
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: ${colores[tipo] ?? colores.info};
+            color: #fff;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.55rem;
+            padding: 10px 20px;
+            border-radius: 6px;
+            z-index: 9999;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+            animation: fadeInOut 3s forwards;
+        `;
+        notif.textContent = texto;
+        document.body.appendChild(notif);
+        setTimeout(() => notif.remove(), 3000);
     }
 
     /* ============================================================
@@ -305,20 +190,20 @@
     const ZOOM_MAX  = 3.0;
     const ZOOM_STEP = 0.15;
 
-    let scale  = 1.0;
-    let panX   = 0;
-    let panY   = 0;
+    let scale      = 1.0;
+    let panX       = 0;
+    let panY       = 0;
     let isDragging = false;
     let lastMouse  = { x: 0, y: 0 };
 
-    const viewport   = document.getElementById("viewport");
-    const canvasWrap = document.getElementById("canvas-wrap");
-    const zoomLabel  = document.getElementById("zoom-label");
+    const viewport   = document.getElementById('viewport');
+    const canvasWrap = document.getElementById('canvas-wrap');
+    const zoomLabel  = document.getElementById('zoom-label');
 
     function applyTransform() {
         canvasWrap.style.transform =
             `translate(${panX}px, ${panY}px) scale(${scale})`;
-        zoomLabel.textContent = Math.round(scale * 100) + "%";
+        zoomLabel.textContent = Math.round(scale * 100) + '%';
     }
 
     function zoomAt(cx, cy, delta) {
@@ -330,22 +215,20 @@
         applyTransform();
     }
 
-    viewport.addEventListener("wheel", function (e) {
+    viewport.addEventListener('wheel', function (e) {
         e.preventDefault();
         const rect  = viewport.getBoundingClientRect();
-        const cx    = e.clientX - rect.left;
-        const cy    = e.clientY - rect.top;
         const delta = e.deltaY < 0 ? ZOOM_STEP : -ZOOM_STEP;
-        zoomAt(cx, cy, delta);
+        zoomAt(e.clientX - rect.left, e.clientY - rect.top, delta);
     }, { passive: false });
 
-    document.getElementById("btn-zoom-in").addEventListener("click", function () {
+    document.getElementById('btn-zoom-in').addEventListener('click', function () {
         zoomAt(viewport.clientWidth / 2, viewport.clientHeight / 2, ZOOM_STEP);
     });
-    document.getElementById("btn-zoom-out").addEventListener("click", function () {
+    document.getElementById('btn-zoom-out').addEventListener('click', function () {
         zoomAt(viewport.clientWidth / 2, viewport.clientHeight / 2, -ZOOM_STEP);
     });
-    document.getElementById("btn-zoom-reset").addEventListener("click", function () {
+    document.getElementById('btn-zoom-reset').addEventListener('click', function () {
         scale = 1.0;
         centerView();
         applyTransform();
@@ -354,15 +237,14 @@
     /* ============================================================
        PAN
     ============================================================ */
-    viewport.addEventListener("mousedown", function (e) {
-        if (e.target.closest(".iso-cube")) return;
+    viewport.addEventListener('mousedown', function (e) {
         isDragging = true;
         lastMouse  = { x: e.clientX, y: e.clientY };
-        viewport.classList.add("dragging");
+        viewport.classList.add('dragging');
         e.preventDefault();
     });
 
-    viewport.addEventListener("mousemove", function (e) {
+    viewport.addEventListener('mousemove', function (e) {
         if (!isDragging) return;
         panX += e.clientX - lastMouse.x;
         panY += e.clientY - lastMouse.y;
@@ -370,257 +252,316 @@
         applyTransform();
     });
 
-    document.addEventListener("mouseup", function () {
+    document.addEventListener('mouseup', function () {
         if (isDragging) {
             isDragging = false;
-            viewport.classList.remove("dragging");
+            viewport.classList.remove('dragging');
         }
     });
 
-    // Touch
+    /* Touch */
     let lastTouches = null;
 
-    viewport.addEventListener("touchstart", function (e) {
+    viewport.addEventListener('touchstart', function (e) {
         lastTouches = e.touches;
         e.preventDefault();
     }, { passive: false });
 
-    viewport.addEventListener("touchmove", function (e) {
+    viewport.addEventListener('touchmove', function (e) {
         e.preventDefault();
-        if (e.touches.length === 1 && lastTouches && lastTouches.length === 1) {
+        if (e.touches.length === 1 && lastTouches?.length === 1) {
             panX += e.touches[0].clientX - lastTouches[0].clientX;
             panY += e.touches[0].clientY - lastTouches[0].clientY;
             applyTransform();
-        } else if (e.touches.length === 2 && lastTouches && lastTouches.length === 2) {
-            const dist = (t) => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
+        } else if (e.touches.length === 2 && lastTouches?.length === 2) {
+            const dist = (t) => Math.hypot(
+                t[0].clientX - t[1].clientX,
+                t[0].clientY - t[1].clientY
+            );
             const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
             const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
             const rect = viewport.getBoundingClientRect();
-            zoomAt(cx - rect.left, cy - rect.top, (dist(e.touches) - dist(lastTouches)) * 0.005);
+            zoomAt(cx - rect.left, cy - rect.top,
+                   (dist(e.touches) - dist(lastTouches)) * 0.005);
         }
         lastTouches = e.touches;
     }, { passive: false });
 
-    viewport.addEventListener("touchend", function (e) {
+    viewport.addEventListener('touchend', function (e) {
         lastTouches = e.touches;
     });
-
-    /* ============================================================
-       GEOMETRÍA DEL CUBO
-    ============================================================ */
-    function makeCubeSVG(colorTop, colorLeft, colorRight) {
-        const W    = TW;
-        const H    = TH;
-        const D    = TD;
-        const svgW = W;
-        const svgH = H + D;
-
-        const A  = [W / 2,       0        ];
-        const B  = [W,           H / 2    ];
-        const C  = [W / 2,       H        ];
-        const D2 = [0,           H / 2    ];
-        const E  = [0,           H / 2 + D];
-        const F  = [W / 2,       H     + D];
-        const G  = [W,           H / 2 + D];
-
-        function pts(arr) { return arr.map(p => p.join(",")).join(" "); }
-
-        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        svg.setAttribute("width",   svgW);
-        svg.setAttribute("height",  svgH);
-        svg.setAttribute("viewBox", `0 0 ${svgW} ${svgH}`);
-
-        const left = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
-        left.setAttribute("points", pts([D2, C, F, E]));
-        left.setAttribute("fill", colorLeft);
-        left.classList.add("poly-left");
-
-        const right = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
-        right.setAttribute("points", pts([C, B, G, F]));
-        right.setAttribute("fill", colorRight);
-        right.classList.add("poly-right");
-
-        const top = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
-        top.setAttribute("points", pts([A, B, C, D2]));
-        top.setAttribute("fill", colorTop);
-        top.classList.add("poly-top");
-
-        svg.appendChild(left);
-        svg.appendChild(right);
-        svg.appendChild(top);
-
-        return svg;
-    }
-
-    /* ============================================================
-       POSICIONAMIENTO ISOMÉTRICO
-    ============================================================ */
-    function gridToScreen(col, row) {
-        return {
-            x: (col - row) * STEP_X,
-            y: (col + row) * STEP_Y
-        };
-    }
-
-    /* ============================================================
-       CONSTRUCCIÓN DE LA CUADRÍCULA
-    ============================================================ */
-    function buildGrid() {
-        const gridEl = document.getElementById("iso-grid");
-
-        const minX    = gridToScreen(0, GRID_ROWS - 1).x;
-        const offsetX = -minX;
-
-        const maxX   = gridToScreen(GRID_COLS - 1, 0).x + TW;
-        const maxY   = gridToScreen(GRID_COLS - 1, GRID_ROWS - 1).y + TH + TD;
-        const totalW = maxX + offsetX;
-        const totalH = maxY;
-
-        gridEl.style.width  = totalW + "px";
-        gridEl.style.height = totalH + "px";
-
-        const C_TOP   = "#7ecfe6";
-        const C_LEFT  = "#4baec8";
-        const C_RIGHT = "#2d8aaa";
-
-        // Painter's algorithm
-        const cells = [];
-        for (let row = 0; row < GRID_ROWS; row++) {
-            for (let col = 0; col < GRID_COLS; col++) {
-                cells.push({ row, col });
-            }
-        }
-        cells.sort((a, b) => (a.row + a.col) - (b.row + b.col));
-
-        cells.forEach(function ({ row, col }, idx) {
-            const { x, y } = gridToScreen(col, row);
-
-            const cube = document.createElement("div");
-            cube.className        = "iso-cube";
-            cube.dataset.row      = row;
-            cube.dataset.col      = col;
-            cube.style.left       = (x + offsetX) + "px";
-            cube.style.top        = y + "px";
-            cube.style.width      = TW + "px";
-            cube.style.height     = (TH + TD) + "px";
-            cube.style.zIndex     = row + col;
-            cube.style.opacity    = "0";
-            cube.style.transition = "opacity 0.25s ease";
-
-            const svg = makeCubeSVG(C_TOP, C_LEFT, C_RIGHT);
-            cube.appendChild(svg);
-
-            cube.addEventListener("mouseenter", onEnter);
-            cube.addEventListener("mouseleave", onLeave);
-            cube.addEventListener("click",      onClick);
-
-            gridEl.appendChild(cube);
-
-            setTimeout(function () {
-                cube.style.opacity = "1";
-            }, idx * 3 + 50);
-        });
-    }
-
-    /* ============================================================
-       EVENTOS DE CELDA
-    ============================================================ */
-    let selectedCube = null;
-
-    function onEnter(e) {
-        if (isDragging) return;
-        const cube = e.currentTarget;
-        showTooltip(e, "Celda (" + cube.dataset.col + ", " + cube.dataset.row + ")");
-    }
-
-    function onLeave() {
-        hideTooltip();
-    }
-
-    function onClick(e) {
-        if (isDragging) return;
-
-        const cube = e.currentTarget;
-        const col  = parseInt(cube.dataset.col);
-        const row  = parseInt(cube.dataset.row);
-
-        // CASO 1: Celda ocupada → mostrar panel de información del edificio
-        if (matrizLogica[row][col] !== null) {
-            mostrarPanelInfo(matrizLogica[row][col]);
-            return;
-        }
-
-        // CASO 2: Celda vacía + hay edificio seleccionado en el menú → construir
-        if (window.edificioSeleccionado) {
-            const edificio = crearEdificio(window.edificioSeleccionado, col, row);
-            if (!edificio) return;
-
-            // Guardar el objeto JS en la matriz lógica
-            matrizLogica[row][col] = edificio;
-
-            // Pintar el cubo visualmente con los colores del tipo de edificio
-            pintarEdificio(cube, window.edificioSeleccionado);
-            return;
-        }
-
-        // CASO 3: Sin edificio seleccionado → selección simple de celda
-        if (selectedCube && selectedCube !== cube) {
-            selectedCube.classList.remove("selected");
-        }
-        if (selectedCube === cube) {
-            cube.classList.remove("selected");
-            selectedCube = null;
-        } else {
-            cube.classList.add("selected");
-            selectedCube = cube;
-        }
-    }
 
     /* ============================================================
        TOOLTIP
     ============================================================ */
-    const tooltip = document.getElementById("tooltip");
+    const tooltip = document.getElementById('tooltip');
 
     function showTooltip(e, text) {
         tooltip.textContent = text;
-        tooltip.classList.add("visible");
-        moveTooltip(e);
+        tooltip.classList.add('visible');
+        tooltip.style.left = (e.clientX + 14) + 'px';
+        tooltip.style.top  = (e.clientY - 32) + 'px';
     }
 
     function hideTooltip() {
-        tooltip.classList.remove("visible");
+        tooltip.classList.remove('visible');
     }
 
-    function moveTooltip(e) {
-        tooltip.style.left = (e.clientX + 14) + "px";
-        tooltip.style.top  = (e.clientY - 32) + "px";
-    }
-
-    document.addEventListener("mousemove", function (e) {
-        if (tooltip.classList.contains("visible")) moveTooltip(e);
+    document.addEventListener('mousemove', function (e) {
+        if (tooltip.classList.contains('visible')) {
+            tooltip.style.left = (e.clientX + 14) + 'px';
+            tooltip.style.top  = (e.clientY - 32) + 'px';
+        }
     });
 
     /* ============================================================
        CENTRAR VISTA
     ============================================================ */
     function centerView() {
-        const vw    = viewport.clientWidth;
-        const vh    = viewport.clientHeight;
-        const scene = document.getElementById("iso-scene");
-        panX = (vw - scene.offsetWidth  * scale) / 2;
-        panY = (vh - scene.offsetHeight * scale) / 2;
+        const scene = document.getElementById('iso-scene');
+        panX = (viewport.clientWidth  - scene.offsetWidth  * scale) / 2;
+        panY = (viewport.clientHeight - scene.offsetHeight * scale) / 2;
     }
 
     /* ============================================================
-       INIT — carga JSONs primero, luego construye la grilla
+       UTILIDAD: nombre legible por etiqueta (para tooltip)
     ============================================================ */
-    document.addEventListener("DOMContentLoaded", async function () {
+    function _nombreEtiqueta(etiqueta) {
+        const nombres = {
+            'g':  'Terreno vacío',
+            'r':  'Vía',
+            'P1': 'Parque',
+            'R1': 'Residencial Básico',
+            'R2': 'Residencial Avanzado',
+            'C1': 'Comercio Básico',
+            'C2': 'Comercio Avanzado',
+            'I1': 'Industrial Básico',
+            'I2': 'Industrial Avanzado',
+            'S1': 'Servicio Básico',
+            'S2': 'Servicio Medio',
+            'S3': 'Servicio Avanzado',
+            'U1': 'Planta de Utilidad Básica',
+            'U2': 'Planta de Utilidad Avanzada',
+        };
+        return nombres[etiqueta] ?? etiqueta;
+    }
+
+    /* ============================================================
+       INIT — cargar JSONs → Juego + Mapa + GridRenderer
+    ============================================================ */
+    document.addEventListener('DOMContentLoaded', async function () {
+
+        /* ----------------------------------------------------------
+           1. Cargar todos los JSONs antes de cualquier interacción
+        ---------------------------------------------------------- */
         await cargarJSONs();
-        buildGrid();
+
+        /* ----------------------------------------------------------
+           2. Leer acción del menú y preparar Juego + Mapa
+        ---------------------------------------------------------- */
+        const juego  = new Juego();
+        let   mapa   = null;
+        let   tamano = 15;
+
+        const accion    = localStorage.getItem(CLAVE_ACCION);
+        const configRaw = localStorage.getItem(CLAVE_CONFIG_NUEVA);
+
+        if (accion === 'continuar') {
+            juego.cargarPartida();
+            if (juego.ciudad && juego.ciudad.mapa) {
+                mapa   = juego.ciudad.mapa;
+                tamano = mapa.ancho;
+            } else {
+                console.warn('[grid] cargarPartida no produjo ciudad válida, usando mapa vacío.');
+                mapa = new Mapa(15, 15);
+                mapa.generarMatriz();
+                tamano = 15;
+            }
+            localStorage.removeItem(CLAVE_ACCION);
+
+        } else if (configRaw) {
+            let config = {};
+            try { config = JSON.parse(configRaw); } catch { config = {}; }
+
+            tamano = (config.ancho >= 15 && config.ancho <= 30) ? config.ancho : 15;
+
+            juego.crearCiudad({
+                nombre:        config.nombre        || 'Mi Ciudad',
+                alcalde:       config.alcalde       || 'Alcalde',
+                ancho:         tamano,
+                alto:          tamano,
+                duracionTurno: config.duracionTurno || 10000,
+                dineroInicial: config.dineroInicial || 50000,
+                coordenadas:   config.regionNombre
+                                   ? { nombre: config.regionNombre, id: config.regionId }
+                                   : null,
+            });
+
+            mapa = juego.ciudad.mapa;
+            mapa.generarMatriz();
+            juego.guardarPartida();
+            localStorage.removeItem(CLAVE_CONFIG_NUEVA);
+
+        } else {
+            const hayPartida = localStorage.getItem('partida') !== null;
+            if (hayPartida) {
+                juego.cargarPartida();
+                mapa   = juego.ciudad?.mapa ?? new Mapa(15, 15);
+                tamano = mapa.ancho;
+                if (!juego.ciudad) mapa.generarMatriz();
+            } else {
+                mapa = new Mapa(15, 15);
+                mapa.generarMatriz();
+                tamano = 15;
+            }
+        }
+
+        /* ----------------------------------------------------------
+           3. Actualizar el texto del top bar
+        ---------------------------------------------------------- */
+        const gridInfo = document.getElementById('grid-info');
+        if (gridInfo) {
+            const nombreCiudad = juego.ciudad?.nombre ?? '';
+            const alcalde      = juego.ciudad?.alcalde ?? '';
+            gridInfo.textContent = nombreCiudad
+                ? `${nombreCiudad} (${alcalde}) — ${tamano} × ${tamano}`
+                : `Cuadrícula ${tamano} × ${tamano} — Vista Isométrica`;
+        }
+
+        /* ----------------------------------------------------------
+           4. Crear GridRenderer con el Mapa de la ciudad
+        ---------------------------------------------------------- */
+        const renderer = new GridRenderer(mapa, {
+            contenedorId: 'iso-grid',
+            TW: 64,
+            TD: 32,
+
+            // ── LÓGICA DE CONSTRUCCIÓN ──────────────────────────────────
+            onCeldaClick: (col, row, etiqueta) => {
+
+                // Guardia: si no hay ciudad activa (acceso directo sin pasar por el menú)
+                if (!juego.ciudad) {
+                    juego.crearCiudad({
+                        nombre: "Ciudad de Prueba",
+                        alcalde: "Alcalde",
+                        ancho: tamano,
+                        alto: tamano,
+                        dineroInicial: 50000,
+                    });
+                }
+
+                // CASO 1: Celda ocupada → mostrar panel de información del objeto
+                if (etiqueta !== 'g') {
+                    // Buscar el objeto en ciudad.construcciones por su id (uid = tipo_col_row)
+                    const objeto = juego.ciudad?.construcciones.find(
+                        c => c.id === `${etiqueta}_${col}_${row}` ||
+                             // Parques y Vías no tienen id, los identificamos por posición
+                             // guardada en dataset del cubo (etiqueta + coordenadas)
+                             (c.id?.endsWith(`_${col}_${row}`))
+                    );
+                    if (objeto) {
+                        mostrarPanelInfo(objeto);
+                    }
+                    return;
+                }
+
+                // CASO 2: Celda vacía pero sin edificio seleccionado → no hacer nada
+                const menuId = window.edificioSeleccionado;
+                if (!menuId) return;
+
+                // Obtener configuración del edificio seleccionado
+                const config = Construccion.obtenerConfig(menuId);
+                if (!config) return;
+
+                // Crear la instancia con valores por defecto (dinámicos en 0 / [])
+                const objeto = Construccion.instanciar(menuId, col, row, datosEdificios);
+                if (!objeto) return;
+
+                // VALIDACIÓN 1: dinero suficiente (via ciudad.construir → objeto.ejecutar)
+                if (!objeto.puedeConstruirse(juego.ciudad)) {
+                    mostrarNotificacion(
+                        `💸 Sin fondos: necesitas $${objeto.costo}`,
+                        'error'
+                    );
+                    return;
+                }
+
+                // VALIDACIÓN 2: intentar colocar en Mapa (valida celda vacía + vía adyacente)
+                const exitoMapa = renderer.colocarElemento(col, row, config.etiqueta);
+                if (!exitoMapa) {
+                    // Mapa.agregarElemento devolvió false: celda ocupada o sin vía adyacente
+                    const razon = mapa.celdaVacia(col, row)
+                        ? '🚧 Necesita una vía adyacente'
+                        : '🚫 Celda ocupada';
+                    mostrarNotificacion(razon, 'error');
+                    return;
+                }
+
+                // Todo OK: descontar dinero + registrar en ciudad.construcciones
+                juego.ciudad.construir(objeto);
+
+                // Guardar partida automáticamente
+                juego.guardarPartida();
+
+                mostrarNotificacion(
+                    `✅ ${objeto.nombre ?? 'Construcción'} construido`,
+                    'exito'
+                );
+
+                console.debug(
+                    `[Build] ${config.etiqueta} en (${col},${row}) →`,
+                    objeto.getInformacion?.() ?? objeto
+                );
+            }
+            // ────────────────────────────────────────────────────────────
+        });
+
+        renderer.inicializar();
+
+        /* ----------------------------------------------------------
+           5. Tooltip
+        ---------------------------------------------------------- */
+        const gridEl = document.getElementById('iso-grid');
+
+        gridEl.addEventListener('celda-enter', function (e) {
+            if (isDragging) return;
+            const { col, row, etiqueta, originalEvent } = e.detail;
+            showTooltip(originalEvent, `(${col}, ${row}) — ${_nombreEtiqueta(etiqueta)}`);
+        });
+
+        gridEl.addEventListener('celda-leave', hideTooltip);
+
+        /* ----------------------------------------------------------
+           6. Guardar partida automáticamente cuando cambia el mapa
+        ---------------------------------------------------------- */
+        gridEl.addEventListener('celda-click', function () {
+            if (juego.ciudad) {
+                juego.ciudad.mapa = mapa;
+                juego.guardarPartida();
+                console.debug('[grid] Partida guardada automáticamente.');
+            }
+        });
+
+        /* ----------------------------------------------------------
+           7. Exponer globalmente para consola / módulos externos
+        ---------------------------------------------------------- */
+        window.juego        = juego;
+        window.mapa         = mapa;
+        window.gridRenderer = renderer;
+
+        /* ----------------------------------------------------------
+           8. Centrar vista
+        ---------------------------------------------------------- */
         setTimeout(function () {
             centerView();
             applyTransform();
         }, 80);
+
+        console.info('[CiudadVirtual] Listo.',
+            juego.ciudad
+                ? `Ciudad: "${juego.ciudad.nombre}" | Turno: ${juego.numeroTurno}`
+                : 'Sin ciudad activa.'
+        );
     });
 
 })();

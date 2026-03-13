@@ -421,3 +421,15 @@ body {
   text-orientation: mixed;
   line-height: 1;
 }
+/* ---- Ítem activo (edificio seleccionado para construir) ---- */
+.build-item--activo {
+  background: var(--bg-item-active);
+  border-left: 3px solid var(--accent);
+}
+
+.build-item--activo .build-name { color: #ffffff; }
+
+.build-item--activo .build-cost {
+  background: rgba(255, 215, 0, 0.22);
+  border-color: rgba(255, 215, 0, 0.6);
+}

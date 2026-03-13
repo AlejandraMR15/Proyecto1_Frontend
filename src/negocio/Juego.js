@@ -80,13 +80,16 @@ export default class Juego {
         let puntaje = 0;
         if (this.administrarPuntaje && this.ciudad) {
             const recursos = this.ciudad.recursos;
+            // Contar ciudadanos sin empleo
+            const desempleados = this.gestorCiudadanos.ciudadanos.filter(c => !c.empleo).length;
             puntaje = this.administrarPuntaje.calcular({
                 poblacion:    this.gestorCiudadanos.calcularTotalCiudadanos(),
                 felicidad:    this.gestorCiudadanos.calcularFelicidadPromedio(),
                 dinero:       recursos.dinero,
                 numEdificios: this.ciudad.construcciones.length,
                 electricidad: recursos.electricidad,
-                agua:         recursos.agua
+                agua:         recursos.agua,
+                desempleados
             });
         }
         console.log("Puntaje:", puntaje);

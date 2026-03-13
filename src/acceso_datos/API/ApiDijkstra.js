@@ -1,12 +1,19 @@
 import ApiExternos from './ApiExternos.js';
 
 export default class ApiDijkstra extends ApiExternos {
+    /**
+     * @param {Array<Array<number>>} [ruta=[]]
+     */
     constructor(ruta = []) {
         super('http://127.0.0.1:5000');
         this.ruta = ruta;
     }
 
-    // Metodo principal: solicita al microservicio el calculo de ruta y retorna JSON.
+    /**
+     * Solicita al microservicio el cálculo de ruta más corta.
+     * @param {{map:Array<Array<number>>, start:[number,number], end:[number,number]}} [datosMapa={}]
+     * @returns {Promise<any>}
+     */
     async calcularRuta(datosMapa = {}) {
         this.validarDatosRuta(datosMapa);
 
@@ -19,12 +26,19 @@ export default class ApiDijkstra extends ApiExternos {
         return resultado;
     }
 
-    // Define el endpoint del microservicio para mantener una unica fuente de verdad.
+    /**
+     * Devuelve el endpoint del servicio de cálculo de ruta.
+     * @returns {string}
+     */
     obtenerEndpointCalculoRuta() {
         return '/api/calculate-route';
     }
 
-    // Construye la configuracion POST con body JSON para el backend.
+    /**
+     * Construye opciones de fetch para una petición POST JSON.
+     * @param {object} datosMapa
+     * @returns {{method:string, headers:Record<string,string>, body:string}}
+     */
     crearOpcionesPost(datosMapa) {
         return {
             method: 'POST',
@@ -35,7 +49,10 @@ export default class ApiDijkstra extends ApiExternos {
         };
     }
 
-    // Garantiza que la entrada tenga el formato esperado por el microservicio.
+    /**
+     * Valida la estructura mínima requerida para calcular una ruta.
+     * @param {{map?:any, start?:any, end?:any}} [datosMapa={}]
+     */
     validarDatosRuta(datosMapa = {}) {
         const tieneMapaValido = Array.isArray(datosMapa.map);
         const tieneInicioValido = this.esCoordenadaValida(datosMapa.start);
@@ -46,7 +63,11 @@ export default class ApiDijkstra extends ApiExternos {
         }
     }
 
-    // Verifica coordenadas con formato [fila, columna].
+    /**
+     * Verifica que una coordenada tenga formato [fila, columna].
+     * @param {any} coordenada
+     * @returns {boolean}
+     */
     esCoordenadaValida(coordenada) {
         return Array.isArray(coordenada)
             && coordenada.length === 2
@@ -54,7 +75,11 @@ export default class ApiDijkstra extends ApiExternos {
             && Number.isInteger(coordenada[1]);
     }
 
-    // Lee JSON tanto en exito como en error y normaliza el mensaje lanzado.
+    /**
+     * Procesa la respuesta HTTP y normaliza el error si aplica.
+     * @param {Response} respuesta
+     * @returns {Promise<any>}
+     */
     async procesarRespuestaJson(respuesta) {
         const datosRespuesta = await respuesta.json();
 

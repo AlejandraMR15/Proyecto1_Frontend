@@ -1,5 +1,17 @@
 import Edificio from '../edificio.js';
 export default class Comercial extends Edificio {
+    /**
+     * @param {number} costo
+     * @param {string|number} id
+     * @param {string} nombre
+     * @param {number} costoMantenimiento
+     * @param {number} consumoElectricidad
+     * @param {number} consumoAgua
+     * @param {boolean} esActivo
+     * @param {number} empleo
+     * @param {Array<object>} empleados
+     * @param {number} ingresoPorTurno
+     */
     constructor(costo, id, nombre, costoMantenimiento, consumoElectricidad, consumoAgua, esActivo, empleo, empleados, ingresoPorTurno) {
         super(costo, id, nombre, costoMantenimiento, consumoElectricidad, consumoAgua, esActivo);
         // Máximo de puestos de trabajo disponibles
@@ -9,14 +21,22 @@ export default class Comercial extends Edificio {
         this.ingresoPorTurno = ingresoPorTurno;
     }
 
-    // Contrata a un ciudadano si hay vacantes. Retorna true si fue contratado.
+    /**
+     * Contrata a un ciudadano si existe vacante.
+     * @param {object} ciudadano
+     * @returns {boolean}
+     */
     añadirEmpleado(ciudadano) {
         if (!this.tieneEmpleoDisponible()) return false;
         this.empleados.push(ciudadano);
         return true;
     }
 
-    // Despide a un ciudadano por su id. Retorna true si fue encontrado y eliminado.
+    /**
+     * Elimina un empleado por id.
+     * @param {object} ciudadano
+     * @returns {boolean}
+     */
     removerEmpleado(ciudadano) {
         const index = this.empleados.findIndex(e => e.id === ciudadano.id);
         if (index === -1) return false;
@@ -24,24 +44,34 @@ export default class Comercial extends Edificio {
         return true;
     }
 
-    // Retorna true si el número de empleados actuales es menor al máximo de empleos.
+    /**
+     * Verifica si hay vacantes disponibles.
+     * @returns {boolean}
+     */
     tieneEmpleoDisponible() {
         return this.empleados.length < this.empleo;
     }
 
-    // Retorna true si el edificio está activo y tiene electricidad para operar.
-    // (La verificación de electricidad real queda en Ciudad/procesarTurno;
-    //  aquí solo comprueba que esActivo sea true.)
+    /**
+     * Indica si el edificio puede generar ingresos este turno.
+     * @returns {boolean}
+     */
     tieneIngresos() {
         return this.esActivo;
     }
 
-    // Retorna el ingreso generado en el turno actual (0 si no está activo).
+    /**
+     * Retorna el ingreso bruto del turno.
+     * @returns {number}
+     */
     generaIngresos() {
         return this.tieneIngresos() ? this.ingresoPorTurno : 0;
     }
 
-    // Procesa el turno: aplica consumos y abona ingresos al objeto Recursos.
+    /**
+     * Aplica consumos e ingresos del turno.
+     * @param {import('../../recursos.js').default} recursos
+     */
     procesarTurno(recursos) {
         super.procesarTurno(recursos);
         // Un edificio comercial no genera ingresos si la electricidad es negativa
@@ -50,7 +80,10 @@ export default class Comercial extends Edificio {
         }
     }
 
-    // Sobrescribe getInformacion para incluir datos comerciales.
+    /**
+     * Devuelve información comercial del edificio.
+     * @returns {object}
+     */
     getInformacion() {
         return {
             ...super.getInformacion(),

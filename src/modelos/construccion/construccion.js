@@ -1,12 +1,25 @@
 export default class Construccion {
+    /**
+     * @param {number} costo
+     */
     constructor(costo) {
         this.costo = costo;
     }
 
+    /**
+     * Indica si la ciudad tiene presupuesto para construir.
+     * @param {import('../ciudad.js').default} ciudad
+     * @returns {boolean}
+     */
     puedeConstruirse(ciudad) {
         return ciudad.recursos.dinero >= this.costo;
     }
 
+    /**
+     * Ejecuta la construcción: descuenta costo y registra la instancia.
+     * @param {import('../ciudad.js').default} ciudad
+     * @returns {boolean}
+     */
     ejecutar(ciudad) {
         if (this.puedeConstruirse(ciudad)) {
             ciudad.recursos.dinero -= this.costo;

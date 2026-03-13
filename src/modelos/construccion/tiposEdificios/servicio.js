@@ -1,5 +1,17 @@
 import Edificio from '../edificio.js';
 export default class Servicio extends Edificio {
+    /**
+     * @param {number} costo
+     * @param {string|number} id
+     * @param {string} nombre
+     * @param {number} costoMantenimiento
+     * @param {number} consumoElectricidad
+     * @param {number} consumoAgua
+     * @param {boolean} esActivo
+     * @param {string} tipoDeServicio
+     * @param {number} felicidad
+     * @param {number} radio
+     */
     constructor(costo, id, nombre, costoMantenimiento, consumoElectricidad, consumoAgua, esActivo, tipoDeServicio, felicidad, radio) {
         super(costo, id, nombre, costoMantenimiento, consumoElectricidad, consumoAgua, esActivo);
         // 'policia' | 'bomberos' | 'hospital'
@@ -10,7 +22,10 @@ export default class Servicio extends Edificio {
         this.radio = radio;
     }
 
-    // Sobrescribe getInformacion para incluir datos de servicio.
+    /**
+     * Devuelve información del servicio.
+     * @returns {object}
+     */
     getInformacion() {
         return {
             ...super.getInformacion(),

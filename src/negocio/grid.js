@@ -40,12 +40,21 @@ import Juego         from './Juego.js';
     const canvasWrap = document.getElementById('canvas-wrap');
     const zoomLabel  = document.getElementById('zoom-label');
 
+    /**
+     * Aplica transformación CSS de pan y zoom al canvas.
+     */
     function applyTransform() {
         canvasWrap.style.transform =
             `translate(${panX}px, ${panY}px) scale(${scale})`;
         zoomLabel.textContent = Math.round(scale * 100) + '%';
     }
 
+    /**
+     * Hace zoom centrado en un punto del viewport.
+     * @param {number} cx
+     * @param {number} cy
+     * @param {number} delta
+     */
     function zoomAt(cx, cy, delta) {
         const newScale = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, scale + delta));
         if (newScale === scale) return;
@@ -136,6 +145,11 @@ import Juego         from './Juego.js';
     ============================================================ */
     const tooltip = document.getElementById('tooltip');
 
+    /**
+     * Muestra el tooltip en la posición del puntero.
+     * @param {MouseEvent} e
+     * @param {string} text
+     */
     function showTooltip(e, text) {
         tooltip.textContent = text;
         tooltip.classList.add('visible');
@@ -143,6 +157,9 @@ import Juego         from './Juego.js';
         tooltip.style.top  = (e.clientY - 32) + 'px';
     }
 
+    /**
+     * Oculta el tooltip del grid.
+     */
     function hideTooltip() {
         tooltip.classList.remove('visible');
     }
@@ -157,6 +174,9 @@ import Juego         from './Juego.js';
     /* ============================================================
        CENTRAR VISTA
     ============================================================ */
+    /**
+     * Centra la escena isométrica dentro del viewport.
+     */
     function centerView() {
         const scene = document.getElementById('iso-scene');
         panX = (viewport.clientWidth  - scene.offsetWidth  * scale) / 2;
@@ -326,6 +346,11 @@ import Juego         from './Juego.js';
     /* ============================================================
        Utilidad: nombre legible por etiqueta
     ============================================================ */
+    /**
+     * Traduce una etiqueta de celda a nombre legible.
+     * @param {string} etiqueta
+     * @returns {string}
+     */
     function _nombreEtiqueta(etiqueta) {
         const nombres = {
             'g':  'Terreno vacío',

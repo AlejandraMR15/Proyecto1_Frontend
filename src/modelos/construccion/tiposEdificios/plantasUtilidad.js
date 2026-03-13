@@ -1,5 +1,16 @@
 import Edificio from '../edificio.js';
 export default class PlantasDeUtilidad extends Edificio {
+    /**
+     * @param {number} costo
+     * @param {string|number} id
+     * @param {string} nombre
+     * @param {number} costoMantenimiento
+     * @param {number} consumoElectricidad
+     * @param {number} consumoAgua
+     * @param {boolean} esActivo
+     * @param {string} tipoDeUtilidad
+     * @param {number} produccionPorTurno
+     */
     constructor(costo, id, nombre, costoMantenimiento, consumoElectricidad, consumoAgua, esActivo, tipoDeUtilidad, produccionPorTurno) {
         super(costo, id, nombre, costoMantenimiento, consumoElectricidad, consumoAgua, esActivo);
         // 'electrica' | 'agua'
@@ -28,13 +39,19 @@ export default class PlantasDeUtilidad extends Edificio {
         }
     }
 
-    // Procesa el turno: primero aplica costos/consumos, luego produce.
+    /**
+     * Procesa costos y producción del turno.
+     * @param {import('../../recursos.js').default} recursos
+     */
     procesarTurno(recursos) {
         super.procesarTurno(recursos);
         this.produccion(recursos);
     }
 
-    // Sobrescribe getInformacion para incluir datos de utilidad.
+    /**
+     * Devuelve información de la planta de utilidad.
+     * @returns {object}
+     */
     getInformacion() {
         return {
             ...super.getInformacion(),

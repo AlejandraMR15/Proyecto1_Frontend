@@ -1,5 +1,9 @@
 export default class StorageManager {
-
+    /**
+     * Guarda un valor serializado como JSON en localStorage.
+     * @param {string} clave
+     * @param {any} datos
+     */
     guardar(clave, datos) {
         try {
             const json = JSON.stringify(datos);
@@ -9,6 +13,11 @@ export default class StorageManager {
         }
     }
 
+    /**
+     * Carga y deserializa un valor JSON desde localStorage.
+     * @param {string} clave
+     * @returns {any|null}
+     */
     cargar(clave) {
         try {
             const datos = localStorage.getItem(clave);
@@ -22,15 +31,26 @@ export default class StorageManager {
         }
     }
 
+    /**
+     * Elimina una clave de localStorage.
+     * @param {string} clave
+     */
     eliminar(clave) {
         localStorage.removeItem(clave);
     }
 
+    /**
+     * Limpia por completo localStorage.
+     */
     limpiarTodo() {
         localStorage.clear();
     }
 
-
+    /**
+     * Exporta el contenido de una clave como archivo JSON descargable.
+     * @param {string} clave
+     * @param {string} [nombreArchivo="datos.json"]
+     */
     exportarJSON(clave, nombreArchivo = "datos.json") {
         const datos = this.cargar(clave);
         if (!datos) {

@@ -9,6 +9,18 @@ import Parques from './construccion/parques.js';
 import Vias from './construccion/vias.js';
 
 export default class Ciudad {
+    /**
+     * Crea una ciudad con su mapa, recursos y estado inicial.
+     * @param {string} nombre
+     * @param {string} alcalde
+     * @param {number} [ancho=15]
+     * @param {number} [alto=15]
+     * @param {object|null} [coordenadas=null]
+     * @param {number} [dineroInicial=50000]
+     * @param {number} [electricidadInicial=0]
+     * @param {number} [aguaInicial=0]
+     * @param {number} [comidaInicial=0]
+     */
     constructor(nombre, alcalde, ancho = 15, alto = 15, coordenadas = null,
                 dineroInicial = 50000, electricidadInicial = 0, aguaInicial = 0, comidaInicial = 0) {
         this.nombre = nombre;

@@ -50,6 +50,9 @@ export default class Juego {
         }
     }
 
+    /**
+     * Reanuda el loop de turnos si el juego estaba en pausa.
+     */
     reanudarJuego() {
         if (this.EstadoDeJuego.estaEnPausa()) {
             this.EstadoDeJuego.cambiarEstado(ESTADOS.JUGANDO);
@@ -58,6 +61,9 @@ export default class Juego {
         }
     }
 
+    /**
+     * Ejecuta la lógica completa de un turno y recalcula el puntaje.
+     */
     ejecutarTurno() {
         if (!this.EstadoDeJuego.estaJugando()) return;
         this.numeroTurno++;
@@ -133,6 +139,9 @@ export default class Juego {
         return this.ciudad;
     }
 
+    /**
+     * Guarda ciudad, turno y ciudadanos en localStorage.
+     */
     guardarPartida() {
         if (!this.ciudad) {
             console.error("No hay ciudad para guardar");
@@ -147,6 +156,9 @@ export default class Juego {
         console.log("Partida guardada");
     }
 
+    /**
+     * Carga la partida guardada y reconstruye referencias de ocupación.
+     */
     cargarPartida() {
         const data = this.StorageManager.cargar('partida');
         if (!data) {

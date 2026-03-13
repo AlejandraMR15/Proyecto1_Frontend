@@ -115,17 +115,40 @@ export default class Ciudadano {
     }
 
     toJSON() {
+        const residenciaId = Ciudadano._extraerIdEdificio(this.residencia);
+        const empleoId = Ciudadano._extraerIdEdificio(this.empleo);
         return {
             id: this.id,
             felicidad: this.felicidad,
-            residencia: this.residencia, // Asumir que residencia tiene id o algo serializable
-            empleo: this.empleo,
+            residenciaId,
+            empleoId,
             servicios: this.servicios
         };
     }
 
-    static fromJSON(json) {
-        const ciudadano = new Ciudadano(json.id, json.felicidad, json.residencia, json.empleo, json.servicios);
+    static fromJSON(json, edificiosPorId = null) {
+        const residenciaId = json?.residenciaId ?? Ciudadano._extraerIdEdificio(json?.residencia);
+        const empleoId = json?.empleoId ?? Ciudadano._extraerIdEdificio(json?.empleo);
+
+        let residencia = null;
+        let empleo = null;
+
+        if (edificiosPorId instanceof Map) {
+            if (residenciaId !== null && residenciaId !== undefined) {
+                residencia = edificiosPorId.get(residenciaId) ?? edificiosPorId.get(String(residenciaId)) ?? null;
+            }
+            if (empleoId !== null && empleoId !== undefined) {
+                empleo = edificiosPorId.get(empleoId) ?? edificiosPorId.get(String(empleoId)) ?? null;
+            }
+        }
+
+        const ciudadano = new Ciudadano(json.id, json.felicidad, residencia, empleo, json.servicios);
         return ciudadano;
+    }
+
+    static _extraerIdEdificio(edificio) {
+        if (edificio === null || edificio === undefined) return null;
+        if (typeof edificio === 'object') return edificio.id ?? null;
+        return edificio;
     }
 }

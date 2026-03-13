@@ -11,7 +11,8 @@ export default class PlantasDeUtilidad extends Edificio {
     /**
      * Ejecuta la producción del turno y actualiza el objeto Recursos.
      * - Planta eléctrica: incrementa electricidad.
-     * - Planta de agua: solo produce si hay electricidad suficiente.
+     * - Planta de agua: produce solo si, tras descontar su consumo del turno,
+     *   la electricidad no queda en negativo.
      * @param {Recursos} recursos
      */
     produccion(recursos) {
@@ -20,17 +21,17 @@ export default class PlantasDeUtilidad extends Edificio {
         if (this.tipoDeUtilidad === 'electrica') {
             recursos.actualizarElectricidad(this.produccionPorTurno);
         } else if (this.tipoDeUtilidad === 'agua') {
-            // La planta de agua necesita electricidad para funcionar
-            if (recursos.electricidad >= this.consumoElectricidad) {
+            // La planta de agua solo opera si pudo cubrir su consumo eléctrico del turno.
+            if (recursos.electricidad >= 0) {
                 recursos.actualizarAgua(this.produccionPorTurno);
             }
         }
     }
 
-    // Procesa el turno: primero produce recursos, luego aplica consumos.
+    // Procesa el turno: primero aplica costos/consumos, luego produce.
     procesarTurno(recursos) {
-        this.produccion(recursos);
         super.procesarTurno(recursos);
+        this.produccion(recursos);
     }
 
     // Sobrescribe getInformacion para incluir datos de utilidad.

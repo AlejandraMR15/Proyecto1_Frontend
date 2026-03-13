@@ -112,6 +112,42 @@ export default class Ciudad {
     }
 
     /**
+     * Crea un índice de construcciones por id para resolver referencias rápidas.
+     * Incluye claves en formato original y string para soportar ids numéricos/texto.
+     * @returns {Map<string|number, object>} Mapa id -> instancia de construcción.
+     */
+    crearIndiceConstruccionesPorId() {
+        const indice = new Map();
+        for (const construccion of this.construcciones) {
+            if (!construccion || construccion.id === null || construccion.id === undefined) continue;
+            indice.set(construccion.id, construccion);
+            indice.set(String(construccion.id), construccion);
+        }
+        return indice;
+    }
+
+    /**
+     * Recalcula ocupación de edificios a partir de las referencias actuales en ciudadanos.
+     * @param {Array<object>} ciudadanos
+     */
+    sincronizarOcupacionDesdeCiudadanos(ciudadanos = []) {
+        // Reinicia contadores para reconstruirlos desde la relación ciudadano -> edificio.
+        for (const construccion of this.construcciones) {
+            if (Array.isArray(construccion.residentes)) construccion.residentes = [];
+            if (Array.isArray(construccion.empleados)) construccion.empleados = [];
+        }
+
+        for (const ciudadano of ciudadanos) {
+            if (ciudadano.residencia && typeof ciudadano.residencia.añadirResidentes === 'function') {
+                ciudadano.residencia.añadirResidentes(ciudadano);
+            }
+            if (ciudadano.empleo && typeof ciudadano.empleo.añadirEmpleado === 'function') {
+                ciudadano.empleo.añadirEmpleado(ciudadano);
+            }
+        }
+    }
+
+    /**
      * Ejecuta un ciclo de turno completo:
      * 1. Primero las plantas de utilidad producen recursos.
      * 2. Luego cada construcción aplica sus consumos y producción.
@@ -191,19 +227,19 @@ export default class Ciudad {
                 return new Residencial(
                     c.costo, c.id, c.nombre, c.costoMantenimiento,
                     c.consumoElectricidad, c.consumoAgua, c.esActivo,
-                    c.capacidad, c.residentes ?? []
+                    c.capacidad, []
                 );
             case 'Comercial':
                 return new Comercial(
                     c.costo, c.id, c.nombre, c.costoMantenimiento,
                     c.consumoElectricidad, c.consumoAgua, c.esActivo,
-                    c.empleo, c.empleados ?? [], c.ingresoPorTurno
+                    c.empleo, [], c.ingresoPorTurno
                 );
             case 'Industrial':
                 return new Industrial(
                     c.costo, c.id, c.nombre, c.costoMantenimiento,
                     c.consumoElectricidad, c.consumoAgua, c.esActivo,
-                    c.empleo, c.empleados ?? [], c.tipoDeProduccion, c.produccion
+                    c.empleo, [], c.tipoDeProduccion, c.produccion
                 );
             case 'PlantasDeUtilidad':
                 return new PlantasDeUtilidad(

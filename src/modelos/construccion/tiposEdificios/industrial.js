@@ -27,6 +27,11 @@ export default class Industrial extends Edificio {
         return true;
     }
 
+    // Retorna true si el número de empleados actuales es menor al máximo de empleos.
+    tieneEmpleoDisponible() {
+        return this.empleados.length < this.empleo;
+    }
+    
     // Retorna el ingreso en dinero que genera por turno.
     // Las granjas no generan dinero directamente, retornan 0.
     ingresosPorTurno() {

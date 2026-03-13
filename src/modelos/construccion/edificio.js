@@ -34,7 +34,11 @@ export default class Edificio extends Construccion {
         if (!this.esActivo) return;
 
         // Descuenta mantenimiento en dinero
-        recursos.egresosDinero(this.costoMantenimiento);
+        const pudoPagarMantenimiento = recursos.egresosDinero(this.costoMantenimiento);
+        if (!pudoPagarMantenimiento) {
+            this.desactivar();
+            return;
+        }
 
         // Descuenta consumos de recursos
         recursos.actualizarElectricidad(-this.consumoElectricidad);

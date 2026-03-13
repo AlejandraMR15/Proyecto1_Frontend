@@ -6,9 +6,6 @@ import Ciudad from "../modelos/ciudad.js";
 import Puntuacion from "./Puntuacion.js";
 import StorageManager from "../acceso_datos/StorageManager.js";
 import Ciudadano from "../modelos/Ciudadano.js";
-import Residencial from "../modelos/construccion/tiposEdificios/residencial.js";
-import Comercial from "../modelos/construccion/tiposEdificios/comercial.js";
-import Industrial from "../modelos/construccion/tiposEdificios/industrial.js";
 
 /**
  * Clase principal que gestiona la lógica del juego.
@@ -89,6 +86,7 @@ export default class Juego {
                 agua:         recursos.agua
             });
         }
+        this.puntaje = puntaje;
         console.log("Puntaje:", puntaje);
     }
 
@@ -154,7 +152,9 @@ export default class Juego {
         }
         this.ciudad = Ciudad.fromJSON(data.ciudad);
         this.numeroTurno = data.numeroTurno;
-        this.gestorCiudadanos.ciudadanos = data.ciudadanos.map(c => Ciudadano.fromJSON(c));
+        const edificiosPorId = this.ciudad.crearIndiceConstruccionesPorId();
+        this.gestorCiudadanos.ciudadanos = (data.ciudadanos || []).map(c => Ciudadano.fromJSON(c, edificiosPorId));
+        this.ciudad.sincronizarOcupacionDesdeCiudadanos(this.gestorCiudadanos.ciudadanos);
         console.log("Partida cargada");
     }
 

@@ -10,18 +10,6 @@ export default class Servicio extends Edificio {
         this.radio = radio;
     }
 
-    /**
-     * Aplica el bonus de felicidad de este servicio a todos los ciudadanos.
-     * Solo actúa si el edificio está activo.
-     * @param {Ciudadano[]} ciudadanos  - Array con todos los ciudadanos de la ciudad
-     */
-    aplicarFelicidad(ciudadanos) {
-        if (!this.esActivo) return;
-        for (const ciudadano of ciudadanos) {
-            ciudadano.felicidad = Math.min(100, ciudadano.felicidad + this.felicidad);
-        }
-    }
-
     // Sobrescribe getInformacion para incluir datos de servicio.
     getInformacion() {
         return {

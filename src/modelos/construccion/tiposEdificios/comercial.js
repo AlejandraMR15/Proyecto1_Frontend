@@ -11,7 +11,7 @@ export default class Comercial extends Edificio {
 
     // Contrata a un ciudadano si hay vacantes. Retorna true si fue contratado.
     añadirEmpleado(ciudadano) {
-        if (!this.tieneCapacidadDisponible()) return false;
+        if (!this.tieneEmpleoDisponible()) return false;
         this.empleados.push(ciudadano);
         return true;
     }
@@ -25,7 +25,7 @@ export default class Comercial extends Edificio {
     }
 
     // Retorna true si el número de empleados actuales es menor al máximo de empleos.
-    tieneCapacidadDisponible() {
+    tieneEmpleoDisponible() {
         return this.empleados.length < this.empleo;
     }
 
@@ -57,7 +57,7 @@ export default class Comercial extends Edificio {
             empleo: this.empleo,
             empleadosActuales: this.empleados.length,
             ingresoPorTurno: this.ingresoPorTurno,
-            tieneCapacidadDisponible: this.tieneCapacidadDisponible()
+            tieneEmpleoDisponible: this.tieneEmpleoDisponible()
         };
     }
 

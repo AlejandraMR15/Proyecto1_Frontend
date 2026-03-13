@@ -49,8 +49,8 @@ Falta organizar y cerrar de forma integral:
 
 En términos de cobertura funcional, falta terminar de incorporar/ajustar las historias de usuario:
 
-- `2 - 10`
-- `14 - 19`
-- `20 - 14`
+- `2 - 10` - construcción
+- `14 - 20` - visualización recursos y apis
+- Las de visualización en móvil, tablet y pc 
 
 Nota: en general, los requerimientos de las historias ya están muy completos; lo que resta son ajustes de condiciones específicas y detalles de cierre para dejarlas al 100%.

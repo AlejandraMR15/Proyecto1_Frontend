@@ -228,5 +228,48 @@
   </button>
 
   <script type="module" src="../../negocio/menuConstruccion.js"></script>
+
+  <!-- ===== WIDGETS CLIMA Y NOTICIAS ===== -->
+ 
+  <!-- Botones flotantes esquina inferior derecha -->
+  <div id="widgets-container">
+ 
+    <!-- Botón Clima (izquierda) -->
+    <button class="widget-btn" id="widget-clima-btn" title="Ver clima">
+      <span class="widget-clima-icono" id="widget-clima-icono">🌤️</span>
+      <span class="widget-clima-temp" id="widget-clima-temp">--°C</span>
+    </button>
+ 
+    <!-- Botón Noticias (derecha) -->
+    <button class="widget-btn" id="widget-noticias-btn" title="Ver noticias">
+      <span class="widget-noticias-icono">📰</span>
+    </button>
+ 
+  </div>
+ 
+  <!-- Info-box tooltip del clima (aparece sobre el botón) -->
+  <div class="clima-infobox" id="clima-infobox" data-visible="false">
+    <div class="clima-infobox-header">
+      <span class="clima-infobox-titulo">🌍 CLIMA ACTUAL</span>
+    </div>
+    <div class="clima-infobox-body" id="clima-infobox-body">
+      <div class="clima-loading">Cargando...</div>
+    </div>
+  </div>
+ 
+  <!-- Panel lateral de noticias (similar al sidebar de construcción) -->
+  <aside class="noticias-panel" id="noticias-panel" data-open="false">
+    <div class="sidebar-header">
+      <div class="sidebar-title-wrap">
+        <span class="sidebar-icon">📰</span>
+        <h2 class="sidebar-title">NOTICIAS</h2>
+      </div>
+    </div>
+    <div class="sidebar-body" id="noticias-panel-body">
+      <div class="noticias-loading">Cargando noticias...</div>
+    </div>
+  </aside>
+ 
+  <script type="module" src="../../negocio/widgetsInfo.js"></script>
 </body>
 </html>

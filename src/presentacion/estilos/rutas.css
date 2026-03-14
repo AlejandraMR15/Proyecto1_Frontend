@@ -1,0 +1,134 @@
+/* ================================================================
+   CIUDAD VIRTUAL — rutas.css
+   Estilos exclusivos del sistema de cálculo y visualización de rutas.
+   Se complementa con GestorRutas.js (src/negocio/).
+================================================================ */
+
+/* ---- Botón "Calcular ruta" ---- */
+#btn-calcular-ruta {
+    position: fixed;
+    top: calc(var(--header-h, 50px) + 16px);
+    left: calc(var(--sb-width, 272px) + 20px);
+    z-index: 210;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+
+    width: 64px;
+    height: 64px;
+    background: var(--bg-cat, #14144a);
+    border: 3px solid var(--border, #3a3a9a);
+    color: var(--text-primary, #c8d8ff);
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+    font-size: 0.4rem;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+
+    /* Bisel pixel art igual al de los widget-btn */
+    box-shadow:
+        inset 2px 2px 0 var(--border-hi, #6868cc),
+        inset -2px -2px 0 var(--border-dk, #06061a),
+        3px 3px 0 var(--border-dk, #06061a);
+
+    transition: background var(--transition, 0.14s steps(4)),
+                border-color var(--transition, 0.14s steps(4));
+}
+
+#btn-calcular-ruta:hover {
+    background: var(--bg-cat-hover, #1e1e6a);
+    border-color: var(--border-hi, #6868cc);
+}
+
+#btn-calcular-ruta:active {
+    box-shadow:
+        inset -2px -2px 0 var(--border-hi, #6868cc),
+        inset 2px 2px 0 var(--border-dk, #06061a);
+    transform: translate(2px, 2px);
+}
+
+/* Icono del botón */
+#btn-calcular-ruta .ruta-icono {
+    font-size: 1.4rem;
+    line-height: 1;
+    filter: drop-shadow(1px 1px 0 rgba(0, 0, 0, 0.9));
+}
+
+/* Estado ACTIVO: borde y brillo cian para indicar que el modo está habilitado */
+#btn-calcular-ruta[data-activo="true"] {
+    background: #0d2e44;
+    border-color: #00e5ff;
+    color: #00e5ff;
+    box-shadow:
+        inset 2px 2px 0 rgba(0, 229, 255, 0.4),
+        inset -2px -2px 0 rgba(0, 100, 140, 0.6),
+        3px 3px 0 rgba(0, 50, 80, 0.8),
+        0 0 12px rgba(0, 229, 255, 0.5);
+    animation: ruta-btn-pulso 1.4s ease-in-out infinite;
+}
+
+@keyframes ruta-btn-pulso {
+    0%, 100% { box-shadow:
+        inset 2px 2px 0 rgba(0, 229, 255, 0.4),
+        inset -2px -2px 0 rgba(0, 100, 140, 0.6),
+        3px 3px 0 rgba(0, 50, 80, 0.8),
+        0 0 12px rgba(0, 229, 255, 0.5); }
+    50%       { box-shadow:
+        inset 2px 2px 0 rgba(0, 229, 255, 0.4),
+        inset -2px -2px 0 rgba(0, 100, 140, 0.6),
+        3px 3px 0 rgba(0, 50, 80, 0.8),
+        0 0 24px rgba(0, 229, 255, 0.9); }
+}
+
+/* ---- Cubo marcado como ORIGEN ---- */
+.iso-cube.ruta-origen .poly-top   { fill: #00e5ff !important; }
+.iso-cube.ruta-origen .poly-left  { fill: #009ab8 !important; }
+.iso-cube.ruta-origen .poly-right { fill: #006e87 !important; }
+
+/* ---- Cubos de la RUTA — animación de pulso/brillo ---- */
+@keyframes ruta-pulso-cubo {
+    0%, 100% {
+        filter: brightness(1.05) drop-shadow(0 0 2px rgba(0, 229, 255, 0.22));
+    }
+    50% {
+        filter: brightness(1.35) drop-shadow(0 0 6px rgba(0, 229, 255, 0.42));
+    }
+}
+
+.iso-cube.ruta-pulso {
+    animation: ruta-pulso-cubo 1.5s ease-in-out infinite;
+    z-index: 5000 !important;
+}
+
+/* ---- Toast de notificaciones del sistema de rutas ---- */
+#toast-ruta {
+    position: fixed;
+    bottom: 188px;
+    left: 112px;
+    z-index: 9000;
+
+    padding: 9px 18px;
+    background: #071018;
+    border: 1px solid #2e7a94;
+    border-radius: 6px;
+    color: #a8dff0;
+    font-size: 0.55rem;
+    font-family: 'Press Start 2P', 'Courier New', monospace;
+    white-space: nowrap;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
+    pointer-events: none;
+
+    opacity: 0;
+    transition: opacity 0.25s;
+}
+
+#toast-ruta.toast-ruta-visible {
+    opacity: 1;
+}
+
+#toast-ruta.toast-ruta-error {
+    border-color: #c04040;
+    color: #f08080;
+}

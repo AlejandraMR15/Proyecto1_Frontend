@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../estilos/menuConstruccion.css">
+    <link rel="stylesheet" href="../estilos/rutas.css">
     <link rel="stylesheet" href="../estilos/styles.css">
 </head>
 <body>
@@ -227,5 +228,15 @@
   </button>
 
   <script type="module" src="../../negocio/menuConstruccion.js"></script>
+
+  <!-- ===== BOTÓN CALCULAR RUTA ===== -->
+  <!-- Posición fija en esquina inferior izquierda, independiente del sidebar. -->
+  <button id="btn-calcular-ruta" data-activo="false" title="Calcular ruta entre dos edificios">
+    <span class="ruta-icono">🗺️</span>
+    <span>RUTA</span>
+  </button>
+ 
+  <!-- ===== SISTEMA DE RUTAS ===== -->
+  <script type="module" src="../../negocio/GestorRutas.js"></script>
 </body>
 </html>

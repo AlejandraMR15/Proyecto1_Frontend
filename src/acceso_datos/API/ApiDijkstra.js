@@ -19,11 +19,15 @@ export default class ApiDijkstra extends ApiExternos {
 
         const endpoint = this.obtenerEndpointCalculoRuta();
         const opcionesPeticion = this.crearOpcionesPost(datosMapa);
-        const respuesta = await fetch(`${this.baseUrl}${endpoint}`, opcionesPeticion);
-        const resultado = await this.procesarRespuestaJson(respuesta);
+        try {
+            const respuesta = await fetch(`${this.baseUrl}${endpoint}`, opcionesPeticion);
+            const resultado = await this.procesarRespuestaJson(respuesta);
 
-        this.ruta = resultado?.route ?? [];
-        return resultado;
+            this.ruta = resultado?.route ?? [];
+            return resultado;
+        } catch (error) {
+            throw new Error('No se pudo conectar al microservicio de rutas. Verifica que este ejecutandose en http://127.0.0.1:5000');
+        }
     }
 
     /**

@@ -103,8 +103,14 @@
   pointer-events: none;
   transform: translateY(8px);
   transition:
+    right 0.14s steps(4),
     opacity 0.12s steps(3),
     transform 0.12s steps(3);
+}
+
+/* Se corre junto a los botones cuando el panel de noticias esta abierto */
+.clima-infobox.panel-noticias-abierto {
+  right: calc(var(--sb-width) + 16px);
 }
 
 .clima-infobox[data-visible="true"] {

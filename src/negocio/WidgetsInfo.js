@@ -20,8 +20,9 @@ import ApiNoticias from '../acceso_datos/API/ApiNoticias.js';
    CONSTANTES
 ================================================================ */
  
-/** Ciudad por defecto para la consulta del clima */
-const CIUDAD_CLIMA = 'Manizales';
+/** Claves de localStorage usadas por menú y juego */
+const CLAVE_PARTIDA = 'partida';
+const CLAVE_CONFIG_NUEVA = 'config-nueva-partida';
  
 /** País por defecto para la consulta de noticias */
 const PAIS_NOTICIAS = 'co';
@@ -76,6 +77,100 @@ function capitalizar(texto = '') {
   if (!texto) return '';
   return texto.charAt(0).toUpperCase() + texto.slice(1);
 }
+
+/**
+ * Traduce descripciones de clima (OpenWeather) de inglés a español.
+ * @param {string} condicion
+ * @returns {string}
+ */
+function traducirCondicionClimatica(condicion = '') {
+  const lower = condicion.toLowerCase().trim();
+  if (!lower) return '';
+
+  const traduccionesExactas = {
+    'clear sky': 'cielo despejado',
+    'few clouds': 'pocas nubes',
+    'scattered clouds': 'nubes dispersas',
+    'broken clouds': 'nubes fragmentadas',
+    'overcast clouds': 'cielo nublado',
+    'light rain': 'lluvia ligera',
+    'moderate rain': 'lluvia moderada',
+    'heavy intensity rain': 'lluvia intensa',
+    'very heavy rain': 'lluvia muy intensa',
+    'extreme rain': 'lluvia extrema',
+    'light snow': 'nieve ligera',
+    'heavy snow': 'nieve intensa',
+    'mist': 'neblina',
+    'fog': 'niebla',
+    'haze': 'calina',
+    'smoke': 'humo',
+    'dust': 'polvo',
+    'sand': 'arena',
+    'ash': 'ceniza volcanica',
+    'squall': 'turbonada',
+    'tornado': 'tornado'
+  };
+
+  if (traduccionesExactas[lower]) {
+    return traduccionesExactas[lower];
+  }
+
+  const traduccionesPorClave = [
+    { clave: 'thunderstorm', texto: 'tormenta electrica' },
+    { clave: 'drizzle', texto: 'llovizna' },
+    { clave: 'rain', texto: 'lluvia' },
+    { clave: 'snow', texto: 'nieve' },
+    { clave: 'mist', texto: 'neblina' },
+    { clave: 'fog', texto: 'niebla' },
+    { clave: 'haze', texto: 'calina' },
+    { clave: 'smoke', texto: 'humo' },
+    { clave: 'dust', texto: 'polvo' },
+    { clave: 'sand', texto: 'arena' },
+    { clave: 'ash', texto: 'ceniza volcanica' },
+    { clave: 'squall', texto: 'turbonada' },
+    { clave: 'tornado', texto: 'tornado' },
+    { clave: 'clear', texto: 'despejado' },
+    { clave: 'cloud', texto: 'nublado' }
+  ];
+
+  const entrada = traduccionesPorClave.find(({ clave }) => lower.includes(clave));
+  return entrada ? entrada.texto : condicion;
+}
+
+/**
+ * Lee una clave JSON de localStorage de forma segura.
+ * @param {string} clave
+ * @returns {object|null}
+ */
+function leerJSONLocalStorage(clave) {
+  try {
+    const raw = localStorage.getItem(clave);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Devuelve la ciudad geográfica seleccionada por el jugador.
+ * Prioriza partida guardada y usa config nueva como respaldo.
+ * @returns {string|null}
+ */
+function obtenerCiudadClimaSeleccionada() {
+  const partida = leerJSONLocalStorage(CLAVE_PARTIDA);
+  const ciudadPartida = partida?.ciudad?.coordenadas?.nombre;
+  if (typeof ciudadPartida === 'string' && ciudadPartida.trim()) {
+    return ciudadPartida.trim();
+  }
+
+  const configNueva = leerJSONLocalStorage(CLAVE_CONFIG_NUEVA);
+  const ciudadConfig = configNueva?.regionNombre;
+  if (typeof ciudadConfig === 'string' && ciudadConfig.trim()) {
+    return ciudadConfig.trim();
+  }
+
+  return null;
+}
  
 /* ================================================================
    MÓDULO CLIMA
@@ -88,6 +183,9 @@ const clima = (function () {
  
   /** Datos más recientes del clima */
   let datosActuales = null;
+
+  /** Ciudad usada en la última consulta */
+  let ciudadConsulta = null;
  
   /* ---- Referencias al DOM ---- */
   let btnEl        = null;
@@ -139,8 +237,13 @@ const clima = (function () {
   /** Consulta la API y actualiza el botón y el info-box */
   async function cargarClima() {
     try {
+      ciudadConsulta = obtenerCiudadClimaSeleccionada();
+      if (!ciudadConsulta) {
+        throw new Error('No hay ciudad geográfica seleccionada para consultar el clima.');
+      }
+
       api = new ApiClima();
-      datosActuales = await api.obtenerInformacion(CIUDAD_CLIMA);
+      datosActuales = await api.obtenerInformacion(ciudadConsulta);
       renderizarBoton(datosActuales);
       renderizarInfobox(datosActuales);
     } catch (err) {
@@ -167,7 +270,7 @@ const clima = (function () {
  
     const icono     = obtenerIconoClima(datos.condicionClimatica);
     const temp      = datos.temperatura !== null ? Math.round(datos.temperatura) + '°C' : '--';
-    const condicion = capitalizar(datos.condicionClimatica) || '--';
+    const condicion = capitalizar(traducirCondicionClimatica(datos.condicionClimatica)) || '--';
     const humedad   = datos.humedad     !== null ? datos.humedad + '%'      : '--';
     const viento    = datos.velocidadViento !== null
       ? datos.velocidadViento.toFixed(1) + ' m/s'
@@ -176,7 +279,7 @@ const clima = (function () {
     infoboxBody.innerHTML = `
       <div class="clima-fila">
         <span class="clima-fila-label">CIUDAD</span>
-        <span class="clima-fila-valor">${CIUDAD_CLIMA.toUpperCase()}</span>
+        <span class="clima-fila-valor">${(ciudadConsulta || '--').toUpperCase()}</span>
       </div>
       <div class="clima-fila">
         <span class="clima-fila-label">CONDICIÓN</span>
@@ -257,7 +360,9 @@ const noticias = (function () {
     abierto = true;
     panelEl.dataset.open = 'true';
     const container = document.getElementById('widgets-container');
+    const climaInfobox = document.getElementById('clima-infobox');
     if (container) container.classList.add('panel-noticias-abierto');
+    if (climaInfobox) climaInfobox.classList.add('panel-noticias-abierto');
     if (!cargado) cargarNoticias();
   }
  
@@ -266,7 +371,9 @@ const noticias = (function () {
     abierto = false;
     panelEl.dataset.open = 'false';
     const container = document.getElementById('widgets-container');
+    const climaInfobox = document.getElementById('clima-infobox');
     if (container) container.classList.remove('panel-noticias-abierto');
+    if (climaInfobox) climaInfobox.classList.remove('panel-noticias-abierto');
   }
  
   /** Consulta la API y renderiza las tarjetas */

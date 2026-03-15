@@ -1,6 +1,6 @@
 /* ========================================
    CIUDAD VIRTUAL — Cuadrícula Isométrica
-   styles.css
+   styles.css — Base: reset, layout, grid
    ======================================== */
 
 *, *::before, *::after {
@@ -16,32 +16,6 @@ html, body {
     overflow: hidden;
     font-family: 'Segoe UI', system-ui, sans-serif;
     color: #7ec8e3;
-}
-
-/* ---- TOP BAR ---- */
-#top-bar {
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    height: 44px;
-    background: #0a1628;
-    border-bottom: 1px solid #1a3a55;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 20px;
-    z-index: 200;
-    letter-spacing: 0.04em;
-}
-
-#title {
-    font-size: 1rem;
-    font-weight: 700;
-    color: #a8dff0;
-}
-
-#grid-info {
-    font-size: 0.75rem;
-    opacity: 0.6;
 }
 
 /* ---- ZOOM CONTROLS ---- */
@@ -85,7 +59,7 @@ html, body {
 /* ---- VIEWPORT ---- */
 #viewport {
     position: fixed;
-    top: 44px; left: 0; right: 0; bottom: 0;
+    top: 0; left: 0; right: 0; bottom: 0;
     overflow: hidden;
     cursor: grab;
     user-select: none;
@@ -93,6 +67,10 @@ html, body {
 
 #viewport.dragging {
     cursor: grabbing;
+}
+
+#viewport.bloqueado {
+    pointer-events: none;
 }
 
 /* ---- CANVAS WRAP (zoom + pan) ---- */
@@ -159,30 +137,20 @@ html, body {
 
 #tooltip.visible { opacity: 1; }
 
-/**
- * Sprite visual de un ciudadano sobre el mapa isométrico.
- *
- * - position: absolute para ubicarse dentro de #iso-grid como los cubos.
- * - transition para suavizar el movimiento entre celdas.
- * - pointer-events: none para no interferir con clics del grid.
- */
+/* ---- CIUDADANOS ---- */
 .citizen-sprite {
     position: absolute;
     width:  10px;
     height: 10px;
-    border-radius: 50%;                      /* forma circular (placeholder) */
-    background: #f0e040;                     /* amarillo brillante — fácil de ver */
+    border-radius: 50%;
+    background: #f0e040;
     border: 1.5px solid #a89800;
     box-shadow: 0 0 4px rgba(240, 224, 64, 0.7);
-    pointer-events: none;                    /* no bloquea interacción con el grid */
-    transition: left 2s linear, top 2s linear; /* suaviza el desplazamiento */
-    z-index: 1000;                           /* encima de los cubos */
+    pointer-events: none;
+    transition: left 2s linear, top 2s linear;
+    z-index: 1000;
 }
 
-/**
- * Variante de color para ciudadanos con felicidad baja (< 40).
- * Se puede añadir esta clase desde JS cuando corresponda.
- */
 .citizen-sprite.triste {
     background: #e06060;
     border-color: #a01010;

@@ -159,7 +159,8 @@ export default class GestorCiudadano {
         const felicidadPromedio = this.calcularFelicidadPromedio();
         const empleosDisponibles = this.obtenerEmpleosDisponibles(edificiosLaborales).length > 0;
         
-        return viviendaDisponible && felicidadPromedio > 60 && empleosDisponibles;
+        const felicidadOk = this.ciudadanos.length === 0 || felicidadPromedio > 60;
+        return viviendaDisponible && felicidadOk && empleosDisponibles;
     }
 
     /**

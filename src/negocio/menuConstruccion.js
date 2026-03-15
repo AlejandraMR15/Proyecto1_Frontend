@@ -282,8 +282,8 @@ function manejarClickCelda(e) {
     // Solo pedimos a GridRenderer que repinte ese cubo con el nuevo color.
     gridRenderer._actualizarCubo(col, row);
 
-    // Persistir estado completo
-    juego.guardarPartida();
+    // Refrescar el HUD para que el dinero se actualice instantáneamente
+    if (typeof window.refrescarHUD === 'function') window.refrescarHUD();
 
     mostrarNotificacion(`✔ ${edificioSeleccionado.label} construido en (${col}, ${row})`);
 }

@@ -7,8 +7,9 @@
 /* ---- Botón "Calcular ruta" ---- */
 #btn-calcular-ruta {
     position: fixed;
-    top: calc(var(--header-h, 50px) + 16px);
-    left: calc(var(--sb-width, 272px) + 20px);
+    top: 12px;
+    left: 50%;
+    transform: translateX(-240px); /* a la izquierda de los recursos */
     z-index: 210;
 
     display: flex;

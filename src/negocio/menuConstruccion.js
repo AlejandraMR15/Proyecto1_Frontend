@@ -225,11 +225,53 @@ function deseleccionarEdificio() {
 }
 
 /* ================================================================
-   BUSCAR EDIFICIO POR COORDENADA
-   Guardamos _x e _y en el objeto al construirlo.
+   REGISTRO LOCAL DE EDIFICIOS POR COORDENADA
+   Map en memoria: "col,row" → instancia del edificio.
+   No depende de toJSON/fromJSON, vive durante la sesión.
 ================================================================ */
-function buscarEdificioPorCoordenada(construcciones, col, row) {
-    return construcciones.find(c => c._x === col && c._y === row) ?? null;
+const _mapaEdificios = new Map();
+
+function registrarEdificio(col, row, edificio) {
+    _mapaEdificios.set(`${col},${row}`, edificio);
+}
+
+function buscarEdificioPorCoordenada(col, row) {
+    return _mapaEdificios.get(`${col},${row}`) ?? null;
+}
+
+/**
+ * Reconstruye el Map local leyendo ciudad.mapa.matriz y ciudad.construcciones.
+ * Necesario al cargar partida porque el Map vive solo en memoria.
+ * Estrategia: recorre la matriz, por cada celda no vacía busca una construcción
+ * del mismo tipo que aún no haya sido asignada a una coordenada.
+ */
+function reconstruirMapaDesdePartida(ciudad) {
+    _mapaEdificios.clear();
+    if (!ciudad || !ciudad.mapa || !ciudad.construcciones) return;
+
+    const matriz       = ciudad.mapa.matriz;
+    const construcciones = [...ciudad.construcciones]; // copia para marcar usados
+    const usados       = new Set();
+
+    for (let row = 0; row < ciudad.mapa.alto; row++) {
+        for (let col = 0; col < ciudad.mapa.ancho; col++) {
+            const etiqueta = matriz[row] && matriz[row][col];
+            if (!etiqueta || etiqueta === 'g' || etiqueta === 'r') continue;
+
+            // Buscar la config que corresponde a esta etiqueta
+            const cfg = Object.values(EDIFICIOS_CONFIG).find(c => c.etiqueta === etiqueta);
+            if (!cfg) continue;
+
+            // Buscar la primera construcción con ese nombre que no esté usada
+            const idx = construcciones.findIndex((c, i) =>
+                !usados.has(i) && c.nombre === cfg.label
+            );
+            if (idx !== -1) {
+                usados.add(idx);
+                _mapaEdificios.set(`${col},${row}`, construcciones[idx]);
+            }
+        }
+    }
 }
 
 /* ================================================================
@@ -246,7 +288,7 @@ function manejarClickCelda(e) {
 
     /* -- Celda OCUPADA → mostrar información -- */
     if (etiqueta !== 'g') {
-        const construccion = buscarEdificioPorCoordenada(ciudad.construcciones, col, row);
+        const construccion = buscarEdificioPorCoordenada(col, row);
         if (construccion) {
             mostrarInfoEdificio(construccion);
         } else {
@@ -258,31 +300,45 @@ function manejarClickCelda(e) {
     /* -- Celda VACÍA sin modo activo → ignorar -- */
     if (!modoConstructivo || !edificioSeleccionado) return;
 
-    /* -- Crear instancia y construir -- */
-    const nuevoEdificio = edificioSeleccionado.fabrica(generarId());
+    /* -- Validaciones ANTES de construir para evitar estados inconsistentes -- */
+    const esVia = edificioSeleccionado.etiqueta === 'r';
 
-    // ciudad.construir() valida dinero + celda vacía + vía adyacente
-    // y llama mapa.agregarElemento() internamente
-    const exito = ciudad.construir(nuevoEdificio, col, row, edificioSeleccionado.etiqueta);
-
-    if (!exito) {
-        if (ciudad.recursos.dinero < nuevoEdificio.costo) {
-            mostrarNotificacion(`⚠ Dinero insuficiente para ${edificioSeleccionado.label}`, 'error');
-        } else {
-            mostrarNotificacion('⚠ Necesitas una vía adyacente para construir aquí', 'error');
-        }
+    // 1. Validar vía adyacente (solo para edificios, no para vías mismas)
+    if (!esVia && !ciudad.mapa.tieneViaAdyacente(col, row)) {
+        mostrarNotificacion('⚠ Necesitas una vía adyacente para construir aquí', 'error');
         return;
     }
 
-    // Guardar coordenadas en el objeto para recuperarlo al hacer click
-    nuevoEdificio._x = col;
-    nuevoEdificio._y = row;
+    // 2. Validar celda vacía
+    if (!ciudad.mapa.celdaVacia(col, row)) {
+        mostrarNotificacion('⚠ Esa celda ya está ocupada', 'error');
+        return;
+    }
 
-    // ciudad.construir() ya actualizó mapa.matriz.
-    // Solo pedimos a GridRenderer que repinte ese cubo con el nuevo color.
+    // 3. Crear instancia y validar dinero antes de ejecutar
+    const nuevoEdificio = edificioSeleccionado.fabrica(generarId());
+
+    if (ciudad.recursos.dinero < nuevoEdificio.costo) {
+        mostrarNotificacion(`⚠ Dinero insuficiente para ${edificioSeleccionado.label}`, 'error');
+        return;
+    }
+
+    // 4. Construir — en este punto todas las validaciones pasaron
+    const exito = ciudad.construir(nuevoEdificio, col, row, edificioSeleccionado.etiqueta);
+
+    if (!exito) {
+        // No debería llegar aquí, pero por seguridad
+        mostrarNotificacion('⚠ No se pudo construir', 'error');
+        return;
+    }
+
+    // 5. Registrar en el mapa local para recuperarlo al hacer click
+    registrarEdificio(col, row, nuevoEdificio);
+
+    // 6. Repintar el cubo en el grid
     gridRenderer._actualizarCubo(col, row);
 
-    // Persistir estado completo
+    // 7. Persistir
     juego.guardarPartida();
 
     mostrarNotificacion(`✔ ${edificioSeleccionado.label} construido en (${col}, ${row})`);
@@ -337,5 +393,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     /* ---- Escuchar clicks del grid desde document para no depender del orden de carga ---- */
     document.addEventListener('celda-click', manejarClickCelda);
+
+    /* ---- Reconstruir el Map local si hay partida cargada ---- */
+    // grid.js también usa DOMContentLoaded, usamos un pequeño delay para
+    // asegurarnos de que window.juego ya esté asignado.
+    setTimeout(() => {
+        if (window.juego && window.juego.ciudad) {
+            reconstruirMapaDesdePartida(window.juego.ciudad);
+        }
+    }, 200);
 
 });

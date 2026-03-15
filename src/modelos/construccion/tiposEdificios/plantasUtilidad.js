@@ -27,16 +27,18 @@ export default class PlantasDeUtilidad extends Edificio {
      * @param {Recursos} recursos
      */
     produccion(recursos) {
-        if (!this.esActivo) return;
+        if (!this.esActivo) return { electricidad: 0, agua: 0 };
 
         if (this.tipoDeUtilidad === 'electrica') {
-            recursos.actualizarElectricidad(this.produccionPorTurno);
+            return { electricidad: this.produccionPorTurno, agua: 0 };
         } else if (this.tipoDeUtilidad === 'agua') {
             // La planta de agua solo opera si pudo cubrir su consumo eléctrico del turno.
             if (recursos.electricidad >= 0) {
-                recursos.actualizarAgua(this.produccionPorTurno);
+                return { electricidad: 0, agua: this.produccionPorTurno };
             }
         }
+
+        return { electricidad: 0, agua: 0 };
     }
 
     /**
@@ -45,7 +47,7 @@ export default class PlantasDeUtilidad extends Edificio {
      */
     procesarTurno(recursos) {
         super.procesarTurno(recursos);
-        this.produccion(recursos);
+        return this.produccion(recursos);
     }
 
     /**

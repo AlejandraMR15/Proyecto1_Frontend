@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="../estilos/hud.css">
     <link rel="stylesheet" href="../estilos/modales.css">
     <link rel="stylesheet" href="../estilos/widgets.css">
+    <link rel="stylesheet" href="../estilos/recoleccionBurbujas.css">
 </head>
 <body>
 
@@ -421,6 +422,11 @@
             <div class="noticias-loading">Cargando noticias...</div>
         </div>
     </aside>
+
+    <!-- ===== UI DE RECOLECCION DE BURBUJAS ===== -->
+    <section id="recoleccion-burbujas-ui" aria-live="polite" aria-atomic="true">
+        <div id="recoleccion-burbujas-toast" class="recoleccion-burbujas-toast" data-visible="false"></div>
+    </section>
 
     <script type="module" src="../../negocio/widgetsInfo.js"></script>
 </body>

@@ -316,6 +316,7 @@ import MovimientoCiudadanos from './MovimientoCiudadanos.js';
         window.juego        = juego;
         window.mapa         = mapa;
         window.gridRenderer = renderer;
+        window.recolectorBurbujas = juego.recolectorBurbujas;
 
         try {
             const movimientoCiudadanos = new MovimientoCiudadanos(

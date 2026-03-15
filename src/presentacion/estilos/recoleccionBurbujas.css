@@ -1,0 +1,32 @@
+#recoleccion-burbujas-ui {
+    position: fixed;
+    right: 18px;
+    bottom: 18px;
+    z-index: 12000;
+    pointer-events: none;
+}
+
+.recoleccion-burbujas-toast {
+    min-width: 220px;
+    max-width: 300px;
+    padding: 10px 14px;
+    border: 1px solid #2e7a94;
+    border-radius: 8px;
+    background: #0a1628;
+    color: #a8dff0;
+    font: 600 0.76rem/1.3 "Press Start 2P", system-ui, sans-serif;
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.45);
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 0.18s ease, transform 0.2s ease;
+}
+
+.recoleccion-burbujas-toast[data-visible="true"] {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.recoleccion-burbujas-toast--warning {
+    border-color: #9f8a32;
+    color: #f0de9a;
+}

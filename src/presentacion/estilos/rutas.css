@@ -8,8 +8,7 @@
 #btn-calcular-ruta {
     position: fixed;
     top: 12px;
-    left: 50%;
-    transform: translateX(-240px); /* a la izquierda de los recursos */
+    left: 494px; /* 280px sidebar + 190px perfil + 12px gap + 12px margen */
     z-index: 210;
 
     display: flex;
@@ -28,14 +27,19 @@
     letter-spacing: 0.04em;
     cursor: pointer;
 
-    /* Bisel pixel art igual al de los widget-btn */
     box-shadow:
         inset 2px 2px 0 var(--border-hi, #6868cc),
         inset -2px -2px 0 var(--border-dk, #06061a),
         3px 3px 0 var(--border-dk, #06061a);
 
     transition: background var(--transition, 0.14s steps(4)),
-                border-color var(--transition, 0.14s steps(4));
+                border-color var(--transition, 0.14s steps(4)),
+                left 0.14s steps(4);
+}
+
+/* Cuando el sidebar está cerrado, mover igual que el perfil */
+body.sidebar-cerrado #btn-calcular-ruta {
+    left: 226px; /* 12px margen + 190px perfil + 12px gap + 12px margen */
 }
 
 #btn-calcular-ruta:hover {
@@ -47,7 +51,6 @@
     box-shadow:
         inset -2px -2px 0 var(--border-hi, #6868cc),
         inset 2px 2px 0 var(--border-dk, #06061a);
-    transform: translate(2px, 2px);
 }
 
 /* Icono del botón */

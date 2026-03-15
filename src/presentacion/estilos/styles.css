@@ -158,3 +158,33 @@ html, body {
 }
 
 #tooltip.visible { opacity: 1; }
+
+/**
+ * Sprite visual de un ciudadano sobre el mapa isométrico.
+ *
+ * - position: absolute para ubicarse dentro de #iso-grid como los cubos.
+ * - transition para suavizar el movimiento entre celdas.
+ * - pointer-events: none para no interferir con clics del grid.
+ */
+.citizen-sprite {
+    position: absolute;
+    width:  10px;
+    height: 10px;
+    border-radius: 50%;                      /* forma circular (placeholder) */
+    background: #f0e040;                     /* amarillo brillante — fácil de ver */
+    border: 1.5px solid #a89800;
+    box-shadow: 0 0 4px rgba(240, 224, 64, 0.7);
+    pointer-events: none;                    /* no bloquea interacción con el grid */
+    transition: left 2s linear, top 2s linear; /* suaviza el desplazamiento */
+    z-index: 1000;                           /* encima de los cubos */
+}
+
+/**
+ * Variante de color para ciudadanos con felicidad baja (< 40).
+ * Se puede añadir esta clase desde JS cuando corresponda.
+ */
+.citizen-sprite.triste {
+    background: #e06060;
+    border-color: #a01010;
+    box-shadow: 0 0 4px rgba(224, 96, 96, 0.7);
+}

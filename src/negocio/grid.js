@@ -13,6 +13,7 @@
 import Mapa         from '../modelos/Mapa.js';
 import GridRenderer  from './GridRenderer.js';
 import Juego         from './Juego.js';
+import MovimientoCiudadanos from './MovimientoCiudadanos.js';
 
 (function () {
     "use strict";
@@ -328,6 +329,19 @@ import Juego         from './Juego.js';
         window.mapa         = mapa;
         window.gridRenderer = renderer;
 
+        try {
+            const movimientoCiudadanos = new MovimientoCiudadanos(
+                mapa,
+                renderer,
+                juego.gestorCiudadanos,
+                { intervaloMs: 2500 }
+            );
+            movimientoCiudadanos.iniciar();
+            window.movimientoCiudadanos = movimientoCiudadanos;
+        } catch (err) {
+            console.error('[MovimientoCiudadanos] Error al inicializar:', err);
+        }
+        
         /* ----------------------------------------------------------
            7. Centrar vista
         ---------------------------------------------------------- */

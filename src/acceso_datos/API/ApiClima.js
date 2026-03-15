@@ -2,6 +2,12 @@ import ApiExternos from './ApiExternos.js';
 import { OPENWEATHER_KEY } from '../../../keys.js';
 
 export default class ApiClima extends ApiExternos {
+    /**
+     * @param {number} [temperatura=0]
+     * @param {string} [condicionClimatica='']
+     * @param {number} [humedad=0]
+     * @param {number} [velocidadViento=0]
+     */
     constructor(temperatura = 0, condicionClimatica = '', humedad = 0, velocidadViento = 0) {
         super('https://api.openweathermap.org');
         this.apiKey = this.leerApiKey();
@@ -11,6 +17,10 @@ export default class ApiClima extends ApiExternos {
         this.velocidadViento = velocidadViento;
     }
 
+    /**
+     * Lee la API key de OpenWeather desde keys.js.
+     * @returns {string}
+     */
     leerApiKey() {
         if (!OPENWEATHER_KEY) {
             throw new Error('No se encontro OPENWEATHER_KEY en keys.js');
@@ -18,7 +28,11 @@ export default class ApiClima extends ApiExternos {
         return OPENWEATHER_KEY;
     }
 
-    // Metodo principal: obtiene coordenadas por ciudad y luego consulta el clima.
+    /**
+     * Obtiene coordenadas por ciudad y luego consulta el clima actual.
+     * @param {string} [nombreCiudad='']
+     * @returns {Promise<{temperatura:number|null, condicionClimatica:string, humedad:number|null, velocidadViento:number|null}>}
+     */
     async obtenerInformacion(nombreCiudad = '') {
         const coordenadasCiudad = await this.obtenerCoordenadasPorCiudad(nombreCiudad);
         const datosClima = await this.obtenerDatosClima(coordenadasCiudad.latitud, coordenadasCiudad.longitud);
@@ -28,7 +42,11 @@ export default class ApiClima extends ApiExternos {
         return climaFormateado;
     }
 
-    // Consulta la API de geocodificacion para encontrar latitud y longitud de la ciudad.
+    /**
+     * Consulta geocodificación para obtener latitud y longitud de una ciudad.
+     * @param {string} nombreCiudad
+     * @returns {Promise<{latitud:number, longitud:number}>}
+     */
     async obtenerCoordenadasPorCiudad(nombreCiudad) {
         const endpointGeocoding = '/geo/1.0/direct';
         const parametrosGeocoding = this.crearParametrosGeocodificacion(nombreCiudad);
@@ -45,7 +63,11 @@ export default class ApiClima extends ApiExternos {
         };
     }
 
-    // Arma parametros para obtener coordenadas desde nombre de ciudad.
+    /**
+     * Construye parámetros para geocodificación por nombre de ciudad.
+     * @param {string} nombreCiudad
+     * @returns {{q:string, limit:number, appid:string}}
+     */
     crearParametrosGeocodificacion(nombreCiudad) {
         return {
             q: nombreCiudad,
@@ -54,7 +76,12 @@ export default class ApiClima extends ApiExternos {
         };
     }
 
-    // Consulta la API principal de clima con latitud y longitud.
+    /**
+     * Consulta el endpoint de clima por coordenadas.
+     * @param {number} latitud
+     * @param {number} longitud
+     * @returns {Promise<any>}
+     */
     async obtenerDatosClima(latitud, longitud) {
         const endpointClima = '/data/2.5/weather';
         const parametrosClima = this.crearParametrosClima(latitud, longitud);
@@ -62,7 +89,12 @@ export default class ApiClima extends ApiExternos {
         return super.obtenerInformacion(endpointClima, parametrosClima);
     }
 
-    // Arma parametros de consulta para el endpoint de clima.
+    /**
+     * Construye parámetros para la consulta de clima.
+     * @param {number} latitud
+     * @param {number} longitud
+     * @returns {{lat:number, lon:number, appid:string, units:string}}
+     */
     crearParametrosClima(latitud, longitud) {
         return {
             lat: latitud,
@@ -72,7 +104,10 @@ export default class ApiClima extends ApiExternos {
         };
     }
 
-    // Mantiene sincronizadas las propiedades de estado de la clase.
+    /**
+     * Actualiza el estado interno de clima.
+     * @param {{temperatura:number|null, condicionClimatica:string, humedad:number|null, velocidadViento:number|null}} climaFormateado
+     */
     actualizarEstadoClimatico(climaFormateado) {
         this.temperatura = climaFormateado.temperatura;
         this.condicionClimatica = climaFormateado.condicionClimatica;
@@ -80,7 +115,11 @@ export default class ApiClima extends ApiExternos {
         this.velocidadViento = climaFormateado.velocidadViento;
     }
 
-    // Extrae solo los campos requeridos para el JSON final.
+    /**
+     * Extrae únicamente los campos requeridos del payload de OpenWeather.
+     * @param {any} datosClima
+     * @returns {{temperatura:number|null, condicionClimatica:string, humedad:number|null, velocidadViento:number|null}}
+     */
     formatearRespuestaClima(datosClima) {
         return {
             temperatura: datosClima?.main?.temp ?? null,

@@ -1,11 +1,18 @@
 import ApiExternos from './ApiExternos.js';
 
 export default class ApiRegion extends ApiExternos {
+    /**
+     * Crea una instancia para consultar datos geográficos de Colombia.
+     */
     constructor() {
         super('https://api-colombia.com');
     }
 
-    // Metodo principal: coordina la consulta de ciudades y el detalle por id.
+    /**
+     * Obtiene el listado de ciudades y el detalle de una ciudad por nombre.
+     * @param {string} [nombreCiudad='']
+     * @returns {Promise<{ciudadBuscada:string, idCiudad:string|null, ciudades:Array<object>, detalleCiudad:object|null, mensaje?:string}>}
+     */
     async obtenerInformacion(nombreCiudad = '') {
         const ciudades = await this.obtenerTodasLasCiudades();
         const idCiudad = this.obtenerIdCiudadPorNombre(ciudades, nombreCiudad);
@@ -30,19 +37,31 @@ export default class ApiRegion extends ApiExternos {
         };
     }
 
-    // Endpoint 1: obtiene toda la informacion de ciudades.
+    /**
+     * Obtiene todas las ciudades disponibles desde la API.
+     * @returns {Promise<Array<object>>}
+     */
     async obtenerTodasLasCiudades() {
         const endpointCiudades = '/api/v1/City/';
         return super.obtenerInformacion(endpointCiudades);
     }
 
-    // Endpoint 2: obtiene la informacion de una ciudad a partir de su id.
+    /**
+     * Obtiene el detalle de una ciudad a partir de su id.
+     * @param {string|number} idCiudad
+     * @returns {Promise<object>}
+     */
     async obtenerDetalleCiudadPorId(idCiudad) {
         const endpointCiudadPorId = `/api/v1/City/${idCiudad}`;
         return super.obtenerInformacion(endpointCiudadPorId);
     }
 
-    // Busca por nombre en la lista de ciudades y retorna el id encontrado.
+    /**
+     * Busca una ciudad por nombre y devuelve su id.
+     * @param {Array<object>} [ciudades=[]]
+     * @param {string} [nombreCiudad='']
+     * @returns {string|number|null}
+     */
     obtenerIdCiudadPorNombre(ciudades = [], nombreCiudad = '') {
         const nombreNormalizado = this.normalizarTexto(nombreCiudad);
 
@@ -58,7 +77,11 @@ export default class ApiRegion extends ApiExternos {
         return ciudadEncontrada?.id ?? null;
     }
 
-    // Estandariza comparaciones de texto para busqueda por nombre.
+    /**
+     * Normaliza texto para comparaciones de búsqueda.
+     * @param {string} [texto='']
+     * @returns {string}
+     */
     normalizarTexto(texto = '') {
         return String(texto).trim().toLowerCase();
     }

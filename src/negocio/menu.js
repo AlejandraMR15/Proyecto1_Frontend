@@ -65,6 +65,10 @@ let cargandoCiudades = false;
 /* ================================================================
    1. VERIFICAR PARTIDA GUARDADA
 ================================================================ */
+/**
+ * Indica si existe una partida guardada en localStorage.
+ * @returns {boolean}
+ */
 function hayPartidaGuardada() {
     try {
         return localStorage.getItem(CLAVE_PARTIDA) !== null;
@@ -73,6 +77,9 @@ function hayPartidaGuardada() {
     }
 }
 
+/**
+ * Inicializa estado visual del menú principal.
+ */
 function inicializarMenuPrincipal() {
     if (hayPartidaGuardada()) {
         btnContinuar.disabled = false;
@@ -83,6 +90,10 @@ function inicializarMenuPrincipal() {
 /* ================================================================
    2. NAVEGACIÓN ENTRE PANTALLAS
 ================================================================ */
+/**
+ * Cambia la pantalla activa en el flujo del menú.
+ * @param {HTMLElement} pantalla
+ */
 function mostrarPantalla(pantalla) {
     document.querySelectorAll('.pantalla').forEach(p => p.classList.remove('activa'));
     pantalla.classList.add('activa');
@@ -109,6 +120,10 @@ btnContinuar.addEventListener('click', () => {
 /* ================================================================
    3. CARGA DE CIUDADES DESDE LA API
 ================================================================ */
+/**
+ * Carga el listado de ciudades desde API y prepara autocomplete.
+ * @returns {Promise<void>}
+ */
 async function cargarCiudadesAPI() {
     cargandoCiudades = true;
     acSpinner.classList.remove('oculto');
@@ -140,7 +155,11 @@ async function cargarCiudadesAPI() {
    muestra lista desplegable, selección confirma el valor.
 ================================================================ */
 
-// Filtra la lista completa con el texto escrito
+/**
+ * Filtra ciudades por el texto ingresado.
+ * @param {string} texto
+ * @returns {Array<object>}
+ */
 function filtrarCiudades(texto) {
     if (!texto.trim()) return [];
     const normalizado = texto.trim().toLowerCase();
@@ -155,6 +174,10 @@ function filtrarCiudades(texto) {
     return [...empiezan, ...contienen].slice(0, 8); // máximo 8 sugerencias
 }
 
+/**
+ * Renderiza sugerencias del autocomplete.
+ * @param {Array<object>} sugerencias
+ */
 function mostrarSugerencias(sugerencias) {
     acLista.innerHTML = '';
 
@@ -179,11 +202,18 @@ function mostrarSugerencias(sugerencias) {
     acLista.classList.remove('oculto');
 }
 
+/**
+ * Oculta y limpia la lista de sugerencias.
+ */
 function ocultarSugerencias() {
     acLista.classList.add('oculto');
     acLista.innerHTML = '';
 }
 
+/**
+ * Fija una ciudad seleccionada en el formulario.
+ * @param {object} ciudad
+ */
 function seleccionarCiudad(ciudad) {
     ciudadSeleccionada = ciudad;
     inputRegion.value = ciudad.name;
@@ -192,7 +222,9 @@ function seleccionarCiudad(ciudad) {
     ocultarSugerencias();
 }
 
-// Resetea la selección si el usuario borra el campo
+/**
+ * Resetea la ciudad seleccionada actual.
+ */
 function resetearSeleccion() {
     ciudadSeleccionada = null;
     regionOculta.value = '';
@@ -273,6 +305,10 @@ sliderMapa.addEventListener('input', () => {
 /* ================================================================
    6. VALIDACIÓN Y CREACIÓN DE PARTIDA
 ================================================================ */
+/**
+ * Valida datos del formulario de creación de partida.
+ * @returns {boolean}
+ */
 function validarFormulario() {
     const alcalde = inputAlcalde.value.trim();
     const ciudad  = inputCiudad.value.trim();
@@ -304,11 +340,18 @@ function validarFormulario() {
     return true;
 }
 
+/**
+ * Muestra un mensaje de error de validación del formulario.
+ * @param {string} msg
+ */
 function mostrarErrorForm(msg) {
     formError.textContent = msg;
     formError.classList.remove('oculto');
 }
 
+/**
+ * Oculta el mensaje de error del formulario.
+ */
 function ocultarErrorForm() {
     formError.classList.add('oculto');
     formError.textContent = '';
@@ -343,6 +386,9 @@ btnCrear.addEventListener('click', () => {
 /* ================================================================
    7. UTILIDADES
 ================================================================ */
+/**
+ * Limpia y resetea todos los controles del formulario.
+ */
 function limpiarFormulario() {
     inputAlcalde.value  = '';
     inputCiudad.value   = '';

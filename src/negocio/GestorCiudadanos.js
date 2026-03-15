@@ -102,7 +102,7 @@ export default class GestorCiudadano {
 
         // filtrar por edificios que reporten vacantes
         return lista.filter(edificio => {
-            if (typeof edificio.tieneEmpleoDisponible === 'function') {
+            if (edificio.tieneEmpleoDisponible) {
                 return edificio.tieneEmpleoDisponible();
             }
             const empleos = edificio.empleo || 0;

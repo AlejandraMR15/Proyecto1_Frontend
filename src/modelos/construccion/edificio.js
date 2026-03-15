@@ -1,5 +1,14 @@
 import Construccion from './construccion.js';
 export default class Edificio extends Construccion {
+    /**
+     * @param {number} costo
+     * @param {string|number} id
+     * @param {string} nombre
+     * @param {number} costoMantenimiento
+     * @param {number} consumoElectricidad
+     * @param {number} consumoAgua
+     * @param {boolean} esActivo
+     */
     constructor(costo, id, nombre, costoMantenimiento, consumoElectricidad, consumoAgua, esActivo) {
         super(costo);
         this.id = id;
@@ -10,17 +19,24 @@ export default class Edificio extends Construccion {
         this.esActivo = esActivo;
     }
 
-    // Marca el edificio como activo (operando normalmente).
+    /**
+     * Marca el edificio como activo.
+     */
     activar() {
         this.esActivo = true;
     }
 
-    // Marca el edificio como inactivo (sin consumo ni producción).
+    /**
+     * Marca el edificio como inactivo.
+     */
     desactivar() {
         this.esActivo = false;
     }
 
-    // Retorna el costo de mantenimiento del edificio.
+    /**
+     * Retorna el costo de mantenimiento.
+     * @returns {number}
+     */
     calcularMantenimiento() {
         return this.costoMantenimiento;
     }
@@ -34,14 +50,21 @@ export default class Edificio extends Construccion {
         if (!this.esActivo) return;
 
         // Descuenta mantenimiento en dinero
-        recursos.egresosDinero(this.costoMantenimiento);
+        const pudoPagarMantenimiento = recursos.egresosDinero(this.costoMantenimiento);
+        if (!pudoPagarMantenimiento) {
+            this.desactivar();
+            return;
+        }
 
         // Descuenta consumos de recursos
         recursos.actualizarElectricidad(-this.consumoElectricidad);
         recursos.actualizarAgua(-this.consumoAgua);
     }
 
-    // Retorna un objeto con la información relevante del edificio.
+    /**
+     * Retorna información resumida del edificio.
+     * @returns {object}
+     */
     getInformacion() {
         return {
             id: this.id,

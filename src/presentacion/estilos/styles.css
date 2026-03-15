@@ -26,22 +26,28 @@ html, body {
     background: #0a1628;
     border-bottom: 1px solid #1a3a55;
     display: flex;
+    flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    padding: 0 20px;
+    padding: 0 16px;
     z-index: 200;
     letter-spacing: 0.04em;
+    gap: 8px;
 }
 
 #title {
     font-size: 1rem;
     font-weight: 700;
     color: #a8dff0;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 #grid-info {
     font-size: 0.75rem;
     opacity: 0.6;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 /* ---- ZOOM CONTROLS ---- */
@@ -158,3 +164,45 @@ html, body {
 }
 
 #tooltip.visible { opacity: 1; }
+
+/* ---- RECURSOS BAR ---- */
+#recursos-bar {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.recurso-item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 4px;
+    background: rgba(7, 16, 24, 0.7);
+    border: 1px solid #1a3a55;
+    border-radius: 5px;
+    padding: 3px 8px;
+    font-family: 'Press Start 2P', monospace;
+    white-space: nowrap;
+    cursor: default;
+    transition: border-color 0.15s;
+}
+
+.recurso-item:hover { border-color: #2e7a94; }
+
+.recurso-icono {
+    font-size: 0.75rem;
+    line-height: 1;
+}
+
+.recurso-valor {
+    font-size: 0.45rem;
+    color: #a8dff0;
+    white-space: nowrap;
+}
+
+/* Colores de alerta en dinero */
+.recurso-item--ok    .recurso-valor { color: #6ecf5a; }
+.recurso-item--warn  .recurso-valor { color: #f0d040; }
+.recurso-item--alert .recurso-valor { color: #e05555; }

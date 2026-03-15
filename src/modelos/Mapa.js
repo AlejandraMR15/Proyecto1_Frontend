@@ -181,8 +181,8 @@ export default class Mapa {
      * Convierte la matriz de etiquetas a matriz binaria para calculo de rutas.
      *
      * Reglas de conversion:
-     * - 0: celda con via ('r')
-     * - 1: cualquier otra etiqueta ('g', 'P1', edificios, etc.)
+     * - 1: celda con via ('r')
+     * - 0: cualquier otra etiqueta ('g', 'P1', edificios, etc.)
      *
      * @returns {Array<Array<number>>} Matriz con 0s y 1s.
      */

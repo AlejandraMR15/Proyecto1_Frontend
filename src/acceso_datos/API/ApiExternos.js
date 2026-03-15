@@ -1,9 +1,17 @@
 export default class ApiExternos {
+    /**
+     * @param {string} baseUrl
+     */
     constructor(baseUrl) {
         this.baseUrl = baseUrl;
     }
 
-    // Metodo heredado comun: arma query params y ejecuta la peticion HTTP.
+    /**
+     * Arma query params y ejecuta la petición HTTP.
+     * @param {string} endpoint
+     * @param {Record<string, any>} [parametros={}]
+     * @returns {Promise<any>}
+     */
     async obtenerInformacion(endpoint, parametros = {}) {
         const parametrosLimpios = this.limpiarParametros(parametros);
         const queryString = new URLSearchParams(parametrosLimpios).toString();
@@ -11,17 +19,30 @@ export default class ApiExternos {
         return this.realizarPeticion(endpointConParametros);
     }
 
-    // Evita enviar parametros undefined, null o vacios.
+    /**
+     * Filtra parámetros inválidos antes de enviarlos en query string.
+     * @param {Record<string, any>} [parametros={}]
+     * @returns {Record<string, any>}
+     */
     limpiarParametros(parametros = {}) {
         const entradasValidas = Object.entries(parametros).filter(([, valor]) => this.esValorValido(valor));
         return Object.fromEntries(entradasValidas);
     }
 
-    // Define que valores pueden viajar en query params.
+    /**
+     * Determina si un valor puede viajar como parámetro de consulta.
+     * @param {any} valor
+     * @returns {boolean}
+     */
     esValorValido(valor) {
         return valor !== undefined && valor !== null && String(valor).trim() !== '';
     }
 
+    /**
+     * Ejecuta la petición HTTP al endpoint indicado.
+     * @param {string} endpoint
+     * @returns {Promise<any>}
+     */
     async realizarPeticion(endpoint) {
         const url = `${this.baseUrl}${endpoint}`;
         const respuesta = await fetch(url);

@@ -410,6 +410,11 @@ export default class GridRenderer {
      */
     _seleccionado = null;
 
+    /**
+     * Emite evento de entrada de puntero sobre celda.
+     * @param {MouseEvent} e
+     * @private
+     */
     _onEnter(e) {
         // El tooltip es gestionado externamente (grid.js / main); aquí solo
         // emitimos el evento con los datos de la celda para que quien quiera
@@ -427,6 +432,10 @@ export default class GridRenderer {
         }));
     }
 
+    /**
+     * Emite evento de salida de puntero de una celda.
+     * @private
+     */
     _onLeave() {
         this._gridEl.dispatchEvent(new CustomEvent('celda-leave', { bubbles: true }));
     }

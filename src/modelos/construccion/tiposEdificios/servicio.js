@@ -1,5 +1,17 @@
 import Edificio from '../edificio.js';
 export default class Servicio extends Edificio {
+    /**
+     * @param {number} costo
+     * @param {string|number} id
+     * @param {string} nombre
+     * @param {number} costoMantenimiento
+     * @param {number} consumoElectricidad
+     * @param {number} consumoAgua
+     * @param {boolean} esActivo
+     * @param {string} tipoDeServicio
+     * @param {number} felicidad
+     * @param {number} radio
+     */
     constructor(costo, id, nombre, costoMantenimiento, consumoElectricidad, consumoAgua, esActivo, tipoDeServicio, felicidad, radio) {
         super(costo, id, nombre, costoMantenimiento, consumoElectricidad, consumoAgua, esActivo);
         // 'policia' | 'bomberos' | 'hospital'
@@ -11,18 +23,9 @@ export default class Servicio extends Edificio {
     }
 
     /**
-     * Aplica el bonus de felicidad de este servicio a todos los ciudadanos.
-     * Solo actúa si el edificio está activo.
-     * @param {Ciudadano[]} ciudadanos  - Array con todos los ciudadanos de la ciudad
+     * Devuelve información del servicio.
+     * @returns {object}
      */
-    aplicarFelicidad(ciudadanos) {
-        if (!this.esActivo) return;
-        for (const ciudadano of ciudadanos) {
-            ciudadano.felicidad = Math.min(100, ciudadano.felicidad + this.felicidad);
-        }
-    }
-
-    // Sobrescribe getInformacion para incluir datos de servicio.
     getInformacion() {
         return {
             ...super.getInformacion(),

@@ -6,9 +6,6 @@ import Ciudad from "../modelos/ciudad.js";
 import Puntuacion from "./Puntuacion.js";
 import StorageManager from "../acceso_datos/StorageManager.js";
 import Ciudadano from "../modelos/Ciudadano.js";
-import Residencial from "../modelos/construccion/tiposEdificios/residencial.js";
-import Comercial from "../modelos/construccion/tiposEdificios/comercial.js";
-import Industrial from "../modelos/construccion/tiposEdificios/industrial.js";
 
 /**
  * Clase principal que gestiona la lógica del juego.
@@ -53,6 +50,9 @@ export default class Juego {
         }
     }
 
+    /**
+     * Reanuda el loop de turnos si el juego estaba en pausa.
+     */
     reanudarJuego() {
         if (this.EstadoDeJuego.estaEnPausa()) {
             this.EstadoDeJuego.cambiarEstado(ESTADOS.JUGANDO);
@@ -61,6 +61,9 @@ export default class Juego {
         }
     }
 
+    /**
+     * Ejecuta la lógica completa de un turno y recalcula el puntaje.
+     */
     ejecutarTurno() {
         if (!this.EstadoDeJuego.estaJugando()) return;
         this.numeroTurno++;
@@ -80,15 +83,19 @@ export default class Juego {
         let puntaje = 0;
         if (this.administrarPuntaje && this.ciudad) {
             const recursos = this.ciudad.recursos;
+            // Contar ciudadanos sin empleo
+            const desempleados = this.gestorCiudadanos.ciudadanos.filter(c => !c.empleo).length;
             puntaje = this.administrarPuntaje.calcular({
                 poblacion:    this.gestorCiudadanos.calcularTotalCiudadanos(),
                 felicidad:    this.gestorCiudadanos.calcularFelicidadPromedio(),
                 dinero:       recursos.dinero,
                 numEdificios: this.ciudad.construcciones.length,
                 electricidad: recursos.electricidad,
-                agua:         recursos.agua
+                agua:         recursos.agua,
+                desempleados
             });
         }
+        this.puntaje = puntaje;
         console.log("Puntaje:", puntaje);
     }
 
@@ -132,6 +139,9 @@ export default class Juego {
         return this.ciudad;
     }
 
+    /**
+     * Guarda ciudad, turno y ciudadanos en localStorage.
+     */
     guardarPartida() {
         if (!this.ciudad) {
             console.error("No hay ciudad para guardar");
@@ -146,6 +156,9 @@ export default class Juego {
         console.log("Partida guardada");
     }
 
+    /**
+     * Carga la partida guardada y reconstruye referencias de ocupación.
+     */
     cargarPartida() {
         const data = this.StorageManager.cargar('partida');
         if (!data) {
@@ -154,7 +167,9 @@ export default class Juego {
         }
         this.ciudad = Ciudad.fromJSON(data.ciudad);
         this.numeroTurno = data.numeroTurno;
-        this.gestorCiudadanos.ciudadanos = data.ciudadanos.map(c => Ciudadano.fromJSON(c));
+        const edificiosPorId = this.ciudad.crearIndiceConstruccionesPorId();
+        this.gestorCiudadanos.ciudadanos = (data.ciudadanos || []).map(c => Ciudadano.fromJSON(c, edificiosPorId));
+        this.ciudad.sincronizarOcupacionDesdeCiudadanos(this.gestorCiudadanos.ciudadanos);
         console.log("Partida cargada");
     }
 

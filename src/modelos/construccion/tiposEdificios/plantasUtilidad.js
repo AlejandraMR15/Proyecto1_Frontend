@@ -1,5 +1,16 @@
 import Edificio from '../edificio.js';
 export default class PlantasDeUtilidad extends Edificio {
+    /**
+     * @param {number} costo
+     * @param {string|number} id
+     * @param {string} nombre
+     * @param {number} costoMantenimiento
+     * @param {number} consumoElectricidad
+     * @param {number} consumoAgua
+     * @param {boolean} esActivo
+     * @param {string} tipoDeUtilidad
+     * @param {number} produccionPorTurno
+     */
     constructor(costo, id, nombre, costoMantenimiento, consumoElectricidad, consumoAgua, esActivo, tipoDeUtilidad, produccionPorTurno) {
         super(costo, id, nombre, costoMantenimiento, consumoElectricidad, consumoAgua, esActivo);
         // 'electrica' | 'agua'
@@ -11,7 +22,8 @@ export default class PlantasDeUtilidad extends Edificio {
     /**
      * Ejecuta la producción del turno y actualiza el objeto Recursos.
      * - Planta eléctrica: incrementa electricidad.
-     * - Planta de agua: solo produce si hay electricidad suficiente.
+     * - Planta de agua: produce solo si, tras descontar su consumo del turno,
+     *   la electricidad no queda en negativo.
      * @param {Recursos} recursos
      */
     produccion(recursos) {
@@ -20,20 +32,26 @@ export default class PlantasDeUtilidad extends Edificio {
         if (this.tipoDeUtilidad === 'electrica') {
             recursos.actualizarElectricidad(this.produccionPorTurno);
         } else if (this.tipoDeUtilidad === 'agua') {
-            // La planta de agua necesita electricidad para funcionar
-            if (recursos.electricidad >= this.consumoElectricidad) {
+            // La planta de agua solo opera si pudo cubrir su consumo eléctrico del turno.
+            if (recursos.electricidad >= 0) {
                 recursos.actualizarAgua(this.produccionPorTurno);
             }
         }
     }
 
-    // Procesa el turno: primero produce recursos, luego aplica consumos.
+    /**
+     * Procesa costos y producción del turno.
+     * @param {import('../../recursos.js').default} recursos
+     */
     procesarTurno(recursos) {
-        this.produccion(recursos);
         super.procesarTurno(recursos);
+        this.produccion(recursos);
     }
 
-    // Sobrescribe getInformacion para incluir datos de utilidad.
+    /**
+     * Devuelve información de la planta de utilidad.
+     * @returns {object}
+     */
     getInformacion() {
         return {
             ...super.getInformacion(),

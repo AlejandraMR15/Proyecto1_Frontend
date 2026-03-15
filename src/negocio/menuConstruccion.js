@@ -404,3 +404,56 @@ document.addEventListener('DOMContentLoaded', function () {
     }, 200);
 
 });
+
+/* ================================================================
+   PANEL DE RECURSOS — actualización en tiempo real
+   Se refresca cada segundo leyendo window.juego directamente.
+================================================================ */
+function formatearDinero(n) {
+    return '$' + Math.floor(n).toLocaleString('es-CO');
+}
+
+function actualizarRecursos() {
+    const juego = window.juego;
+    if (!juego || !juego.ciudad) return;
+
+    const r   = juego.ciudad.recursos;
+    const fel = juego.gestorCiudadanos
+        ? Math.round(juego.gestorCiudadanos.calcularFelicidadPromedio())
+        : 0;
+
+    // Dinero
+    const dineroEl = document.getElementById('val-dinero');
+    const recDinero = document.getElementById('rec-dinero');
+    if (dineroEl) {
+        dineroEl.textContent = formatearDinero(r.dinero);
+        recDinero.classList.remove('recurso-item--ok', 'recurso-item--warn', 'recurso-item--alert');
+        if (r.dinero >= 10000)      recDinero.classList.add('recurso-item--ok');
+        else if (r.dinero >= 1000)  recDinero.classList.add('recurso-item--warn');
+        else                         recDinero.classList.add('recurso-item--alert');
+    }
+
+    // Electricidad
+    const electrEl = document.getElementById('val-electr');
+    if (electrEl) electrEl.textContent = Math.floor(r.electricidad);
+
+    // Agua
+    const aguaEl = document.getElementById('val-agua');
+    if (aguaEl) aguaEl.textContent = Math.floor(r.agua);
+
+    // Comida
+    const comidaEl = document.getElementById('val-comida');
+    if (comidaEl) comidaEl.textContent = Math.floor(r.comida);
+
+    // Felicidad
+    const felEl = document.getElementById('val-felicidad');
+    if (felEl) felEl.textContent = fel + '%';
+}
+
+// Arrancar el intervalo de actualización cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', function () {
+    // Primer render con pequeño delay para que window.juego esté asignado
+    setTimeout(actualizarRecursos, 300);
+    // Luego actualizar cada segundo
+    setInterval(actualizarRecursos, 1000);
+});

@@ -224,8 +224,27 @@ export default class GridRenderer {
         cubo.style.transition = 'opacity 0.25s ease';
 
         const colores = this._coloresPorEtiqueta(etiqueta);
-        const svg = this._crearSVGCubo(colores.top, colores.left, colores.right);
-        cubo.appendChild(svg);
+        const imagen = this._obtenerImagenPorEtiqueta(etiqueta);
+        
+        console.log(`Creando cubo (${col},${row}) etiqueta=${etiqueta} imagen=${imagen}`);
+        
+        if (imagen) {
+            // Mostrar imagen como fondo del cubo
+            const imgEl = document.createElement('img');
+            imgEl.src = imagen;
+            imgEl.style.width = '100%';
+            imgEl.style.height = '100%';
+            imgEl.style.objectFit = 'cover';
+            imgEl.style.objectPosition = 'center';
+            imgEl.style.borderRadius = '4px';
+            console.log(`✓ Agregando imagen: ${imagen}`);
+            cubo.appendChild(imgEl);
+        } else {
+            // Mostrar SVG coloreado
+            console.log(`✗ No hay imagen, usando color para etiqueta ${etiqueta}`);
+            const svg = this._crearSVGCubo(colores.top, colores.left, colores.right);
+            cubo.appendChild(svg);
+        }
 
         // Eventos
         cubo.addEventListener('mouseenter', (e) => this._onEnter(e));
@@ -256,15 +275,26 @@ export default class GridRenderer {
         cubo.dataset.etiqueta = etiqueta;
 
         const colores = this._coloresPorEtiqueta(etiqueta);
+        const imagen = this._obtenerImagenPorEtiqueta(etiqueta);
 
-        // Actualizar fills de los tres polígonos (top, left, right)
-        const polyTop   = cubo.querySelector('.poly-top');
-        const polyLeft  = cubo.querySelector('.poly-left');
-        const polyRight = cubo.querySelector('.poly-right');
+        // Limpiar contenido anterior
+        cubo.innerHTML = '';
 
-        if (polyTop)   polyTop.setAttribute('fill',   colores.top);
-        if (polyLeft)  polyLeft.setAttribute('fill',  colores.left);
-        if (polyRight) polyRight.setAttribute('fill', colores.right);
+        if (imagen) {
+            // Mostrar imagen como fondo del cubo
+            const imgEl = document.createElement('img');
+            imgEl.src = imagen;
+            imgEl.style.width = '100%';
+            imgEl.style.height = '100%';
+            imgEl.style.objectFit = 'cover';
+            imgEl.style.objectPosition = 'center';
+            imgEl.style.borderRadius = '4px';
+            cubo.appendChild(imgEl);
+        } else {
+            // Mostrar SVG coloreado
+            const svg = this._crearSVGCubo(colores.top, colores.left, colores.right);
+            cubo.appendChild(svg);
+        }
 
         // Efecto visual breve para indicar el cambio
         this._animarCambio(cubo);
@@ -336,6 +366,41 @@ export default class GridRenderer {
 
         // Fallback: terreno vacío para etiquetas desconocidas
         return paletas[etiqueta] ?? paletas['g'];
+    }
+
+    /**
+     * Mapeo de etiquetas a imágenes                                        
+     * Devuelve la ruta de imagen para una etiqueta dada.
+     * @private
+     * @param {string} etiqueta
+     * @returns {string|null} Ruta de la imagen o null si no existe
+     */
+    _obtenerImagenPorEtiqueta(etiqueta) {
+        const imagenes = {
+            // Terreno vacío
+            'g':  null,
+            // Vías
+            'r':  null,
+            // Parques
+            'P1': '/src/acceso_datos/imagen/parque.avif',
+            // Residencial
+            'R1': '/src/acceso_datos/imagen/casa%20residencial.avif',
+            'R2': '/src/acceso_datos/imagen/edificio%20residencial.jpg',
+            // Comercial
+            'C1': '/src/acceso_datos/imagen/tienda.avif',
+            'C2': '/src/acceso_datos/imagen/centro%20comercial.avif',
+            // Industrial
+            'I1': '/src/acceso_datos/imagen/fabrica.avif',
+            'I2': '/src/acceso_datos/imagen/granja.jpg',
+            // Servicios
+            'S1': '/src/acceso_datos/imagen/policia.png',
+            'S2': '/src/acceso_datos/imagen/bomberos.jpg',
+            'S3': '/src/acceso_datos/imagen/hospital.png',
+            // Plantas de utilidad
+            'U1': '/src/acceso_datos/imagen/planta%20energia.avif',
+            'U2': '/src/acceso_datos/imagen/agua.jpg',
+        };
+        return imagenes[etiqueta] || null;
     }
 
     /* ------------------------------------------------------------------ */

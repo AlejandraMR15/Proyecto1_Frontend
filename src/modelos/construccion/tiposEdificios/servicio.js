@@ -39,6 +39,7 @@ export default class Servicio extends Edificio {
             ...super.getInformacion(),
             tipoDeServicio: this.tipoDeServicio,
             felicidadAportada: this.felicidad,
+            consumoComida: this.consumoComida,
             radio: this.radio
         };
     }

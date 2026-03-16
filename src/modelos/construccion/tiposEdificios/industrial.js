@@ -12,11 +12,13 @@ export default class Industrial extends Edificio {
      * @param {Array<object>} empleados
      * @param {string} tipoDeProduccion
      * @param {number} produccion
+     * @param {number} [consumoComida=1] - Consumo de comida por empleado
      */
-    constructor(costo, id, nombre, costoMantenimiento, consumoElectricidad, consumoAgua, esActivo, empleo, empleados, tipoDeProduccion, produccion) {
-        super(costo, id, nombre, costoMantenimiento, consumoElectricidad, consumoAgua, esActivo);
+    constructor(costo, id, nombre, costoMantenimiento, consumoElectricidad, consumoAgua, esActivo, empleo, empleados, tipoDeProduccion, produccion, consumoComida = 1) {
+        super(costo, id, nombre, costoMantenimiento, consumoElectricidad, consumoAgua, esActivo, consumoComida * empleo);
         // Máximo de puestos de trabajo disponibles
         this.empleo = empleo;
+        this.consumoComidaPorEmpleado = consumoComida;
         // Array de objetos Ciudadano empleados aquí
         this.empleados = empleados ?? [];
         // 'fabrica' genera dinero; 'granja' genera comida
@@ -98,6 +100,22 @@ export default class Industrial extends Edificio {
     }
 
     /**
+     * Procesa consumos del turno: mantenimiento, electricidad, agua y comida por empleados actuales.
+     * @param {import('../../recursos.js').default} recursos
+     */
+    procesarConsumo(recursos) {
+        if (!this.esActivo) return;
+
+        recursos.egresosDinero(this.costoMantenimiento);
+        recursos.actualizarElectricidad(-this.consumoElectricidad);
+        recursos.actualizarAgua(-this.consumoAgua);
+        
+        // Consumo de comida basado en empleados actuales
+        const consumoComida = this.empleados.length * this.consumoComidaPorEmpleado;
+        recursos.actualizarComida(-consumoComida);
+    }
+
+    /**
      * Procesa consumo y producción del turno.
      * @param {import('../../recursos.js').default} recursos
      */
@@ -112,12 +130,15 @@ export default class Industrial extends Edificio {
      */
     getInformacion() {
         const tipoTexto = this.tipoDeProduccion === 'fabrica' ? '💰 Dinero' : '🍎 Comida';
+        const consumoComidaActual = this.empleados.length * this.consumoComidaPorEmpleado;
         return {
             ...super.getInformacion(),
             empleo: this.empleo,
             empleadosActuales: this.empleados.length,
             tipoDeProduccion: tipoTexto,
-            produccionPorTurno: `${this.produccion} ${tipoTexto.split(' ')[1].toLowerCase()}`
+            produccionPorTurno: `${this.produccion} ${tipoTexto.split(' ')[1].toLowerCase()}`,
+            consumoComida: consumoComidaActual,
+            consumoComidaPorEmpleado: this.consumoComidaPorEmpleado
         };
     }
 

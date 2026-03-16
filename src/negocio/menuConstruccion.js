@@ -145,6 +145,9 @@ function mostrarInfoEdificio(construccion) {
         costoMantenimiento:        'Mantenimiento/turno ($)',
         consumoElectricidad:       'Consumo eléctrico (u/t)',
         consumoAgua:               'Consumo agua (u/t)',
+        consumoComida:             'Consumo comida/turno',
+        consumoComidaPorResidente: 'Comida por residente/turno',
+        consumoComidaPorEmpleado:  'Comida por empleado/turno',
         esActivo:                  'Activo',
         capacidad:                 'Capacidad',
         ocupacion:                 'Ocupación actual',
@@ -230,7 +233,8 @@ function activarModoDemolicion() {
     modoDemolicion = true;
     modoConstructivo = false;
     deseleccionarEdificio();
-    document.body.style.cursor = 'not-allowed';
+    // Cursor tipo herramienta (grab) para indicar modo demolición
+    document.body.style.cursor = 'grab';
     mostrarNotificacion('Modo demolición activado — haz click en un edificio para demoler');
 }
 
@@ -352,7 +356,7 @@ function ejecutarDemolicion(construccion, col, row) {
     }
 
     // 2. Demoler en la ciudad (ya devuelve el 50% del dinero)
-    const exito = ciudad.demoler(construccion.id);
+    const exito = ciudad.demoler(construccion);
     if (!exito) {
         mostrarNotificacion('⚠ No se pudo demoler el edificio', 'error');
         return;
@@ -374,7 +378,7 @@ function ejecutarDemolicion(construccion, col, row) {
     actualizarRecursos();
 
     mostrarNotificacion(`✔ Demolido. Recuperaste $${reembolso}`);
-    desactivarModoDemolicion();
+    // Nota: NO desactivamos el modo, el usuario lo hace con el botón
 }
 
  
@@ -456,8 +460,12 @@ function manejarClickCelda(e) {
         return;
     }
 
-    /* -- Celda OCUPADA → mostrar información -- */
+    /* -- Celda OCUPADA → mostrar información (NO si estamos en modo ruta) -- */
     if (etiqueta !== 'g') {
+        // No mostrar información si estamos seleccionando puntos de ruta
+        if (window.estaModoRutaActivo && window.estaModoRutaActivo()) {
+            return;
+        }
         const construccion = buscarEdificioPorCoordenada(col, row);
         if (construccion) {
             mostrarInfoEdificio(construccion);

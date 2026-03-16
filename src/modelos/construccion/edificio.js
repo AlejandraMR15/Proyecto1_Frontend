@@ -8,14 +8,16 @@ export default class Edificio extends Construccion {
      * @param {number} consumoElectricidad
      * @param {number} consumoAgua
      * @param {boolean} esActivo
+     * @param {number} [consumoComida=0] - Consumo de comida por turno (proporcional a ocupación)
      */
-    constructor(costo, id, nombre, costoMantenimiento, consumoElectricidad, consumoAgua, esActivo) {
+    constructor(costo, id, nombre, costoMantenimiento, consumoElectricidad, consumoAgua, esActivo, consumoComida = 0) {
         super(costo);
         this.id = id;
         this.nombre = nombre;
         this.costoMantenimiento = costoMantenimiento;
         this.consumoElectricidad = consumoElectricidad;
         this.consumoAgua = consumoAgua;
+        this.consumoComida = consumoComida;
         this.esActivo = esActivo;
     }
 
@@ -42,7 +44,7 @@ export default class Edificio extends Construccion {
     }
 
     /**
-     * Procesa consumo de un turno: descuenta mantenimiento, electricidad y agua.
+     * Procesa consumo de un turno: descuenta mantenimiento, electricidad, agua y comida.
      * El dinero puede ser negativo (GAME OVER se checkea después en Juego.ejecutarTurno).
      * @param {Recursos} recursos
      */
@@ -55,6 +57,11 @@ export default class Edificio extends Construccion {
         // Descuenta consumos de recursos
         recursos.actualizarElectricidad(-this.consumoElectricidad);
         recursos.actualizarAgua(-this.consumoAgua);
+        
+        // Descuenta consumo de comida
+        if (this.consumoComida > 0) {
+            recursos.actualizarComida(-this.consumoComida);
+        }
     }
 
     /**

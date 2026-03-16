@@ -10,9 +10,10 @@ export default class PlantasDeUtilidad extends Edificio {
      * @param {boolean} esActivo
      * @param {string} tipoDeUtilidad
      * @param {number} produccionPorTurno
+     * @param {number} [consumoComida=0] - Consumo de comida
      */
-    constructor(costo, id, nombre, costoMantenimiento, consumoElectricidad, consumoAgua, esActivo, tipoDeUtilidad, produccionPorTurno) {
-        super(costo, id, nombre, costoMantenimiento, consumoElectricidad, consumoAgua, esActivo);
+    constructor(costo, id, nombre, costoMantenimiento, consumoElectricidad, consumoAgua, esActivo, tipoDeUtilidad, produccionPorTurno, consumoComida = 0) {
+        super(costo, id, nombre, costoMantenimiento, consumoElectricidad, consumoAgua, esActivo, consumoComida);
         // 'electrica' | 'agua'
         this.tipoDeUtilidad = tipoDeUtilidad;
         // Cantidad de recurso producida por turno
@@ -69,7 +70,8 @@ export default class PlantasDeUtilidad extends Edificio {
         return {
             ...super.getInformacion(),
             tipoDeUtilidad: tipoTexto,
-            produccionPorTurno: `${this.produccionPorTurno} ${tipoTexto.split(' ')[1].toLowerCase()}`
+            produccionPorTurno: `${this.produccionPorTurno} ${tipoTexto.split(' ')[1].toLowerCase()}`,
+            consumoComida: this.consumoComida
         };
     }
 

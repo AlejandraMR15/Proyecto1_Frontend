@@ -39,6 +39,18 @@ const apiDijkstra = new ApiDijkstra();
 const cubosRuta = new Set();
 
 /* ================================================================
+   CONSULTAR ESTADO DEL MODO RUTA
+================================================================ */
+
+/**
+ * Devuelve true si el modo ruta está activo.
+ * Exportada para que otros módulos (menuConstruccion.js) consulten el estado.
+ */
+window.estaModoRutaActivo = function() {
+    return modoRutaActivo;
+};
+
+/* ================================================================
    ACTIVAR / DESACTIVAR MODO RUTA
 ================================================================ */
 

@@ -69,6 +69,12 @@ export default class GridRenderer {
         // Mapa inverso: clave "col,row" → elemento div del cubo
         // Permite actualizaciones O(1) sin recorrer el DOM.
         this._cubos = new Map();
+
+        // Contenedor para las burbujas de recursos
+        this._burbujesEl = null;
+
+        // Offset X guardado en tiempo de construcción para usar en animaciones
+        this._offsetX = 0;
     }
 
     /* ------------------------------------------------------------------ */
@@ -84,6 +90,15 @@ export default class GridRenderer {
         if (!this._gridEl) {
             throw new Error(`GridRenderer: no se encontró el elemento #${this.contenedorId}`);
         }
+
+        // Crear contenedor para las burbujas de recursos
+        this._burbujesEl = document.createElement('div');
+        this._burbujesEl.id = 'burbujas-recursos';
+        this._burbujesEl.style.cssText = [
+            'position:absolute', 'top:0', 'left:0', 'width:100%', 'height:100%',
+            'pointer-events:none', 'overflow:visible', 'z-index:4000'
+        ].join(';');
+        this._gridEl.appendChild(this._burbujesEl);
 
         // Aseguramos que Mapa tenga una matriz generada
         if (!Array.isArray(this.mapa.matriz) || this.mapa.matriz.length === 0) {
@@ -175,12 +190,12 @@ export default class GridRenderer {
 
         // Offset para que ningún cubo tenga x < 0
         const minX = this._gridToScreen(0, rows - 1).x;
-        const offsetX = -minX;
+        this._offsetX = -minX;
 
         // Dimensiones totales del contenedor
         const maxX = this._gridToScreen(cols - 1, 0).x + this.TW;
         const maxY = this._gridToScreen(cols - 1, rows - 1).y + this.TH + this.TD;
-        this._gridEl.style.width  = (maxX + offsetX) + 'px';
+        this._gridEl.style.width  = (maxX + this._offsetX) + 'px';
         this._gridEl.style.height = maxY + 'px';
 
         // Painter's Algorithm: renderizar de menor a mayor (col + row)
@@ -193,7 +208,7 @@ export default class GridRenderer {
         celdas.sort((a, b) => (a.row + a.col) - (b.row + b.col));
 
         celdas.forEach(({ row, col }, idx) => {
-            const cubo = this._crearCubo(col, row, offsetX, idx);
+            const cubo = this._crearCubo(col, row, this._offsetX, idx);
             this._gridEl.appendChild(cubo);
             this._cubos.set(`${col},${row}`, cubo);
         });
@@ -226,7 +241,6 @@ export default class GridRenderer {
         const colores = this._coloresPorEtiqueta(etiqueta);
         const imagen = this._obtenerImagenPorEtiqueta(etiqueta);
         
-        console.log(`Creando cubo (${col},${row}) etiqueta=${etiqueta} imagen=${imagen}`);
         
         if (imagen) {
             // Mostrar imagen como fondo del cubo
@@ -237,11 +251,9 @@ export default class GridRenderer {
             imgEl.style.objectFit = 'cover';
             imgEl.style.objectPosition = 'center';
             imgEl.style.borderRadius = '4px';
-            console.log(`✓ Agregando imagen: ${imagen}`);
             cubo.appendChild(imgEl);
         } else {
             // Mostrar SVG coloreado
-            console.log(`✗ No hay imagen, usando color para etiqueta ${etiqueta}`);
             const svg = this._crearSVGCubo(colores.top, colores.left, colores.right);
             cubo.appendChild(svg);
         }
@@ -542,4 +554,112 @@ export default class GridRenderer {
             detail: { col, row, etiqueta }
         }));
     }
+
+    /* ------------------------------------------------------------------ */
+    /*  Sistema de burbujas de recursos                                     */
+    /* ------------------------------------------------------------------ */
+
+    /**
+     * Muestra una burbuja de recurso que asciende desde un edificio.
+     * Anima la burbuja con un movimiento ascendente y fade out.
+     * 
+     * @param {number} col - Columna del edificio
+     * @param {number} row - Fila del edificio
+     * @param {string} tipo - Tipo de recurso ('dinero', 'comida', 'electricidad', 'agua')
+     * @param {number} cantidad - Cantidad del recurso
+     */
+    mostrarBurbuja(col, row, tipo, cantidad) {
+        console.log('[GridRenderer] Burbuja solicitada:', { col, row, tipo, cantidad });
+        
+        if (!this._burbujesEl) {
+            console.error('[GridRenderer] ERROR: _burbujesEl no existe. El contenedor no fue inicializado.');
+            return;
+        }
+
+        // Mapeo de tipos de recurso a emojis
+        const iconos = {
+            'dinero': '💵',
+            'comida': '🍎',
+            'electricidad': '⚡',
+            'agua': '💧',
+            'produccion': '📦'
+        };
+
+        // Mapeo de colores por tipo
+        const colores = {
+            'dinero': '#FFD700',
+            'comida': '#FF6B6B',
+            'electricidad': '#FFA500',
+            'agua': '#4ECDC4',
+            'produccion': '#95E1D3'
+        };
+
+        const icono = iconos[tipo] || '📦';
+        const color = colores[tipo] || '#FFD700';
+
+        // Obtener posición del cubo en pantalla (coordenadas isométricas)
+        const { x, y } = this._gridToScreen(col, row);
+        
+        // Calcular posición final dentro del contenedor de burbujas
+        // Las burbujas están en un contenedor absoluto con top:0, left:0
+        // relativo al #iso-grid, así que usamos las coordenadas isométricas directamente
+        const posX = x + this._offsetX + this.TW / 2; 
+        const posY = y + this.TH / 2;
+
+        console.log('[GridRenderer] Posición calculada:', { posX, posY, x, y, offsetX: this._offsetX });
+
+        // Crear elemento de burbuja
+        const burbuja = document.createElement('div');
+        burbuja.className = 'burbuja-recurso';
+        burbuja.style.cssText = `
+            position: absolute;
+            left: ${posX}px;
+            top: ${posY}px;
+            transform: translate(-50%, -50%);
+            width: 48px;
+            height: 48px;
+            background: ${color};
+            border: 3px solid rgba(255,255,255,0.9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.5), inset 0 2px 4px rgba(255,255,255,0.4);
+            pointer-events: none;
+            z-index: 5001;
+        `;
+
+        // Agregar cantidad si es > 1
+        if (cantidad > 1) {
+            burbuja.innerHTML = `
+                <span style="position:absolute;font-size:12px;bottom:-6px;right:-2px;background:rgba(0,0,0,0.7);color:white;padding:2px 5px;border-radius:3px;font-weight:bold;white-space:nowrap">${cantidad}</span>
+                ${icono}
+            `;
+        } else {
+            burbuja.textContent = icono;
+        }
+
+        this._burbujesEl.appendChild(burbuja);
+        console.log('[GridRenderer] Burbuja agregada al DOM');
+
+        // Forzar reflow para que la animación inicial sea visible
+        void burbuja.offsetHeight;
+
+        // Aplicar animación
+        requestAnimationFrame(() => {
+            burbuja.style.transition = 'all 1.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+            burbuja.style.opacity = '0';
+            burbuja.style.transform = 'translate(-50%, calc(-50% - 120px)) scale(0.8)';
+            console.log('[GridRenderer] Animación iniciada');
+        });
+
+        // Limpiar después de la animación
+        setTimeout(() => {
+            burbuja.remove();
+            console.log('[GridRenderer] Burbuja removida del DOM');
+        }, 1800);
+    }
 }
+

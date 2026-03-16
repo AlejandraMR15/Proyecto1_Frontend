@@ -10,10 +10,12 @@ export default class Residencial extends Edificio {
      * @param {boolean} esActivo
      * @param {number} capacidad
      * @param {Array<object>} residentes
+     * @param {number} [consumoComida=1] - Consumo de comida por residente
      */
-    constructor(costo, id, nombre, costoMantenimiento, consumoElectricidad, consumoAgua, esActivo, capacidad, residentes) {
-        super(costo, id, nombre, costoMantenimiento, consumoElectricidad, consumoAgua, esActivo);
+    constructor(costo, id, nombre, costoMantenimiento, consumoElectricidad, consumoAgua, esActivo, capacidad, residentes, consumoComida = 1) {
+        super(costo, id, nombre, costoMantenimiento, consumoElectricidad, consumoAgua, esActivo, consumoComida * capacidad);
         this.capacidad = capacidad;
+        this.consumoComidaPorResidente = consumoComida;
         // Array de objetos Ciudadano que viven aquí
         this.residentes = residentes ?? [];
     }
@@ -59,14 +61,16 @@ export default class Residencial extends Edificio {
 
     /**
      * Calcula consumo proporcional según ocupación.
-     * @returns {{electricidad:number, agua:number}}
+     * Cada residente consume 1 unidad de comida.
+     * @returns {{electricidad:number, agua:number, comida:number}}
      */
     calcularConsumoActual() {
-        if (this.capacidad === 0) return { electricidad: 0, agua: 0 };
+        if (this.capacidad === 0) return { electricidad: 0, agua: 0, comida: 0 };
         const proporcion = this.residentes.length / this.capacidad;
         return {
             electricidad: this.consumoElectricidad * proporcion,
-            agua: this.consumoAgua * proporcion
+            agua: this.consumoAgua * proporcion,
+            comida: this.residentes.length * this.consumoComidaPorResidente
         };
     }
 
@@ -90,6 +94,7 @@ export default class Residencial extends Edificio {
         const consumo = this.calcularConsumoActual();
         recursos.actualizarElectricidad(-consumo.electricidad);
         recursos.actualizarAgua(-consumo.agua);
+        recursos.actualizarComida(-consumo.comida);
     }
 
     /**
@@ -113,7 +118,9 @@ export default class Residencial extends Edificio {
             ocupacion: this.ocupacion(),
             tieneCapacidadDisponible: this.tieneCapacidadDisponible(),
             consumoActualElectricidad: consumo.electricidad,
-            consumoActualAgua: consumo.agua
+            consumoActualAgua: consumo.agua,
+            consumoActualComida: consumo.comida,
+            consumoComidaPorResidente: this.consumoComidaPorResidente
         };
     }
 

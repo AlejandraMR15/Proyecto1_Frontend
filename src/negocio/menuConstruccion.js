@@ -7,7 +7,7 @@
  *  - Modo construcción: seleccionar edificio del sidebar y colocarlo en el mapa.
  *  - Modal de información al hacer click en celda ocupada.
  */
-
+ 
 import Residencial       from '../modelos/construccion/tiposEdificios/residencial.js';
 import Comercial         from '../modelos/construccion/tiposEdificios/comercial.js';
 import Industrial        from '../modelos/construccion/tiposEdificios/industrial.js';
@@ -15,7 +15,7 @@ import Servicio          from '../modelos/construccion/tiposEdificios/servicio.j
 import PlantasDeUtilidad from '../modelos/construccion/tiposEdificios/plantasUtilidad.js';
 import Parques           from '../modelos/construccion/parques.js';
 import Vias              from '../modelos/construccion/vias.js';
-
+ 
 /* ================================================================
    CONFIGURACIONES POR DEFECTO DE CADA EDIFICIO
    Mapeadas por el data-id del item en el sidebar.
@@ -87,21 +87,21 @@ const EDIFICIOS_CONFIG = {
         fabrica:  () => new Vias(100)
     }
 };
-
+ 
 /* ================================================================
    ESTADO DEL MÓDULO
 ================================================================ */
 let modoConstructivo     = false;
 let edificioSeleccionado = null;   // config del edificio elegido en el sidebar
 let itemActivoEl         = null;   // <li> resaltado en el sidebar
-
+ 
 /* ================================================================
    UTILIDAD: id único para cada edificio construido
 ================================================================ */
 function generarId() {
     return 'edif-' + Date.now() + '-' + Math.floor(Math.random() * 10000);
 }
-
+ 
 /* ================================================================
    NOTIFICACIÓN en pantalla (sin alert)
 ================================================================ */
@@ -126,18 +126,18 @@ function mostrarNotificacion(mensaje, tipo = 'info') {
     clearTimeout(notif._timeout);
     notif._timeout = setTimeout(() => { notif.style.opacity = '0'; }, 2800);
 }
-
+ 
 /* ================================================================
    MODAL DE INFORMACIÓN DEL EDIFICIO
 ================================================================ */
 function mostrarInfoEdificio(construccion) {
     const previo = document.getElementById('modal-info-edificio');
     if (previo) previo.remove();
-
+ 
     const info = typeof construccion.getInformacion === 'function'
         ? construccion.getInformacion()
         : { nombre: construccion.constructor.name, costo: construccion.costo };
-
+ 
     const LABELS = {
         nombre:                    'Nombre',
         costo:                     'Costo ($)',
@@ -160,7 +160,7 @@ function mostrarInfoEdificio(construccion) {
         felicidadAportada:         'Felicidad aportada',
         radio:                     'Radio influencia (celdas)'
     };
-
+ 
     const filas = Object.entries(info)
         .filter(([clave]) => clave !== 'id')
         .map(([clave, valor]) => {
@@ -171,7 +171,7 @@ function mostrarInfoEdificio(construccion) {
                 <td style="color:#a8dff0;padding:5px 0;font-size:0.82rem">${valStr}</td>
             </tr>`;
         }).join('');
-
+ 
     const modal = document.createElement('div');
     modal.id = 'modal-info-edificio';
     modal.style.cssText = [
@@ -181,7 +181,7 @@ function mostrarInfoEdificio(construccion) {
         'box-shadow:0 8px 32px rgba(0,0,0,0.75)', 'color:#a8dff0',
         'font-family:Segoe UI,system-ui,sans-serif'
     ].join(';');
-
+ 
     modal.innerHTML = `
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
             <h3 style="font-size:1rem;color:#a8dff0;margin:0">${info.nombre ?? 'Edificio'}</h3>
@@ -190,10 +190,10 @@ function mostrarInfoEdificio(construccion) {
         </div>
         <table style="border-collapse:collapse;width:100%">${filas}</table>
     `;
-
+ 
     document.body.appendChild(modal);
     document.getElementById('modal-cerrar').addEventListener('click', () => modal.remove());
-
+ 
     // Cerrar al hacer click fuera
     setTimeout(() => {
         document.addEventListener('click', function cerrarFuera(e) {
@@ -204,7 +204,7 @@ function mostrarInfoEdificio(construccion) {
         });
     }, 100);
 }
-
+ 
 /* ================================================================
    SELECCIÓN DE EDIFICIO EN EL SIDEBAR
 ================================================================ */
@@ -217,28 +217,28 @@ function seleccionarEdificio(li) {
     li.classList.add('build-item--activo');
     mostrarNotificacion(`Modo construcción: ${config.label} — haz click en una celda`);
 }
-
+ 
 function deseleccionarEdificio() {
     if (itemActivoEl) itemActivoEl.classList.remove('build-item--activo');
     edificioSeleccionado = null;
     itemActivoEl = null;
 }
-
+ 
 /* ================================================================
    REGISTRO LOCAL DE EDIFICIOS POR COORDENADA
    Map en memoria: "col,row" → instancia del edificio.
    No depende de toJSON/fromJSON, vive durante la sesión.
 ================================================================ */
 const _mapaEdificios = new Map();
-
+ 
 function registrarEdificio(col, row, edificio) {
     _mapaEdificios.set(`${col},${row}`, edificio);
 }
-
+ 
 function buscarEdificioPorCoordenada(col, row) {
     return _mapaEdificios.get(`${col},${row}`) ?? null;
 }
-
+ 
 /**
  * Reconstruye el Map local leyendo ciudad.mapa.matriz y ciudad.construcciones.
  * Necesario al cargar partida porque el Map vive solo en memoria.
@@ -248,20 +248,20 @@ function buscarEdificioPorCoordenada(col, row) {
 function reconstruirMapaDesdePartida(ciudad) {
     _mapaEdificios.clear();
     if (!ciudad || !ciudad.mapa || !ciudad.construcciones) return;
-
+ 
     const matriz       = ciudad.mapa.matriz;
     const construcciones = [...ciudad.construcciones]; // copia para marcar usados
     const usados       = new Set();
-
+ 
     for (let row = 0; row < ciudad.mapa.alto; row++) {
         for (let col = 0; col < ciudad.mapa.ancho; col++) {
             const etiqueta = matriz[row] && matriz[row][col];
             if (!etiqueta || etiqueta === 'g' || etiqueta === 'r') continue;
-
+ 
             // Buscar la config que corresponde a esta etiqueta
             const cfg = Object.values(EDIFICIOS_CONFIG).find(c => c.etiqueta === etiqueta);
             if (!cfg) continue;
-
+ 
             // Buscar la primera construcción con ese nombre que no esté usada
             const idx = construcciones.findIndex((c, i) =>
                 !usados.has(i) && c.nombre === cfg.label
@@ -273,7 +273,7 @@ function reconstruirMapaDesdePartida(ciudad) {
         }
     }
 }
-
+ 
 /* ================================================================
    LÓGICA PRINCIPAL: CLICK EN CELDA DEL GRID
 ================================================================ */
@@ -281,11 +281,11 @@ function manejarClickCelda(e) {
     const { col, row, etiqueta } = e.detail;
     const juego        = window.juego;
     const gridRenderer = window.gridRenderer;
-
+ 
     if (!juego || !juego.ciudad || !gridRenderer) return;
-
+ 
     const ciudad = juego.ciudad;
-
+ 
     /* -- Celda OCUPADA → mostrar información -- */
     if (etiqueta !== 'g') {
         const construccion = buscarEdificioPorCoordenada(col, row);
@@ -296,86 +296,86 @@ function manejarClickCelda(e) {
         }
         return;
     }
-
+ 
     /* -- Celda VACÍA sin modo activo → ignorar -- */
     if (!modoConstructivo || !edificioSeleccionado) return;
-
+ 
     /* -- Validaciones ANTES de construir para evitar estados inconsistentes -- */
     const esVia = edificioSeleccionado.etiqueta === 'r';
-
+ 
     // 1. Validar vía adyacente (solo para edificios, no para vías mismas)
     if (!esVia && !ciudad.mapa.tieneViaAdyacente(col, row)) {
         mostrarNotificacion('⚠ Necesitas una vía adyacente para construir aquí', 'error');
         return;
     }
-
+ 
     // 2. Validar celda vacía
     if (!ciudad.mapa.celdaVacia(col, row)) {
         mostrarNotificacion('⚠ Esa celda ya está ocupada', 'error');
         return;
     }
-
+ 
     // 3. Crear instancia y validar dinero antes de ejecutar
     const nuevoEdificio = edificioSeleccionado.fabrica(generarId());
-
+ 
     if (ciudad.recursos.dinero < nuevoEdificio.costo) {
         mostrarNotificacion(`⚠ Dinero insuficiente para ${edificioSeleccionado.label}`, 'error');
         return;
     }
-
+ 
     // 4. Construir — en este punto todas las validaciones pasaron
     const exito = ciudad.construir(nuevoEdificio, col, row, edificioSeleccionado.etiqueta);
-
+ 
     if (!exito) {
         // No debería llegar aquí, pero por seguridad
         mostrarNotificacion('⚠ No se pudo construir', 'error');
         return;
     }
-
+ 
     // 5. Registrar en el mapa local para recuperarlo al hacer click
     registrarEdificio(col, row, nuevoEdificio);
-
+ 
     // 6. Repintar el cubo en el grid
     gridRenderer._actualizarCubo(col, row);
-
+ 
     // 7. Persistir
     juego.guardarPartida();
-
+ 
     mostrarNotificacion(`✔ ${edificioSeleccionado.label} construido en (${col}, ${row})`);
 }
-
+ 
 /* ================================================================
    INIT
 ================================================================ */
 document.addEventListener('DOMContentLoaded', function () {
-
+ 
     const sidebar  = document.getElementById('sidebar');
     const closeBtn = document.getElementById('sidebarClose');
     const tabBtn   = document.getElementById('sidebarTab');
-
+ 
     /* ---- Abrir / cerrar sidebar → activa / desactiva modo construcción ---- */
     function abrirSidebar() {
         sidebar.dataset.open = 'true';
         modoConstructivo = true;
     }
-
+ 
     function cerrarSidebar() {
         sidebar.dataset.open = 'false';
         modoConstructivo = false;
         deseleccionarEdificio();
     }
-
+ 
     closeBtn.addEventListener('click', cerrarSidebar);
     tabBtn.addEventListener('click',   abrirSidebar);
-
+ 
     // Estado inicial según data-open del HTML
     modoConstructivo = sidebar.dataset.open === 'true';
-
+ 
     /* ---- ESC cierra el sidebar ---- */
     document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') cerrarSidebar();
     });
-
+ 
     /* ---- Acordeón de categorías ---- */
     document.querySelectorAll('.cat-header').forEach(function (btn) {
         btn.addEventListener('click', function () {
@@ -383,17 +383,17 @@ document.addEventListener('DOMContentLoaded', function () {
             cat.dataset.open = cat.dataset.open === 'true' ? 'false' : 'true';
         });
     });
-
+ 
     /* ---- Selección de edificio en el sidebar ---- */
     document.querySelectorAll('.build-item').forEach(function (li) {
         li.addEventListener('click', function () {
             seleccionarEdificio(li);
         });
     });
-
+ 
     /* ---- Escuchar clicks del grid desde document para no depender del orden de carga ---- */
     document.addEventListener('celda-click', manejarClickCelda);
-
+ 
     /* ---- Reconstruir el Map local si hay partida cargada ---- */
     // grid.js también usa DOMContentLoaded, usamos un pequeño delay para
     // asegurarnos de que window.juego ya esté asignado.
@@ -402,9 +402,9 @@ document.addEventListener('DOMContentLoaded', function () {
             reconstruirMapaDesdePartida(window.juego.ciudad);
         }
     }, 200);
-
+ 
 });
-
+ 
 /* ================================================================
    PANEL DE RECURSOS — actualización en tiempo real
    Se refresca cada segundo leyendo window.juego directamente.
@@ -412,16 +412,16 @@ document.addEventListener('DOMContentLoaded', function () {
 function formatearDinero(n) {
     return '$' + Math.floor(n).toLocaleString('es-CO');
 }
-
+ 
 function actualizarRecursos() {
     const juego = window.juego;
     if (!juego || !juego.ciudad) return;
-
+ 
     const r   = juego.ciudad.recursos;
     const fel = juego.gestorCiudadanos
         ? Math.round(juego.gestorCiudadanos.calcularFelicidadPromedio())
         : 0;
-
+ 
     // Dinero
     const dineroEl = document.getElementById('val-dinero');
     const recDinero = document.getElementById('rec-dinero');
@@ -432,24 +432,24 @@ function actualizarRecursos() {
         else if (r.dinero >= 1000)  recDinero.classList.add('recurso-item--warn');
         else                         recDinero.classList.add('recurso-item--alert');
     }
-
+ 
     // Electricidad
     const electrEl = document.getElementById('val-electr');
     if (electrEl) electrEl.textContent = Math.floor(r.electricidad);
-
+ 
     // Agua
     const aguaEl = document.getElementById('val-agua');
     if (aguaEl) aguaEl.textContent = Math.floor(r.agua);
-
+ 
     // Comida
     const comidaEl = document.getElementById('val-comida');
     if (comidaEl) comidaEl.textContent = Math.floor(r.comida);
-
+ 
     // Felicidad
     const felEl = document.getElementById('val-felicidad');
     if (felEl) felEl.textContent = fel + '%';
 }
-
+ 
 // Arrancar el intervalo de actualización cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', function () {
     // Primer render con pequeño delay para que window.juego esté asignado

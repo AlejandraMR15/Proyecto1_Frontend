@@ -1,6 +1,6 @@
 /* ========================================
    CIUDAD VIRTUAL — Cuadrícula Isométrica
-   styles.css
+   styles.css — Base: reset, layout, grid
    ======================================== */
 
 *, *::before, *::after {
@@ -60,7 +60,7 @@ html, body {
 /* ---- VIEWPORT ---- */
 #viewport {
     position: fixed;
-    top: 44px; left: 0; right: 0; bottom: 0;
+    top: 0; left: 0; right: 0; bottom: 0;
     overflow: hidden;
     cursor: grab;
     user-select: none;
@@ -68,6 +68,10 @@ html, body {
 
 #viewport.dragging {
     cursor: grabbing;
+}
+
+#viewport.bloqueado {
+    pointer-events: none;
 }
 
 /* ---- CANVAS WRAP (zoom + pan) ---- */
@@ -133,3 +137,23 @@ html, body {
 }
 
 #tooltip.visible { opacity: 1; }
+
+/* ---- CIUDADANOS ---- */
+.citizen-sprite {
+    position: absolute;
+    width:  10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #f0e040;
+    border: 1.5px solid #a89800;
+    box-shadow: 0 0 4px rgba(240, 224, 64, 0.7);
+    pointer-events: none;
+    transition: left 2s linear, top 2s linear;
+    z-index: 1000;
+}
+
+.citizen-sprite.triste {
+    background: #e06060;
+    border-color: #a01010;
+    box-shadow: 0 0 4px rgba(224, 96, 96, 0.7);
+}

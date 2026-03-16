@@ -71,17 +71,19 @@ export default class Industrial extends Edificio {
      * @param {Recursos} recursos
      */
     producirRecursos(recursos) {
-        if (!this.esActivo) return;
+        if (!this.esActivo) return { dinero: 0, comida: 0 };
 
         // Detecta si faltan recursos críticos para esta industria
         const faltanRecursos = recursos.electricidad < 0 || recursos.agua < 0;
         const factor = faltanRecursos ? 0.5 : 1;
 
         if (this.tipoDeProduccion === 'fabrica') {
-            recursos.dinero += Math.floor(this.produccion * factor);
+            return { dinero: Math.floor(this.produccion * factor), comida: 0 };
         } else if (this.tipoDeProduccion === 'granja') {
-            recursos.actualizarComida(Math.floor(this.produccion * factor));
+            return { dinero: 0, comida: Math.floor(this.produccion * factor) };
         }
+
+        return { dinero: 0, comida: 0 };
     }
 
     /**
@@ -90,7 +92,7 @@ export default class Industrial extends Edificio {
      */
     procesarTurno(recursos) {
         super.procesarTurno(recursos);
-        this.producirRecursos(recursos);
+        return this.producirRecursos(recursos);
     }
 
     /**

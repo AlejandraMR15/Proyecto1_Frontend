@@ -1,0 +1,216 @@
+/* ========================================
+   CIUDAD VIRTUAL — modales.css
+   Modales: pausa, configuraciones,
+   ranking y finalizar partida
+   ======================================== */
+
+/* ---- BASE DEL OVERLAY ---- */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    z-index: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Press Start 2P', monospace;
+}
+
+.modal-overlay[data-visible="false"] {
+    display: none;
+}
+
+/* ---- CAJA DEL MODAL ---- */
+.modal-caja {
+    background: #0f0f2a;
+    border: 3px solid #3a3a9a;
+    border-radius: 6px;
+    padding: 28px 32px;
+    min-width: 300px;
+    max-width: 480px;
+    width: 90%;
+    box-shadow: 6px 6px 0 #06061a, inset 2px 2px 0 #6868cc44;
+}
+
+.modal-caja-config {
+    max-width: 520px;
+}
+
+.modal-caja-ranking {
+    max-width: 760px;
+    width: 95%;
+}
+
+/* ---- TÍTULO Y TEXTO ---- */
+.modal-titulo {
+    font-size: 0.75rem;
+    color: #ffd700;
+    text-align: center;
+    margin-bottom: 22px;
+    letter-spacing: 0.06em;
+    text-shadow: 2px 2px 0 #aa8800;
+}
+
+.modal-texto {
+    font-size: 0.5rem;
+    color: #c8d8ff;
+    text-align: center;
+    line-height: 1.8;
+    margin-bottom: 20px;
+}
+
+/* ---- BOTONES ---- */
+.modal-opciones {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 16px;
+}
+
+.modal-opciones.horizontal {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.modal-opciones.horizontal .modal-btn {
+    flex: 1;
+    min-width: 120px;
+}
+
+.modal-btn {
+    width: 100%;
+    padding: 10px 16px;
+    background: #14144a;
+    border: 2px solid #3a3a9a;
+    color: #c8d8ff;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.5rem;
+    cursor: pointer;
+    border-radius: 4px;
+    letter-spacing: 0.05em;
+    transition: background 0.12s, border-color 0.12s;
+    box-shadow: inset 2px 2px 0 #6868cc44, inset -2px -2px 0 #06061a, 3px 3px 0 #06061a;
+}
+
+.modal-btn:hover {
+    background: #1e1e6a;
+    border-color: #6868cc;
+}
+
+.modal-btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: inset -2px -2px 0 #6868cc44, inset 2px 2px 0 #06061a;
+}
+
+.modal-btn-primario {
+    background: #0e3a1a;
+    border-color: #3a9a4a;
+    color: #a0e870;
+}
+
+.modal-btn-primario:hover {
+    background: #1a5a28;
+    border-color: #6acc7a;
+}
+
+.modal-btn-peligro {
+    background: #3a0e0e;
+    border-color: #9a3a3a;
+    color: #e87070;
+}
+
+.modal-btn-peligro:hover {
+    background: #5a1a1a;
+    border-color: #cc6a6a;
+}
+
+/* ---- CONFIGURACIONES ---- */
+.config-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    max-height: 340px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.config-grupo {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.config-label {
+    font-size: 0.42rem;
+    color: #7ec8e3;
+    line-height: 1.6;
+}
+
+.config-input {
+    background: #06061a;
+    border: 2px solid #3a3a9a;
+    color: #ffd700;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.55rem;
+    padding: 6px 10px;
+    border-radius: 4px;
+    width: 100%;
+    outline: none;
+}
+
+.config-input:focus {
+    border-color: #6868cc;
+}
+
+/* ---- RANKING — tabla ---- */
+#ranking-tabla-wrap {
+    overflow-x: auto;
+    margin-bottom: 8px;
+}
+
+#ranking-tabla {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.38rem;
+    color: #c8d8ff;
+}
+
+#ranking-tabla th {
+    background: #14144a;
+    color: #ffd700;
+    padding: 7px 8px;
+    border: 1px solid #3a3a9a;
+    text-align: left;
+    white-space: nowrap;
+}
+
+#ranking-tabla td {
+    padding: 6px 8px;
+    border: 1px solid #1e1e5a;
+    white-space: nowrap;
+}
+
+#ranking-tabla tbody tr:nth-child(even) {
+    background: #0d0d22;
+}
+
+#ranking-tabla tbody tr:hover {
+    background: #1a1a4a;
+}
+
+#ranking-tabla tbody tr.ranking-actual {
+    background: #1a3a14;
+    color: #a0e870;
+}
+
+#ranking-tabla td:first-child {
+    color: #ffd700;
+    font-weight: 700;
+}
+
+#ranking-vacio {
+    text-align: center;
+    color: #6878a8;
+    font-size: 0.45rem;
+    padding: 24px 0;
+}

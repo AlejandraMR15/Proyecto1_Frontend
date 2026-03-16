@@ -76,8 +76,10 @@ export default class Comercial extends Edificio {
         super.procesarTurno(recursos);
         // Un edificio comercial no genera ingresos si la electricidad es negativa
         if (recursos.electricidad >= 0) {
-            recursos.dinero += this.generaIngresos();
+            return { dinero: this.generaIngresos() };
         }
+
+        return { dinero: 0 };
     }
 
     /**

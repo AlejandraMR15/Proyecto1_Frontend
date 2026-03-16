@@ -3,16 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ciudad Virtual – Cuadrícula Isométrica</title>
     <title>Ciudad Virtual</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../estilos/menuConstruccion.css">
+    <link rel="stylesheet" href="../estilos/rutas.css">
     <link rel="stylesheet" href="../estilos/styles.css">
+    <link rel="stylesheet" href="../estilos/Hud.css">
+    <link rel="stylesheet" href="../estilos/Modales.css">
+    <link rel="stylesheet" href="../estilos/Widgets.css">
+    <link rel="stylesheet" href="../estilos/recoleccionBurbujas.css">
 </head>
 <body>
 
+    <!-- ===== RECURSOS FLOTANTES (arriba centro) ===== -->
+    <div id="hud-recursos">
+        <div class="hud-recurso" id="hud-dinero">
+            <span class="hud-recurso-icono">💰</span>
+            <div class="hud-recurso-datos">
+                <span class="hud-recurso-label">DINERO</span>
+                <span class="hud-recurso-valor" id="val-dinero">$50.000</span>
+            </div>
+        </div>
+        <div class="hud-recurso" id="hud-electricidad">
+            <span class="hud-recurso-icono">⚡</span>
+            <div class="hud-recurso-datos">
+                <span class="hud-recurso-label">ELECTRICIDAD</span>
+                <span class="hud-recurso-valor" id="val-electricidad">0</span>
+            </div>
+        </div>
+        <div class="hud-recurso" id="hud-agua">
+            <span class="hud-recurso-icono">💧</span>
+            <div class="hud-recurso-datos">
+                <span class="hud-recurso-label">AGUA</span>
+                <span class="hud-recurso-valor" id="val-agua">0</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== BOTONES CONTROL (esquina superior derecha) ===== -->
+    <div id="hud-controles">
+        <button id="btn-pausa" title="Pausar / Reanudar (ESC)">⏸</button>
+        <button id="btn-ranking" title="Ver Ranking">🏆</button>
+    </div>
+
+    <!-- ===== PANEL PERFIL (esquina superior izquierda) ===== -->
+    <div id="hud-perfil">
+        <div id="perfil-nombre-ciudad">🏙️ <span id="perfil-ciudad">Mi Ciudad</span></div>
+        <div id="perfil-alcalde">👤 <span id="perfil-alcalde-nombre">Alcalde</span></div>
+        <div id="perfil-puntuacion">⭐ <span id="perfil-score">0</span></div>
+    </div>
+
+    <!-- ===== PANEL BIENESTAR: felicidad y comida (separado del perfil) ===== -->
+    <div id="hud-bienestar">
+        <div class="bienestar-fila">
+            <span class="bienestar-icono">😊</span>
+            <div class="bienestar-datos">
+                <span class="bienestar-label">FELICIDAD</span>
+                <span class="bienestar-valor" id="val-felicidad">0%</span>
+            </div>
+        </div>
+        <div class="bienestar-fila">
+            <span class="bienestar-icono">🍎</span>
+            <div class="bienestar-datos">
+                <span class="bienestar-label">COMIDA</span>
+                <span class="bienestar-valor" id="val-comida">0 u</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== TIMER DE TURNO ===== -->
+    <div id="hud-turno">
+        <div id="turno-numero">TURNO <span id="val-turno">0</span></div>
+        <div id="turno-barra-wrap">
+            <div id="turno-barra-fill"></div>
+        </div>
+        <div id="turno-tiempo">
+            <span id="val-tiempo-actual">0s</span>
+            <span class="turno-sep">/</span>
+            <span id="val-tiempo-total">10s</span>
+        </div>
+    </div>
+
+    <!-- ===== VIEWPORT ===== -->
     <div id="viewport">
         <div id="canvas-wrap">
             <div id="iso-scene">
@@ -30,198 +104,330 @@
 
     <div id="tooltip"></div>
 
-    <script type="module" src="../../negocio/grid.js"></script>
-
-  <!-- ===== PANEL LATERAL DE CONSTRUCCIÓN ===== -->
-  <aside class="sidebar" id="sidebar" data-open="true">
-
-    <div class="sidebar-header">
-      <div class="sidebar-title-wrap">
-        <span class="sidebar-icon">🏗️</span>
-        <h2 class="sidebar-title">CONSTRUIR</h2>
-      </div>
-      <button class="sidebar-close" id="sidebarClose" title="Cerrar panel">✕</button>
+    <!-- ===== MODAL DE PAUSA ===== -->
+    <div id="modal-pausa" class="modal-overlay" data-visible="false">
+        <div class="modal-caja">
+            <div class="modal-titulo">⏸ JUEGO PAUSADO</div>
+            <div class="modal-opciones">
+                <button class="modal-btn modal-btn-primario" id="btn-reanudar">▶ REANUDAR</button>
+                <button class="modal-btn" id="btn-configuraciones">⚙ CONFIGURACIONES</button>
+                <button class="modal-btn" id="btn-guardar-partida">💾 GUARDAR PARTIDA</button>
+                <button class="modal-btn modal-btn-peligro" id="btn-finalizar">✕ FINALIZAR PARTIDA</button>
+            </div>
+        </div>
     </div>
 
-    <div class="sidebar-body">
+    <!-- ===== MODAL DE CONFIGURACIONES ===== -->
+    <div id="modal-config" class="modal-overlay" data-visible="false">
+        <div class="modal-caja modal-caja-config">
+            <div class="modal-titulo">⚙ CONFIGURACIONES</div>
+            <div class="config-lista">
+                <div class="config-grupo">
+                    <label class="config-label">Duración del turno (segundos)</label>
+                    <input class="config-input" type="number" id="cfg-duracion-turno" min="5" max="300" value="10">
+                </div>
+                <div class="config-grupo">
+                    <label class="config-label">Agua consumida por ciudadano/turno</label>
+                    <input class="config-input" type="number" id="cfg-agua-ciudadano" min="0" max="50" value="1">
+                </div>
+                <div class="config-grupo">
+                    <label class="config-label">Electricidad consumida por ciudadano/turno</label>
+                    <input class="config-input" type="number" id="cfg-elec-ciudadano" min="0" max="50" value="1">
+                </div>
+                <div class="config-grupo">
+                    <label class="config-label">Comida consumida por ciudadano/turno</label>
+                    <input class="config-input" type="number" id="cfg-comida-ciudadano" min="0" max="50" value="1">
+                </div>
+                <div class="config-grupo">
+                    <label class="config-label">Beneficio felicidad (servicios)</label>
+                    <input class="config-input" type="number" id="cfg-beneficio-servicio" min="1" max="50" value="10">
+                </div>
+                <div class="config-grupo">
+                    <label class="config-label">Tasa de crecimiento poblacional (1-3)</label>
+                    <input class="config-input" type="number" id="cfg-tasa-crecimiento" min="1" max="3" value="3">
+                </div>
+            </div>
+            <div class="modal-opciones">
+                <button class="modal-btn modal-btn-primario" id="btn-cfg-guardar">✔ GUARDAR</button>
+                <button class="modal-btn" id="btn-cfg-cancelar">✕ CANCELAR</button>
+            </div>
+        </div>
+    </div>
 
-      <!-- RESIDENCIAL -->
-      <div class="category" data-open="true">
-        <button class="cat-header">
-          <span class="cat-icon">🏠</span>
-          <span class="cat-name">RESIDENCIAL</span>
-          <span class="cat-arrow">▼</span>
+    <!-- ===== MODAL FINALIZAR PARTIDA ===== -->
+    <div id="modal-finalizar" class="modal-overlay" data-visible="false">
+        <div class="modal-caja">
+            <div class="modal-titulo">⚠ FINALIZAR PARTIDA</div>
+            <p class="modal-texto">¿Deseas finalizar la partida? El puntaje actual se guardará en el ranking.</p>
+            <div class="modal-opciones">
+                <button class="modal-btn modal-btn-peligro" id="btn-finalizar-confirmar">✔ CONFIRMAR</button>
+                <button class="modal-btn" id="btn-finalizar-cancelar">✕ CANCELAR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== PANEL LATERAL DE RANKING ===== -->
+    <aside id="panel-ranking" data-open="false">
+        <div class="ranking-panel-header">
+            <span>🏆 RANKING</span>
+            <button id="btn-ranking-cerrar" title="Cerrar">✕</button>
+        </div>
+        <div class="ranking-panel-body">
+            <table id="ranking-tabla">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Ciudad</th>
+                        <th>Score</th>
+                        <th>Turnos</th>
+                    </tr>
+                </thead>
+                <tbody id="ranking-tbody"></tbody>
+            </table>
+            <div id="ranking-vacio" style="display:none;">Sin partidas aún.</div>
+        </div>
+        <div class="ranking-panel-footer">
+            <button class="modal-btn modal-btn-peligro" id="btn-ranking-reiniciar">🗑 REINICIAR</button>
+            <button class="modal-btn" id="btn-ranking-exportar">⬇ EXPORTAR</button>
+        </div>
+    </aside>
+
+    <script type="module" src="../../negocio/HUD.js"></script>
+    <script type="module" src="../../negocio/grid.js"></script>
+
+    <!-- ===== PANEL LATERAL DE CONSTRUCCIÓN ===== -->
+    <aside class="sidebar" id="sidebar" data-open="false">
+        <div class="sidebar-header">
+            <div class="sidebar-title-wrap">
+                <span class="sidebar-icon">🏗️</span>
+                <h2 class="sidebar-title">CONSTRUIR</h2>
+            </div>
+            <button class="sidebar-close" id="sidebarClose" title="Cerrar panel">✕</button>
+        </div>
+        <div class="sidebar-body">
+            <!-- RESIDENCIAL -->
+            <div class="category" data-open="true">
+                <button class="cat-header">
+                    <span class="cat-icon">🏠</span>
+                    <span class="cat-name">RESIDENCIAL</span>
+                    <span class="cat-arrow">▼</span>
+                </button>
+                <ul class="cat-items">
+                    <li class="build-item" data-id="res-001">
+                        <span class="build-icon">🏠</span>
+                        <div class="build-info">
+                            <span class="build-name">Casa</span>
+                            <span class="build-cost">💰 $1.000</span>
+                        </div>
+                    </li>
+                    <li class="build-item" data-id="res-002">
+                        <span class="build-icon">🏢</span>
+                        <div class="build-info">
+                            <span class="build-name">Apartamento</span>
+                            <span class="build-cost">💰 $3.000</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <!-- COMERCIAL -->
+            <div class="category" data-open="false">
+                <button class="cat-header">
+                    <span class="cat-icon">🏪</span>
+                    <span class="cat-name">COMERCIAL</span>
+                    <span class="cat-arrow">▼</span>
+                </button>
+                <ul class="cat-items">
+                    <li class="build-item" data-id="com-001">
+                        <span class="build-icon">🏪</span>
+                        <div class="build-info">
+                            <span class="build-name">Tienda</span>
+                            <span class="build-cost">💰 $2.000</span>
+                        </div>
+                    </li>
+                    <li class="build-item" data-id="com-002">
+                        <span class="build-icon">🏬</span>
+                        <div class="build-info">
+                            <span class="build-name">C. Comercial</span>
+                            <span class="build-cost">💰 $8.000</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <!-- INDUSTRIAL -->
+            <div class="category" data-open="false">
+                <button class="cat-header">
+                    <span class="cat-icon">🏭</span>
+                    <span class="cat-name">INDUSTRIAL</span>
+                    <span class="cat-arrow">▼</span>
+                </button>
+                <ul class="cat-items">
+                    <li class="build-item" data-id="ind-001">
+                        <span class="build-icon">🏭</span>
+                        <div class="build-info">
+                            <span class="build-name">Fábrica</span>
+                            <span class="build-cost">💰 $5.000</span>
+                        </div>
+                    </li>
+                    <li class="build-item" data-id="ind-002">
+                        <span class="build-icon">🌾</span>
+                        <div class="build-info">
+                            <span class="build-name">Granja</span>
+                            <span class="build-cost">💰 $3.000</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <!-- SERVICIOS -->
+            <div class="category" data-open="false">
+                <button class="cat-header">
+                    <span class="cat-icon">🚒</span>
+                    <span class="cat-name">SERVICIOS</span>
+                    <span class="cat-arrow">▼</span>
+                </button>
+                <ul class="cat-items">
+                    <li class="build-item" data-id="serv-001">
+                        <span class="build-icon">👮</span>
+                        <div class="build-info">
+                            <span class="build-name">Est. Policía</span>
+                            <span class="build-cost">💰 $4.000</span>
+                        </div>
+                    </li>
+                    <li class="build-item" data-id="serv-002">
+                        <span class="build-icon">🚒</span>
+                        <div class="build-info">
+                            <span class="build-name">Est. Bomberos</span>
+                            <span class="build-cost">💰 $4.000</span>
+                        </div>
+                    </li>
+                    <li class="build-item" data-id="serv-003">
+                        <span class="build-icon">🏥</span>
+                        <div class="build-info">
+                            <span class="build-name">Hospital</span>
+                            <span class="build-cost">💰 $6.000</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <!-- PLANTAS DE UTILIDAD -->
+            <div class="category" data-open="false">
+                <button class="cat-header">
+                    <span class="cat-icon">⚡</span>
+                    <span class="cat-name">UTILIDADES</span>
+                    <span class="cat-arrow">▼</span>
+                </button>
+                <ul class="cat-items">
+                    <li class="build-item" data-id="util-001">
+                        <span class="build-icon">⚡</span>
+                        <div class="build-info">
+                            <span class="build-name">Pl. Eléctrica</span>
+                            <span class="build-cost">💰 $10.000</span>
+                        </div>
+                    </li>
+                    <li class="build-item" data-id="util-002">
+                        <span class="build-icon">💧</span>
+                        <div class="build-info">
+                            <span class="build-name">Pl. de Agua</span>
+                            <span class="build-cost">💰 $8.000</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <!-- PARQUES -->
+            <div class="category" data-open="false">
+                <button class="cat-header">
+                    <span class="cat-icon">🌳</span>
+                    <span class="cat-name">PARQUES</span>
+                    <span class="cat-arrow">▼</span>
+                </button>
+                <ul class="cat-items">
+                    <li class="build-item" data-id="parque-001">
+                        <span class="build-icon">🌳</span>
+                        <div class="build-info">
+                            <span class="build-name">Parque</span>
+                            <span class="build-cost">💰 $500</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <!-- VÍAS -->
+            <div class="category" data-open="false">
+                <button class="cat-header">
+                    <span class="cat-icon">🛣️</span>
+                    <span class="cat-name">VÍAS</span>
+                    <span class="cat-arrow">▼</span>
+                </button>
+                <ul class="cat-items">
+                    <li class="build-item" data-id="via-001">
+                        <span class="build-icon">🛣️</span>
+                        <div class="build-info">
+                            <span class="build-name">Vía</span>
+                            <span class="build-cost">💰 $100</span>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Botón para abrir el panel de construcción -->
+    <button id="sidebarTab" title="Abrir panel de construcción">
+        <span style="font-size:1.4rem;line-height:1">🏗️</span>
+        <span>CONSTRUIR</span>
+    </button>
+
+    <!-- Mensaje de guardado (aparece a la derecha del botón construir) -->
+    <div id="hud-guardando" data-visible="false">
+        <span id="guardando-icono">💾</span>
+        <span id="guardando-texto">Guardando...</span>
+    </div>
+
+    <script type="module" src="../../negocio/menuConstruccion.js"></script>
+
+    <!-- ===== BOTÓN CALCULAR RUTA ===== -->
+    <button id="btn-calcular-ruta" data-activo="false" title="Calcular ruta entre dos edificios">
+        <span class="ruta-icono">🗺️</span>
+        <span>RUTA</span>
+    </button>
+
+    <script type="module" src="../../negocio/GestorRutas.js"></script>
+
+    <!-- ===== WIDGETS CLIMA Y NOTICIAS ===== -->
+    <div id="widgets-container">
+        <button class="widget-btn" id="widget-clima-btn" title="Ver clima">
+            <span class="widget-clima-icono" id="widget-clima-icono">🌤️</span>
+            <span class="widget-clima-temp" id="widget-clima-temp">--°C</span>
         </button>
-        <ul class="cat-items">
-          <li class="build-item" data-id="res-001">
-            <span class="build-icon">🏠</span>
-            <div class="build-info">
-              <span class="build-name">Casa</span>
-              <span class="build-cost">💰 $1.000</span>
-            </div>
-          </li>
-          <li class="build-item" data-id="res-002">
-            <span class="build-icon">🏢</span>
-            <div class="build-info">
-              <span class="build-name">Apartamento</span>
-              <span class="build-cost">💰 $3.000</span>
-            </div>
-          </li>
-        </ul>
-      </div>
-
-      <!-- COMERCIAL -->
-      <div class="category" data-open="false">
-        <button class="cat-header">
-          <span class="cat-icon">🏪</span>
-          <span class="cat-name">COMERCIAL</span>
-          <span class="cat-arrow">▼</span>
+        <button class="widget-btn" id="widget-noticias-btn" title="Ver noticias">
+            <span class="widget-noticias-icono">📰</span>
         </button>
-        <ul class="cat-items">
-          <li class="build-item" data-id="com-001">
-            <span class="build-icon">🏪</span>
-            <div class="build-info">
-              <span class="build-name">Tienda</span>
-              <span class="build-cost">💰 $2.000</span>
-            </div>
-          </li>
-          <li class="build-item" data-id="com-002">
-            <span class="build-icon">🏬</span>
-            <div class="build-info">
-              <span class="build-name">C. Comercial</span>
-              <span class="build-cost">💰 $8.000</span>
-            </div>
-          </li>
-        </ul>
-      </div>
+    </div>
 
-      <!-- INDUSTRIAL -->
-      <div class="category" data-open="false">
-        <button class="cat-header">
-          <span class="cat-icon">🏭</span>
-          <span class="cat-name">INDUSTRIAL</span>
-          <span class="cat-arrow">▼</span>
-        </button>
-        <ul class="cat-items">
-          <li class="build-item" data-id="ind-001">
-            <span class="build-icon">🏭</span>
-            <div class="build-info">
-              <span class="build-name">Fábrica</span>
-              <span class="build-cost">💰 $5.000</span>
-            </div>
-          </li>
-          <li class="build-item" data-id="ind-002">
-            <span class="build-icon">🌾</span>
-            <div class="build-info">
-              <span class="build-name">Granja</span>
-              <span class="build-cost">💰 $3.000</span>
-            </div>
-          </li>
-        </ul>
-      </div>
+    <div class="clima-infobox" id="clima-infobox" data-visible="false">
+        <div class="clima-infobox-header">
+            <span class="clima-infobox-titulo">🌍 CLIMA ACTUAL</span>
+        </div>
+        <div class="clima-infobox-body" id="clima-infobox-body">
+            <div class="clima-loading">Cargando...</div>
+        </div>
+    </div>
 
-      <!-- SERVICIOS -->
-      <div class="category" data-open="false">
-        <button class="cat-header">
-          <span class="cat-icon">🚒</span>
-          <span class="cat-name">SERVICIOS</span>
-          <span class="cat-arrow">▼</span>
-        </button>
-        <ul class="cat-items">
-          <li class="build-item" data-id="serv-001">
-            <span class="build-icon">👮</span>
-            <div class="build-info">
-              <span class="build-name">Est. Policía</span>
-              <span class="build-cost">💰 $4.000</span>
+    <aside class="noticias-panel" id="noticias-panel" data-open="false">
+        <div class="sidebar-header">
+            <div class="sidebar-title-wrap">
+                <span class="sidebar-icon">📰</span>
+                <h2 class="sidebar-title">NOTICIAS</h2>
             </div>
-          </li>
-          <li class="build-item" data-id="serv-002">
-            <span class="build-icon">🚒</span>
-            <div class="build-info">
-              <span class="build-name">Est. Bomberos</span>
-              <span class="build-cost">💰 $4.000</span>
-            </div>
-          </li>
-          <li class="build-item" data-id="serv-003">
-            <span class="build-icon">🏥</span>
-            <div class="build-info">
-              <span class="build-name">Hospital</span>
-              <span class="build-cost">💰 $6.000</span>
-            </div>
-          </li>
-        </ul>
-      </div>
+        </div>
+        <div class="sidebar-body" id="noticias-panel-body">
+            <div class="noticias-loading">Cargando noticias...</div>
+        </div>
+    </aside>
 
-      <!-- PLANTAS DE UTILIDAD -->
-      <div class="category" data-open="false">
-        <button class="cat-header">
-          <span class="cat-icon">⚡</span>
-          <span class="cat-name">UTILIDADES</span>
-          <span class="cat-arrow">▼</span>
-        </button>
-        <ul class="cat-items">
-          <li class="build-item" data-id="util-001">
-            <span class="build-icon">⚡</span>
-            <div class="build-info">
-              <span class="build-name">Pl. Eléctrica</span>
-              <span class="build-cost">💰 $10.000</span>
-            </div>
-          </li>
-          <li class="build-item" data-id="util-002">
-            <span class="build-icon">💧</span>
-            <div class="build-info">
-              <span class="build-name">Pl. de Agua</span>
-              <span class="build-cost">💰 $8.000</span>
-            </div>
-          </li>
-        </ul>
-      </div>
+    <!-- ===== UI DE RECOLECCION DE BURBUJAS ===== -->
+    <section id="recoleccion-burbujas-ui" aria-live="polite" aria-atomic="true">
+        <div id="recoleccion-burbujas-toast" class="recoleccion-burbujas-toast" data-visible="false"></div>
+    </section>
 
-      <!-- PARQUES -->
-      <div class="category" data-open="false">
-        <button class="cat-header">
-          <span class="cat-icon">🌳</span>
-          <span class="cat-name">PARQUES</span>
-          <span class="cat-arrow">▼</span>
-        </button>
-        <ul class="cat-items">
-          <li class="build-item" data-id="parque-001">
-            <span class="build-icon">🌳</span>
-            <div class="build-info">
-              <span class="build-name">Parque</span>
-              <span class="build-cost">💰 $500</span>
-            </div>
-          </li>
-        </ul>
-      </div>
-
-      <!-- VÍAS -->
-      <div class="category" data-open="false">
-        <button class="cat-header">
-          <span class="cat-icon">🛣️</span>
-          <span class="cat-name">VÍAS</span>
-          <span class="cat-arrow">▼</span>
-        </button>
-        <ul class="cat-items">
-          <li class="build-item" data-id="via-001">
-            <span class="build-icon">🛣️</span>
-            <div class="build-info">
-              <span class="build-name">Vía</span>
-              <span class="build-cost">💰 $100</span>
-            </div>
-          </li>
-        </ul>
-      </div>
-
-    </div><!-- /.sidebar-body -->
-  </aside>
-
-  <!-- Pestaña flotante para reabrir el panel -->
-  <button class="sidebar-tab" id="sidebarTab" title="Abrir panel de construcción">
-    🏗️
-    <span>CONSTRUIR</span>
-  </button>
-
-  <script type="module" src="../../negocio/menuConstruccion.js"></script>
+    <script type="module" src="../../negocio/WidgetsInfo.js"></script>
 </body>
 </html>

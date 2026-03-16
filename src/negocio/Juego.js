@@ -6,6 +6,7 @@ import Ciudad from "../modelos/ciudad.js";
 import Puntuacion from "./Puntuacion.js";
 import StorageManager from "../acceso_datos/StorageManager.js";
 import Ciudadano from "../modelos/Ciudadano.js";
+import RecoleccionBurbujas from "./RecoleccionBurbujas.js";
 
 /**
  * Clase principal que gestiona la lógica del juego.
@@ -23,6 +24,7 @@ export default class Juego {
         this.StorageManager = new StorageManager();
         this.EstadoDeJuego = new EstadoDeJuego();
         this.gestorCiudadanos = new GestorCiudadano();
+        this.recolectorBurbujas = new RecoleccionBurbujas(this);
         this.numeroTurno = 0;
     }
 
@@ -70,11 +72,12 @@ export default class Juego {
         console.log("Turno:", this.numeroTurno);
         if (this.ciudad) {
             // Procesar turno en la ciudad
-            this.ciudad.procesarTurno(this.gestorCiudadanos.ciudadanos);
+            const produccionPendiente = this.ciudad.procesarTurno(this.gestorCiudadanos.ciudadanos);
+            this.recolectorBurbujas.registrarProduccionLote(produccionPendiente);
             // Obtener datos agregados de ciudad para población y felicidad
             const edificiosResidenciales = this.ciudad.obtenerEdificiosResidenciales();
             const edificiosLaborales = this.ciudad.obtenerEdificiosLaborales();
-            const valorServicios = this.ciudad.obtenerValorServicios();
+            const valorServicios = this.recolectorBurbujas.obtenerBonoFelicidad();
             // Recalcular felicidad de toda la población con el estado actual de la ciudad
             this.gestorCiudadanos.recalcularFelicidadCiudadanos(valorServicios);
             // Procesar crecimiento poblacional
@@ -150,7 +153,8 @@ export default class Juego {
         const data = {
             ciudad: this.ciudad.toJSON(),
             numeroTurno: this.numeroTurno,
-            ciudadanos: this.gestorCiudadanos.ciudadanos.map(c => c.toJSON())
+            ciudadanos: this.gestorCiudadanos.ciudadanos.map(c => c.toJSON()),
+            recoleccion: this.recolectorBurbujas.toJSON()
         };
         this.StorageManager.guardar('partida', data);
         console.log("Partida guardada");
@@ -170,6 +174,7 @@ export default class Juego {
         const edificiosPorId = this.ciudad.crearIndiceConstruccionesPorId();
         this.gestorCiudadanos.ciudadanos = (data.ciudadanos || []).map(c => Ciudadano.fromJSON(c, edificiosPorId));
         this.ciudad.sincronizarOcupacionDesdeCiudadanos(this.gestorCiudadanos.ciudadanos);
+        this.recolectorBurbujas.cargarDesdeJSON(data.recoleccion);
         console.log("Partida cargada");
     }
 

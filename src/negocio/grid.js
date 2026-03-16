@@ -269,19 +269,7 @@ import MovimientoCiudadanos from './MovimientoCiudadanos.js';
         }
 
         /* ----------------------------------------------------------
-           2. Actualizar el texto del top bar con el tamaño real
-        ---------------------------------------------------------- */
-        const gridInfo = document.getElementById('grid-info');
-        if (gridInfo) {
-            const nombreCiudad = juego.ciudad?.nombre ?? '';
-            const alcalde      = juego.ciudad?.alcalde ?? '';
-            gridInfo.textContent = nombreCiudad
-                ? `${nombreCiudad} (${alcalde}) — ${tamano} × ${tamano}`
-                : `Cuadrícula ${tamano} × ${tamano} — Vista Isométrica`;
-        }
-
-        /* ----------------------------------------------------------
-           3. Crear GridRenderer con el Mapa de la ciudad
+           2. Crear GridRenderer con el Mapa de la ciudad
         ---------------------------------------------------------- */
         const renderer = new GridRenderer(mapa, {
             contenedorId: 'iso-grid',
@@ -296,7 +284,7 @@ import MovimientoCiudadanos from './MovimientoCiudadanos.js';
         renderer.inicializar();
 
         /* ----------------------------------------------------------
-           4. Tooltip
+           3. Tooltip
         ---------------------------------------------------------- */
         const gridEl = document.getElementById('iso-grid');
 
@@ -309,7 +297,7 @@ import MovimientoCiudadanos from './MovimientoCiudadanos.js';
         gridEl.addEventListener('celda-leave', hideTooltip);
 
         /* ----------------------------------------------------------
-           5. Guardar partida automáticamente cuando cambia el mapa
+           4. Guardar partida automáticamente cuando cambia el mapa
               Se escucha el evento 'celda-click' que emite GridRenderer
         ---------------------------------------------------------- */
         gridEl.addEventListener('celda-click', function () {
@@ -323,11 +311,12 @@ import MovimientoCiudadanos from './MovimientoCiudadanos.js';
         });
 
         /* ----------------------------------------------------------
-           6. Exponer globalmente para consola / módulos externos
+           5. Exponer globalmente para consola / módulos externos
         ---------------------------------------------------------- */
         window.juego        = juego;
         window.mapa         = mapa;
         window.gridRenderer = renderer;
+        window.recolectorBurbujas = juego.recolectorBurbujas;
 
         try {
             const movimientoCiudadanos = new MovimientoCiudadanos(
@@ -343,7 +332,7 @@ import MovimientoCiudadanos from './MovimientoCiudadanos.js';
         }
         
         /* ----------------------------------------------------------
-           7. Centrar vista
+           6. Centrar vista
         ---------------------------------------------------------- */
         setTimeout(function () {
             centerView();

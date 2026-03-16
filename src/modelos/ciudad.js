@@ -166,17 +166,55 @@ export default class Ciudad {
      * @param {Ciudadano[]} [ciudadanos=[]]  - Array con todos los ciudadanos de la ciudad.
      */
     procesarTurno(ciudadanos = []) {
+        const produccionPendiente = {
+            dinero: 0,
+            electricidad: 0,
+            agua: 0,
+            felicidad: this.obtenerValorServicios(),
+            comida: 0,
+        };
+
         // Paso 1: plantas primero para que la electricidad esté disponible
         const plantas = this.construcciones.filter(c => c instanceof PlantasDeUtilidad);
         for (const planta of plantas) {
-            planta.procesarTurno(this.recursos);
+            const produccionPlanta = planta.procesarTurno(this.recursos);
+            this._acumularProduccionPendiente(produccionPendiente, produccionPlanta);
         }
 
         // Paso 2: resto de edificios (excepto plantas ya procesadas)
         const otrosEdificios = this.construcciones.filter(c => !(c instanceof PlantasDeUtilidad));
         for (const edificio of otrosEdificios) {
             if (typeof edificio.procesarTurno === 'function') {
-                edificio.procesarTurno(this.recursos);
+                const produccionEdificio = edificio.procesarTurno(this.recursos);
+                this._acumularProduccionPendiente(produccionPendiente, produccionEdificio);
+            }
+        }
+
+        if (produccionPendiente.comida > 0) {
+            this.recursos.actualizarComida(produccionPendiente.comida);
+        }
+
+        return {
+            dinero: produccionPendiente.dinero,
+            electricidad: produccionPendiente.electricidad,
+            agua: produccionPendiente.agua,
+            felicidad: produccionPendiente.felicidad,
+        };
+    }
+
+    /**
+     * Acumula los recursos producidos en el turno para recolección por burbujas.
+     * @private
+     * @param {object} acumulado
+     * @param {object|null|undefined} produccion
+     */
+    _acumularProduccionPendiente(acumulado, produccion) {
+        if (!produccion || typeof produccion !== 'object') return;
+
+        for (const tipo of ['dinero', 'electricidad', 'agua', 'comida']) {
+            const valor = Number(produccion[tipo]);
+            if (Number.isFinite(valor) && valor > 0) {
+                acumulado[tipo] += valor;
             }
         }
     }

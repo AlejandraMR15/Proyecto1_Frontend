@@ -427,6 +427,8 @@ function actualizarRecursos() {
     const recDinero = document.getElementById('rec-dinero');
     if (dineroEl) {
         dineroEl.textContent = formatearDinero(r.dinero);
+    }
+    if (recDinero) {
         recDinero.classList.remove('recurso-item--ok', 'recurso-item--warn', 'recurso-item--alert');
         if (r.dinero >= 10000)      recDinero.classList.add('recurso-item--ok');
         else if (r.dinero >= 1000)  recDinero.classList.add('recurso-item--warn');
@@ -434,7 +436,7 @@ function actualizarRecursos() {
     }
  
     // Electricidad
-    const electrEl = document.getElementById('val-electr');
+    const electrEl = document.getElementById('val-electricidad');
     if (electrEl) electrEl.textContent = Math.floor(r.electricidad);
  
     // Agua

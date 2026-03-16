@@ -65,6 +65,7 @@ export default class Juego {
 
     /**
      * Ejecuta la lógica completa de un turno y recalcula el puntaje.
+     * Valida que dinero, electricidad y agua no sean negativos.
      */
     ejecutarTurno() {
         if (!this.EstadoDeJuego.estaJugando()) return;
@@ -74,10 +75,29 @@ export default class Juego {
             // Procesar turno en la ciudad
             const produccionPendiente = this.ciudad.procesarTurno(this.gestorCiudadanos.ciudadanos);
             this.recolectorBurbujas.registrarProduccionLote(produccionPendiente);
+
+            // VALIDACIÓN: Verificar si algún recurso crítico es negativo → GAME OVER
+            const recursos = this.ciudad.recursos;
+            if (recursos.dinero < 0) {
+                console.error("¡GAME OVER! Te has quedado sin dinero.");
+                this.finalizarPartida("Sin dinero");
+                return;
+            }
+            if (recursos.electricidad < 0) {
+                console.error("¡GAME OVER! Te has quedado sin electricidad.");
+                this.finalizarPartida("Sin electricidad");
+                return;
+            }
+            if (recursos.agua < 0) {
+                console.error("¡GAME OVER! Te has quedado sin agua.");
+                this.finalizarPartida("Sin agua");
+                return;
+            }
+
             // Obtener datos agregados de ciudad para población y felicidad
             const edificiosResidenciales = this.ciudad.obtenerEdificiosResidenciales();
             const edificiosLaborales = this.ciudad.obtenerEdificiosLaborales();
-            const valorServicios = this.recolectorBurbujas.obtenerBonoFelicidad();
+            const valorServicios = produccionPendiente.felicidad;  // Usar el valor calculado en ciudad.procesarTurno()
             // Recalcular felicidad de toda la población con el estado actual de la ciudad
             this.gestorCiudadanos.recalcularFelicidadCiudadanos(valorServicios);
             // Procesar crecimiento poblacional
@@ -100,6 +120,50 @@ export default class Juego {
         }
         this.puntaje = puntaje;
         console.log("Puntaje:", puntaje);
+    }
+
+    /**
+     * Finaliza la partida actual por Game Over.
+     * Detiene el sistema de turnos, cambia el estado a GAME OVER y muestra modal.
+     * @param {string} [razon="Desconocida"] - Razón del game over.
+     */
+    finalizarPartida(razon = "Desconocida") {
+        this.pausarJuego();
+        this.EstadoDeJuego.cambiarEstado(ESTADOS.GAME_OVER);
+        console.log(`Partida finalizada: ${razon}`);
+        this.guardarPartida();
+        
+        // Mostrar modal de GAME OVER
+        this._mostrarModalGameOver(razon);
+    }
+
+    /**
+     * Muestra el modal de GAME OVER con la razón.
+     * @private
+     * @param {string} razon
+     */
+    _mostrarModalGameOver(razon) {
+        const modalGameOver = document.getElementById('modal-game-over');
+        if (!modalGameOver) return;
+
+        // Actualizar contenido del modal
+        const elRazon = document.getElementById('modal-game-over-razon');
+        const elTurno = document.getElementById('modal-game-over-turno');
+        const elScore = document.getElementById('modal-game-over-score');
+
+        if (elRazon) {
+            const razones = {
+                'Sin dinero': '💰 Te has quedado sin dinero',
+                'Sin electricidad': '⚡ Te has quedado sin electricidad',
+                'Sin agua': '💧 Te has quedado sin agua'
+            };
+            elRazon.textContent = razones[razon] || razon;
+        }
+        if (elTurno) elTurno.textContent = this.numeroTurno;
+        if (elScore) elScore.textContent = this.puntaje || 0;
+
+        // Mostrar modal
+        modalGameOver.dataset.visible = 'true';
     }
 
     /**

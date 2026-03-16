@@ -164,6 +164,51 @@ body {
   transform: translate(1px, 1px);
 }
 
+/* ---- Contenedor de botones en header ---- */
+.sidebar-header-buttons {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ---- Botón de demolición ---- */
+.sidebar-btn-demoler {
+  background: var(--bg-item);
+  border: 2px solid var(--border);
+  color: var(--text-secondary);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  cursor: pointer;
+  padding: 5px 7px;
+  line-height: 1;
+  transition: color var(--transition), background var(--transition), border-color var(--transition);
+  /* Borde biselado pixel */
+  box-shadow:
+    inset 1px 1px 0 var(--border-hi),
+    inset -1px -1px 0 var(--border-dk);
+}
+
+.sidebar-btn-demoler:hover {
+  color: #ff8080;
+  background: var(--bg-item-hover);
+  border-color: #e05555;
+}
+
+.sidebar-btn-demoler:active {
+  box-shadow:
+    inset -1px -1px 0 var(--border-hi),
+    inset 1px 1px 0 var(--border-dk);
+  transform: translate(1px, 1px);
+}
+
+/* ---- Botón de demolición ACTIVO ---- */
+.sidebar-btn-demoler.demoler-activo {
+  background: #8a2a2a;
+  border-color: #e05555;
+  color: #ff8080;
+  text-shadow: 0 0 8px rgba(224, 85, 85, 0.6);
+}
+
 /* ---- Cuerpo con scroll ---- */
 .sidebar-body {
   flex: 1;

@@ -162,7 +162,8 @@ export default class Ciudad {
     /**
      * Ejecuta un ciclo de turno completo:
      * 1. Primero las plantas de utilidad producen recursos.
-     * 2. Luego cada construcción aplica sus consumos y producción.
+     * 2. Luego otros edificios producen recursos.
+     * 3. Finalmente todos los edificios aplican sus consumos.
      * @param {Ciudadano[]} [ciudadanos=[]]  - Array con todos los ciudadanos de la ciudad.
      */
     procesarTurno(ciudadanos = []) {
@@ -174,24 +175,53 @@ export default class Ciudad {
             comida: 0,
         };
 
-        // Paso 1: plantas primero para que la electricidad esté disponible
+        // ===== FASE 1: PRODUCCIÓN de plantas de utilidad =====
         const plantas = this.construcciones.filter(c => c instanceof PlantasDeUtilidad);
         for (const planta of plantas) {
-            const produccionPlanta = planta.procesarTurno(this.recursos);
-            this._acumularProduccionPendiente(produccionPendiente, produccionPlanta);
+            const produccion = planta.procesarProduccion(this.recursos);
+            this._acumularProduccionPendiente(produccionPendiente, produccion);
         }
 
-        // Paso 2: resto de edificios (excepto plantas ya procesadas)
+        // Aplicar producción de plantas inmediatamente (la planta de agua la necesita)
+        if (produccionPendiente.electricidad > 0) {
+            this.recursos.actualizarElectricidad(produccionPendiente.electricidad);
+            console.log('Electricidad producida:', produccionPendiente.electricidad, '→ Total:', this.recursos.electricidad);
+        }
+        if (produccionPendiente.agua > 0) {
+            this.recursos.actualizarAgua(produccionPendiente.agua);
+            console.log('Agua producida:', produccionPendiente.agua, '→ Total:', this.recursos.agua);
+        }
+
+        // Reset para siguiente fase
+        produccionPendiente.dinero = 0;
+        produccionPendiente.electricidad = 0;
+        produccionPendiente.agua = 0;
+        produccionPendiente.comida = 0;
+
+        // ===== FASE 2: PRODUCCIÓN de otros edificios =====
         const otrosEdificios = this.construcciones.filter(c => !(c instanceof PlantasDeUtilidad));
         for (const edificio of otrosEdificios) {
-            if (typeof edificio.procesarTurno === 'function') {
-                const produccionEdificio = edificio.procesarTurno(this.recursos);
-                this._acumularProduccionPendiente(produccionPendiente, produccionEdificio);
+            if (typeof edificio.procesarProduccion === 'function') {
+                const produccion = edificio.procesarProduccion(this.recursos);
+                this._acumularProduccionPendiente(produccionPendiente, produccion);
             }
         }
 
+        // Aplicar producción de otros edificios
+        if (produccionPendiente.dinero > 0) {
+            this.recursos.dinero += produccionPendiente.dinero;
+            console.log('Dinero producido:', produccionPendiente.dinero, '→ Total:', this.recursos.dinero);
+        }
         if (produccionPendiente.comida > 0) {
             this.recursos.actualizarComida(produccionPendiente.comida);
+            console.log('Comida producida:', produccionPendiente.comida, '→ Total:', this.recursos.comida);
+        }
+
+        // ===== FASE 3: CONSUMOS de todos los edificios =====
+        for (const edificio of this.construcciones) {
+            if (typeof edificio.procesarConsumo === 'function') {
+                edificio.procesarConsumo(this.recursos);
+            }
         }
 
         return {

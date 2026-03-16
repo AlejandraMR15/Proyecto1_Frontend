@@ -66,11 +66,12 @@ export default class Industrial extends Edificio {
     }
 
     /**
-     * Aplica la producción al objeto Recursos.
+     * Retorna la producción sin aplicarla.
      * Si faltan agua o electricidad se reduce la producción al 50%.
      * @param {Recursos} recursos
+     * @returns {{dinero: number, comida: number}}
      */
-    producirRecursos(recursos) {
+    procesarProduccion(recursos) {
         if (!this.esActivo) return { dinero: 0, comida: 0 };
 
         // Detecta si faltan recursos críticos para esta industria
@@ -87,12 +88,22 @@ export default class Industrial extends Edificio {
     }
 
     /**
+     * Aplica la producción al objeto Recursos.
+     * Si faltan agua o electricidad se reduce la producción al 50%.
+     * @deprecated Usar procesarProduccion() en su lugar
+     * @param {Recursos} recursos
+     */
+    producirRecursos(recursos) {
+        return this.procesarProduccion(recursos);
+    }
+
+    /**
      * Procesa consumo y producción del turno.
      * @param {import('../../recursos.js').default} recursos
      */
     procesarTurno(recursos) {
-        super.procesarTurno(recursos);
-        return this.producirRecursos(recursos);
+        this.procesarConsumo(recursos);
+        return this.procesarProduccion(recursos);
     }
 
     /**
@@ -100,12 +111,13 @@ export default class Industrial extends Edificio {
      * @returns {object}
      */
     getInformacion() {
+        const tipoTexto = this.tipoDeProduccion === 'fabrica' ? '💰 Dinero' : '🍎 Comida';
         return {
             ...super.getInformacion(),
             empleo: this.empleo,
             empleadosActuales: this.empleados.length,
-            tipoDeProduccion: this.tipoDeProduccion,
-            produccionPorTurno: this.produccion
+            tipoDeProduccion: tipoTexto,
+            produccionPorTurno: `${this.produccion} ${tipoTexto.split(' ')[1].toLowerCase()}`
         };
     }
 

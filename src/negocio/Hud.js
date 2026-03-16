@@ -134,6 +134,10 @@ function actualizarHUD() {
 
 /**
  * Aplica clase 'negativo' si el valor es < 0 y actualiza el texto.
+ * Para dinero, aplica colores según el valor:
+ *  - Verde: > $10,000
+ *  - Amarillo: < $5,000
+ *  - Rojo: < $1,000
  * @param {string} contenedorId
  * @param {HTMLElement} el
  * @param {string} texto
@@ -143,9 +147,28 @@ function actualizarRecurso(contenedorId, el, texto) {
     el.textContent = texto;
     const contenedor = document.getElementById(contenedorId);
     if (!contenedor) return;
+    
     // Extraer número del texto para comparar
     const num = parseFloat(texto.replace(/[^0-9\-]/g, ''));
+    
+    // Aplicar clase 'negativo' para valores < 0
     contenedor.classList.toggle('negativo', num < 0);
+    
+    // Aplicar colores específicos para dinero
+    if (contenedorId === 'hud-dinero') {
+        // Remover todas las clases de color
+        el.classList.remove('dinero-verde', 'dinero-amarillo', 'dinero-rojo');
+        
+        if (num >= 10000) {
+            el.classList.add('dinero-verde');
+        } else if (num < 5000) {
+            el.classList.add('dinero-amarillo');
+        }
+        
+        if (num < 1000) {
+            el.classList.add('dinero-rojo');
+        }
+    }
 }
 
 /* ================================================================
@@ -213,7 +236,7 @@ function onNuevoTurno() {
 ================================================================ */
 
 /**
- * Alterna entre pausar y reanudar el juego.
+ * Alterna entre pausar y reanudar el juego, o abre pausa en GAME OVER.
  */
 function togglePausa() {
     const juego = window.juego;
@@ -227,9 +250,24 @@ function togglePausa() {
         if (window.movimientoCiudadanos) window.movimientoCiudadanos.detener();
         // Bloquear interacción con el viewport
         document.getElementById('viewport')?.classList.add('bloqueado');
+        // Actualizar título del modal
+        const tituloModal = modalPausa?.querySelector('.modal-titulo');
+        if (tituloModal) tituloModal.textContent = '⏸ JUEGO PAUSADO';
         setModal(modalPausa, true);
     } else if (juego.EstadoDeJuego.estaEnPausa()) {
         reanudarJuego();
+    } else if (juego.EstadoDeJuego.estado === 'game_over') {
+        // En GAME OVER: mostrar modal de pausa para acceso a configuraciones
+        btnPausa.textContent = '▶';
+        btnPausa.classList.add('pausado');
+        document.getElementById('viewport')?.classList.add('bloqueado');
+        // Actualizar título del modal para GAME OVER
+        const tituloModal = modalPausa?.querySelector('.modal-titulo');
+        if (tituloModal) tituloModal.textContent = '🔴 GAME OVER';
+        // Ocultar botón de reanudar en GAME OVER
+        const btnReanudar = document.getElementById('btn-reanudar');
+        if (btnReanudar) btnReanudar.style.display = 'none';
+        setModal(modalPausa, true);
     }
 }
 
@@ -239,6 +277,12 @@ function togglePausa() {
 function reanudarJuego() {
     const juego = window.juego;
     if (!juego) return;
+    
+    // No reanudar si estamos en GAME OVER
+    if (juego.EstadoDeJuego.estado === 'game_over') {
+        return;
+    }
+    
     juego.reanudarJuego();
     btnPausa.textContent = '⏸';
     btnPausa.classList.remove('pausado');
@@ -246,6 +290,13 @@ function reanudarJuego() {
     if (window.movimientoCiudadanos) window.movimientoCiudadanos.iniciar();
     // Desbloquear viewport
     document.getElementById('viewport')?.classList.remove('bloqueado');
+    
+    // Restaurar título y botón de reanudar
+    const tituloModal = modalPausa?.querySelector('.modal-titulo');
+    if (tituloModal) tituloModal.textContent = '⏸ JUEGO PAUSADO';
+    const btnReanudar = document.getElementById('btn-reanudar');
+    if (btnReanudar) btnReanudar.style.display = '';
+    
     setModal(modalPausa, false);
 }
 
@@ -501,11 +552,36 @@ document.getElementById('btn-finalizar-cancelar')?.addEventListener('click', () 
     setModal(modalPausa, true);
 });
 
+// Modal GAME OVER
+document.getElementById('btn-game-over-ranking')?.addEventListener('click', () => {
+    const modalGameOver = document.getElementById('modal-game-over');
+    if (modalGameOver) modalGameOver.dataset.visible = 'false';
+    abrirRanking();
+});
+
+document.getElementById('btn-game-over-config')?.addEventListener('click', () => {
+    const modalGameOver = document.getElementById('modal-game-over');
+    if (modalGameOver) modalGameOver.dataset.visible = 'false';
+    abrirConfig();
+});
+
+document.getElementById('btn-game-over-cerrar')?.addEventListener('click', () => {
+    const modalGameOver = document.getElementById('modal-game-over');
+    if (modalGameOver) modalGameOver.dataset.visible = 'false';
+});
+
 // Tecla ESC → pausar/reanudar juego o cerrar modal abierto
 document.addEventListener('keydown', (e) => {
     if (e.code !== 'Escape') return;
     if (e.target.tagName === 'INPUT') return;
     e.preventDefault();
+
+    // Si hay algún modal de GAME OVER abierto → cerrarlo
+    const modalGameOver = document.getElementById('modal-game-over');
+    if (modalGameOver && modalGameOver.dataset.visible === 'true') {
+        modalGameOver.dataset.visible = 'false';
+        return;
+    }
 
     // Si hay algún modal de config, finalizar, etc. abierto → cerrarlo primero
     if (modalConfig.dataset.visible === 'true') {

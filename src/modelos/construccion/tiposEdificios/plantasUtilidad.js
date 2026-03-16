@@ -20,13 +20,11 @@ export default class PlantasDeUtilidad extends Edificio {
     }
 
     /**
-     * Ejecuta la producción del turno y actualiza el objeto Recursos.
-     * - Planta eléctrica: incrementa electricidad.
-     * - Planta de agua: produce solo si, tras descontar su consumo del turno,
-     *   la electricidad no queda en negativo.
+     * Retorna la producción del turno sin aplicarla a recursos.
      * @param {Recursos} recursos
+     * @returns {{electricidad: number, agua: number}}
      */
-    produccion(recursos) {
+    procesarProduccion(recursos) {
         if (!this.esActivo) return { electricidad: 0, agua: 0 };
 
         if (this.tipoDeUtilidad === 'electrica') {
@@ -42,12 +40,24 @@ export default class PlantasDeUtilidad extends Edificio {
     }
 
     /**
-     * Procesa costos y producción del turno.
-     * @param {import('../../recursos.js').default} recursos
+     * Ejecuta la producción del turno y actualiza el objeto Recursos.
+     * - Planta eléctrica: incrementa electricidad.
+     * - Planta de agua: produce solo si, tras descontar su consumo del turno,
+     *   la electricidad no queda en negativo.
+     * @deprecated Usar procesarProduccion() en su lugar
+     * @param {Recursos} recursos
+     */
+    produccion(recursos) {
+        return this.procesarProduccion(recursos);
+    }
+
+    /**
+     * Procesa un turno: primero consumo, luego retorna producción.
+     * @param {Recursos} recursos
      */
     procesarTurno(recursos) {
-        super.procesarTurno(recursos);
-        return this.produccion(recursos);
+        this.procesarConsumo(recursos);
+        return this.procesarProduccion(recursos);
     }
 
     /**
@@ -55,10 +65,11 @@ export default class PlantasDeUtilidad extends Edificio {
      * @returns {object}
      */
     getInformacion() {
+        const tipoTexto = this.tipoDeUtilidad === 'electrica' ? '⚡ Electricidad' : '💧 Agua';
         return {
             ...super.getInformacion(),
-            tipoDeUtilidad: this.tipoDeUtilidad,
-            produccionPorTurno: this.produccionPorTurno
+            tipoDeUtilidad: tipoTexto,
+            produccionPorTurno: `${this.produccionPorTurno} ${tipoTexto.split(' ')[1].toLowerCase()}`
         };
     }
 

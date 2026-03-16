@@ -69,17 +69,28 @@ export default class Comercial extends Edificio {
     }
 
     /**
-     * Aplica consumos e ingresos del turno.
-     * @param {import('../../recursos.js').default} recursos
+     * Retorna el ingreso del turno sin aplicarlo.
+     * @param {Recursos} recursos
+     * @returns {{dinero: number}}
      */
-    procesarTurno(recursos) {
-        super.procesarTurno(recursos);
+    procesarProduccion(recursos) {
+        if (!this.tieneIngresos()) return { dinero: 0 };
+        
         // Un edificio comercial no genera ingresos si la electricidad es negativa
         if (recursos.electricidad >= 0) {
-            return { dinero: this.generaIngresos() };
+            return { dinero: this.ingresoPorTurno };
         }
 
         return { dinero: 0 };
+    }
+
+    /**
+     * Procesa consumos e ingresos del turno.
+     * @param {import('../../recursos.js').default} recursos
+     */
+    procesarTurno(recursos) {
+        this.procesarConsumo(recursos);
+        return this.procesarProduccion(recursos);
     }
 
     /**
@@ -91,7 +102,7 @@ export default class Comercial extends Edificio {
             ...super.getInformacion(),
             empleo: this.empleo,
             empleadosActuales: this.empleados.length,
-            ingresoPorTurno: this.ingresoPorTurno,
+            produccionPorTurno: `💰 ${this.ingresoPorTurno} dinero`,
             tieneEmpleoDisponible: this.tieneEmpleoDisponible()
         };
     }

@@ -71,10 +71,18 @@ export default class Residencial extends Edificio {
     }
 
     /**
+     * No produce nada.
+     * @returns {{}}
+     */
+    procesarProduccion(recursos) {
+        return {};
+    }
+
+    /**
      * Aplica costos del turno con consumo proporcional.
      * @param {import('../../recursos.js').default} recursos
      */
-    procesarTurno(recursos) {
+    procesarConsumo(recursos) {
         if (!this.esActivo) return;
 
         recursos.egresosDinero(this.costoMantenimiento);
@@ -82,6 +90,15 @@ export default class Residencial extends Edificio {
         const consumo = this.calcularConsumoActual();
         recursos.actualizarElectricidad(-consumo.electricidad);
         recursos.actualizarAgua(-consumo.agua);
+    }
+
+    /**
+     * Procesa un turno completo (solo consumo para residencial).
+     * @deprecated Ya no se usa, usar procesarConsumo() directamente
+     * @param {import('../../recursos.js').default} recursos
+     */
+    procesarTurno(recursos) {
+        this.procesarConsumo(recursos);
     }
 
     /**

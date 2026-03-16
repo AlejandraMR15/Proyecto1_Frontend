@@ -23,6 +23,14 @@ export default class Servicio extends Edificio {
     }
 
     /**
+     * No produce recursos.
+     * @returns {{}}
+     */
+    procesarProduccion(recursos) {
+        return {};
+    }
+
+    /**
      * Devuelve información del servicio.
      * @returns {object}
      */

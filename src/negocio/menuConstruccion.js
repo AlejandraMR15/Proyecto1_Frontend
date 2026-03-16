@@ -92,8 +92,9 @@ const EDIFICIOS_CONFIG = {
    ESTADO DEL MÓDULO
 ================================================================ */
 let modoConstructivo     = false;
-let edificioSeleccionado = null;   // config del edificio elegido en el sidebar
-let itemActivoEl         = null;   // <li> resaltado en el sidebar
+let modoDemolicion       = false;        // NEW: modo demolición activo
+let edificioSeleccionado = null;         // config del edificio elegido en el sidebar
+let itemActivoEl         = null;         // <li> resaltado en el sidebar
  
 /* ================================================================
    UTILIDAD: id único para cada edificio construido
@@ -148,21 +149,19 @@ function mostrarInfoEdificio(construccion) {
         capacidad:                 'Capacidad',
         ocupacion:                 'Ocupación actual',
         tieneCapacidadDisponible:  'Tiene espacio',
-        consumoActualElectricidad: 'Consumo elec. actual',
-        consumoActualAgua:         'Consumo agua actual',
         empleo:                    'Empleos totales',
         empleadosActuales:         'Empleados actuales',
-        ingresoPorTurno:           'Ingreso/turno ($)',
-        tipoDeProduccion:          'Tipo producción',
+        ingresoPorTurno:           'Producción/turno',
+        tipoDeProduccion:          'Tipo de producción',
         produccionPorTurno:        'Producción/turno',
-        tipoDeUtilidad:            'Tipo utilidad',
+        tipoDeUtilidad:            'Tipo de utilidad',
         tipoDeServicio:            'Tipo servicio',
-        felicidadAportada:         'Felicidad aportada',
+        felicidadAportada:         '😊 Felicidad aportada',
         radio:                     'Radio influencia (celdas)'
     };
  
     const filas = Object.entries(info)
-        .filter(([clave]) => clave !== 'id')
+        .filter(([clave]) => clave !== 'id' && !clave.startsWith('consumoActual'))
         .map(([clave, valor]) => {
             const label  = LABELS[clave] || clave;
             const valStr = typeof valor === 'boolean' ? (valor ? 'Sí' : 'No') : valor;
@@ -223,6 +222,161 @@ function deseleccionarEdificio() {
     edificioSeleccionado = null;
     itemActivoEl = null;
 }
+
+/* ================================================================
+   FUNCIONES DE DEMOLICIÓN — NEW
+================================================================ */
+function activarModoDemolicion() {
+    modoDemolicion = true;
+    modoConstructivo = false;
+    deseleccionarEdificio();
+    document.body.style.cursor = 'not-allowed';
+    mostrarNotificacion('Modo demolición activado — haz click en un edificio para demoler');
+}
+
+function desactivarModoDemolicion() {
+    modoDemolicion = false;
+    document.body.style.cursor = 'default';
+}
+
+/**
+ * Muestra modal de confirmación de demolición.
+ * @param {object} construccion - Edificio a demoler
+ * @param {number} col - Columna del edificio
+ * @param {number} row - Fila del edificio
+ */
+function mostrarConfirmacionDemolicion(construccion, col, row) {
+    const previo = document.getElementById('modal-confirmar-demolicion');
+    if (previo) previo.remove();
+
+    const info = typeof construccion.getInformacion === 'function'
+        ? construccion.getInformacion()
+        : { nombre: construccion.constructor.name, costo: construccion.costo };
+
+    // Detectar si hay ciudadanos afectados
+    let mensajeCiudadanos = '';
+    if (Array.isArray(construccion.residentes)) {
+        const num = construccion.residentes.length;
+        if (num > 0) {
+            mensajeCiudadanos = `<p style="color:#f08080;margin-top:8px">⚠️ Hay ${num} ciudadano(s) viviendo aquí. Quedarán sin hogar.</p>`;
+        }
+    }
+    if (Array.isArray(construccion.empleados)) {
+        const num = construccion.empleados.length;
+        if (num > 0) {
+            mensajeCiudadanos += `<p style="color:#f08080;margin-top:8px">⚠️ Hay ${num} ciudadano(s) empleado(s) aquí. Quedarán sin trabajo.</p>`;
+        }
+    }
+
+    const reembolso = Math.floor(info.costo * 0.5);
+    const textoReembolso = `Recibirás $${reembolso} (50% del costo)`;
+
+    const modal = document.createElement('div');
+    modal.id = 'modal-confirmar-demolicion';
+    modal.style.cssText = [
+        'position:fixed', 'top:50%', 'left:50%', 'transform:translate(-50%,-50%)',
+        'background:#0a1628', 'border:2px solid #e05555', 'border-radius:10px',
+        'padding:24px 28px', 'z-index:10000', 'min-width:320px', 'max-width:450px',
+        'box-shadow:0 8px 32px rgba(0,0,0,0.9)', 'color:#a8dff0',
+        'font-family:Segoe UI,system-ui,sans-serif'
+    ].join(';');
+
+    modal.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+            <h3 style="font-size:1rem;color:#f08080;margin:0">🗑️ ¿DEMOLER ${info.nombre.toUpperCase()}?</h3>
+            <button id="modal-demolicion-cerrar" style="background:none;border:none;color:#4a9fb5;
+                font-size:1.2rem;cursor:pointer;line-height:1;padding:0">✕</button>
+        </div>
+        <div style="background:#1a2a38;padding:12px;border-radius:6px;margin-bottom:16px">
+            <p style="margin:0;font-size:0.9rem">Ubicación: (${col}, ${row})</p>
+            <p style="margin:8px 0 0 0;font-size:0.9rem;color:#2e7a94">${textoReembolso}</p>
+        </div>
+        ${mensajeCiudadanos}
+        <div style="display:flex;gap:8px;margin-top:16px">
+            <button id="modal-demolicion-confirmar" style="flex:1;padding:10px;background:#e05555;
+                border:none;color:#fff;cursor:pointer;border-radius:6px;font-weight:bold">
+                ✔ CONFIRMAR DEMOLICIÓN
+            </button>
+            <button id="modal-demolicion-cancelar" style="flex:1;padding:10px;background:#2a3a48;
+                border:1px solid #2e7a94;color:#a8dff0;cursor:pointer;border-radius:6px">
+                ✕ CANCELAR
+            </button>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    document.getElementById('modal-demolicion-cerrar').addEventListener('click', () => modal.remove());
+    document.getElementById('modal-demolicion-cancelar').addEventListener('click', () => modal.remove());
+    document.getElementById('modal-demolicion-confirmar').addEventListener('click', () => {
+        ejecutarDemolicion(construccion, col, row);
+        modal.remove();
+    });
+
+    // Cerrar al hacer click fuera
+    setTimeout(() => {
+        document.addEventListener('click', function cerrarAlClickFuera(e) {
+            if (!modal.contains(e.target) && e.target !== modal) {
+                modal.remove();
+                document.removeEventListener('click', cerrarAlClickFuera);
+            }
+        });
+    }, 100);
+}
+
+/**
+ * Ejecuta la demolición: elimina el edificio, devuelve dinero, actualiza el mapa.
+ * @param {object} construccion - Edificio a demoler
+ * @param {number} col - Columna del edificio
+ * @param {number} row - Fila del edificio
+ */
+function ejecutarDemolicion(construccion, col, row) {
+    const juego = window.juego;
+    const gridRenderer = window.gridRenderer;
+
+    if (!juego || !juego.ciudad || !gridRenderer) return;
+
+    const ciudad = juego.ciudad;
+    const reembolso = Math.floor(construccion.costo * 0.5);
+
+    // 1. Eliminar ciudadanos afectados
+    if (Array.isArray(construccion.residentes)) {
+        construccion.residentes.forEach(ciudadano => {
+            ciudadano.residencia = null;
+        });
+    }
+    if (Array.isArray(construccion.empleados)) {
+        construccion.empleados.forEach(ciudadano => {
+            ciudadano.empleo = null;
+        });
+    }
+
+    // 2. Demoler en la ciudad (ya devuelve el 50% del dinero)
+    const exito = ciudad.demoler(construccion.id);
+    if (!exito) {
+        mostrarNotificacion('⚠ No se pudo demoler el edificio', 'error');
+        return;
+    }
+
+    // 3. Limpiar celda en el mapa
+    ciudad.mapa.eliminarElemento(col, row);
+
+    // 4. Actualizar el grid visual
+    gridRenderer._actualizarCubo(col, row);
+
+    // 5. Limpiar del registro local
+    _mapaEdificios.delete(`${col},${row}`);
+
+    // 6. Persistir
+    juego.guardarPartida();
+
+    // 7. Actualizar HUD para que se vea inmediatamente
+    actualizarRecursos();
+
+    mostrarNotificacion(`✔ Demolido. Recuperaste $${reembolso}`);
+    desactivarModoDemolicion();
+}
+
  
 /* ================================================================
    REGISTRO LOCAL DE EDIFICIOS POR COORDENADA
@@ -286,6 +440,22 @@ function manejarClickCelda(e) {
  
     const ciudad = juego.ciudad;
  
+    /* -- MODO DEMOLICIÓN → detectar celda ocupada -- */
+    if (modoDemolicion) {
+        if (etiqueta === 'g') {
+            mostrarNotificacion('⚠ No hay nada que demoler ahí', 'error');
+            return;
+        }
+        // Buscar construcción en esa coordenada
+        const construccion = buscarEdificioPorCoordenada(col, row);
+        if (construccion) {
+            mostrarConfirmacionDemolicion(construccion, col, row);
+        } else {
+            mostrarNotificacion('⚠ No se encontró el edificio', 'error');
+        }
+        return;
+    }
+
     /* -- Celda OCUPADA → mostrar información -- */
     if (etiqueta !== 'g') {
         const construccion = buscarEdificioPorCoordenada(col, row);
@@ -352,28 +522,54 @@ document.addEventListener('DOMContentLoaded', function () {
     const sidebar  = document.getElementById('sidebar');
     const closeBtn = document.getElementById('sidebarClose');
     const tabBtn   = document.getElementById('sidebarTab');
+    const demolirBtn = document.getElementById('sidebarDemolir');
  
     /* ---- Abrir / cerrar sidebar → activa / desactiva modo construcción ---- */
     function abrirSidebar() {
         sidebar.dataset.open = 'true';
         modoConstructivo = true;
+        desactivarModoDemolicion();
+        if (demolirBtn) demolirBtn.classList.remove('demoler-activo');
     }
  
     function cerrarSidebar() {
         sidebar.dataset.open = 'false';
         modoConstructivo = false;
+        desactivarModoDemolicion();
         deseleccionarEdificio();
+        if (demolirBtn) demolirBtn.classList.remove('demoler-activo');
     }
  
     closeBtn.addEventListener('click', cerrarSidebar);
     tabBtn.addEventListener('click',   abrirSidebar);
+
+    /* ---- Botón de demoler ---- */
+    if (demolirBtn) {
+        demolirBtn.addEventListener('click', function () {
+            if (modoDemolicion) {
+                desactivarModoDemolicion();
+                demolirBtn.classList.remove('demoler-activo');
+                mostrarNotificacion('Modo demolición desactivado');
+            } else {
+                activarModoDemolicion();
+                demolirBtn.classList.add('demoler-activo');
+                sidebar.dataset.open = 'true';
+                modoConstructivo = false;
+                deseleccionarEdificio();
+            }
+        });
+    }
  
     // Estado inicial según data-open del HTML
     modoConstructivo = sidebar.dataset.open === 'true';
  
     /* ---- ESC cierra el sidebar ---- */
     document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape') cerrarSidebar();
+        if (e.key === 'Escape') {
+            cerrarSidebar();
+            desactivarModoDemolicion();
+            if (demolirBtn) demolirBtn.classList.remove('demoler-activo');
+        }
     });
  
     /* ---- Acordeón de categorías ---- */
@@ -388,6 +584,8 @@ document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.build-item').forEach(function (li) {
         li.addEventListener('click', function () {
             seleccionarEdificio(li);
+            desactivarModoDemolicion();
+            if (demolirBtn) demolirBtn.classList.remove('demoler-activo');
         });
     });
  

@@ -208,6 +208,20 @@ function mostrarInfoEdificio(construccion) {
 }
  
 /* ================================================================
+   CURSOR DEL VIEWPORT
+================================================================ */
+
+/**
+ * Cambia el cursor del viewport y de todos los cubos del grid.
+ * @param {'crosshair'|'not-allowed'|''} cursor
+ */
+function aplicarCursorModo(cursor) {
+    const vp = document.getElementById('viewport');
+    if (vp) vp.style.cursor = cursor;
+    document.querySelectorAll('.iso-cube').forEach(el => el.style.cursor = cursor);
+}
+
+/* ================================================================
    SELECCIÓN DE EDIFICIO EN EL SIDEBAR
 ================================================================ */
 function seleccionarEdificio(li) {
@@ -217,6 +231,7 @@ function seleccionarEdificio(li) {
     edificioSeleccionado = config;
     itemActivoEl = li;
     li.classList.add('build-item--activo');
+    aplicarCursorModo('crosshair');
     mostrarNotificacion(`Modo construcción: ${config.label} — haz click en una celda`);
 }
  
@@ -224,6 +239,8 @@ function deseleccionarEdificio() {
     if (itemActivoEl) itemActivoEl.classList.remove('build-item--activo');
     edificioSeleccionado = null;
     itemActivoEl = null;
+    // Solo resetear cursor si no estamos en modo demolición
+    if (!modoDemolicion) aplicarCursorModo('');
 }
 
 /* ================================================================
@@ -233,14 +250,14 @@ function activarModoDemolicion() {
     modoDemolicion = true;
     modoConstructivo = false;
     deseleccionarEdificio();
-    // Cursor tipo herramienta (grab) para indicar modo demolición
-    document.body.style.cursor = 'grab';
+    aplicarCursorModo('not-allowed');
     mostrarNotificacion('Modo demolición activado — haz click en un edificio para demoler');
 }
 
 function desactivarModoDemolicion() {
     modoDemolicion = false;
-    document.body.style.cursor = 'default';
+    // Solo resetear cursor si no hay edificio seleccionado para construir
+    if (!edificioSeleccionado) aplicarCursorModo('');
 }
 
 /**

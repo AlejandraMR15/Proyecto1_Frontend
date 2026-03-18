@@ -113,6 +113,8 @@
                 <button class="modal-btn modal-btn-primario" id="btn-reanudar">▶ REANUDAR</button>
                 <button class="modal-btn" id="btn-configuraciones">⚙ CONFIGURACIONES</button>
                 <button class="modal-btn" id="btn-guardar-partida">💾 GUARDAR PARTIDA</button>
+                <button class="modal-btn" id="btn-exportar-ciudad">📤 EXPORTAR CIUDAD</button>
+                <button class="modal-btn" id="btn-importar-ciudad">📥 IMPORTAR CIUDAD</button>
                 <button class="modal-btn modal-btn-peligro" id="btn-finalizar">✕ FINALIZAR PARTIDA</button>
             </div>
         </div>
@@ -436,6 +438,28 @@
         <span id="guardando-icono">💾</span>
         <span id="guardando-texto">Guardando...</span>
     </div>
+
+    <!-- ===== MODAL IMPORTAR CIUDAD ===== -->
+    <div id="modal-importar" class="modal-overlay" data-visible="false">
+        <div class="modal-caja">
+            <div class="modal-titulo">📥 IMPORTAR CIUDAD</div>
+            <p class="modal-texto">
+                ⚠️ <strong>Tu partida actual se perderá permanentemente.</strong>
+                Esta acción no se puede deshacer. Si quieres conservarla,
+                cancela y usa <em>Exportar Ciudad</em> primero.
+            </p>
+            <div id="importar-aviso-error" class="importar-error" data-visible="false">
+                <span id="importar-error-texto">Error al leer el archivo.</span>
+            </div>
+            <div class="modal-opciones">
+                <button class="modal-btn modal-btn-primario" id="btn-importar-confirmar">📂 SELECCIONAR ARCHIVO</button>
+                <button class="modal-btn" id="btn-importar-cancelar">✕ CANCELAR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Input de archivo oculto para importar ciudad JSON -->
+    <input type="file" id="input-importar-ciudad" accept=".json" style="display:none">
 
     <script type="module" src="../../negocio/menuConstruccion.js"></script>
 

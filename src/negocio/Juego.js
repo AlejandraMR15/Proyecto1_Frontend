@@ -29,11 +29,17 @@ export default class Juego {
     }
 
     /**
-     * Inicia el juego si hay una ciudad creada.
+     * Inicia el juego si hay una ciudad creada y no está en GAME_OVER.
      */
     iniciarJuego() {
         if (!this.ciudad) {
             console.error("No hay ciudad creada");
+            return;
+        }
+        // Si ya estamos en GAME_OVER (partida cargada con game_over persistido),
+        // no arrancar el sistema de turnos.
+        if (this.EstadoDeJuego.esGameOver()) {
+            console.warn("[Juego] iniciarJuego() ignorado: la partida está en GAME_OVER.");
             return;
         }
         this.EstadoDeJuego.cambiarEstado(ESTADOS.JUGANDO);
@@ -124,12 +130,17 @@ export default class Juego {
 
     /**
      * Finaliza la partida actual por Game Over.
-     * Detiene el sistema de turnos, cambia el estado a GAME OVER y muestra modal.
+     * Detiene el sistema de turnos, el movimiento de ciudadanos,
+     * cambia el estado a GAME_OVER y muestra modal.
      * @param {string} [razon="Desconocida"] - Razón del game over.
      */
     finalizarPartida(razon = "Desconocida") {
         this.pausarJuego();
         this.EstadoDeJuego.cambiarEstado(ESTADOS.GAME_OVER);
+        // Detener también el movimiento visual de ciudadanos
+        if (typeof window !== 'undefined' && window.movimientoCiudadanos) {
+            window.movimientoCiudadanos.detener();
+        }
         console.log(`Partida finalizada: ${razon}`);
         this.guardarPartida();
         

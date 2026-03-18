@@ -249,6 +249,11 @@ import MovimientoCiudadanos from './MovimientoCiudadanos.js';
             // "Continuar partida" quede disponible en el menú
             juego.guardarPartida();
 
+            // Persistir la duración del turno para que sobreviva recargas
+            // (Hud.js la leerá en initHUD() y la aplicará al SistemaTurnos)
+            const durSegundos = Math.round((config.duracionTurno || 10000) / 1000);
+            juego.StorageManager.guardar('config-turno', { duracionTurno: durSegundos });
+
             // Limpiar config para que una recarga no re-cree la ciudad
             localStorage.removeItem(CLAVE_CONFIG_NUEVA);
 

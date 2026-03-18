@@ -91,14 +91,18 @@ export default class GridRenderer {
             throw new Error(`GridRenderer: no se encontró el elemento #${this.contenedorId}`);
         }
 
-        // Crear contenedor para las burbujas de recursos
+        // Crear contenedor para las burbujas de recursos como overlay fijo en el body.
+        // Debe estar fuera del canvas-wrap para no verse afectado por overflow:hidden
+        // del viewport, y para que las coordenadas sean relativas a la pantalla.
+        const existente = document.getElementById('burbujas-recursos');
+        if (existente) existente.remove();
         this._burbujesEl = document.createElement('div');
         this._burbujesEl.id = 'burbujas-recursos';
         this._burbujesEl.style.cssText = [
-            'position:absolute', 'top:0', 'left:0', 'width:100%', 'height:100%',
-            'pointer-events:none', 'overflow:visible', 'z-index:4000'
+            'position:fixed', 'top:0', 'left:0', 'width:100%', 'height:100%',
+            'pointer-events:none', 'overflow:visible', 'z-index:9000'
         ].join(';');
-        this._gridEl.appendChild(this._burbujesEl);
+        document.body.appendChild(this._burbujesEl);
 
         // Aseguramos que Mapa tenga una matriz generada
         if (!Array.isArray(this.mapa.matriz) || this.mapa.matriz.length === 0) {
@@ -597,16 +601,25 @@ export default class GridRenderer {
         const icono = iconos[tipo] || '📦';
         const color = colores[tipo] || '#FFD700';
 
-        // Obtener posición del cubo en pantalla (coordenadas isométricas)
-        const { x, y } = this._gridToScreen(col, row);
-        
-        // Calcular posición final dentro del contenedor de burbujas
-        // Las burbujas están en un contenedor absoluto con top:0, left:0
-        // relativo al #iso-grid, así que usamos las coordenadas isométricas directamente
-        const posX = x + this._offsetX + this.TW / 2; 
-        const posY = y + this.TH / 2;
-
-        console.log('[GridRenderer] Posición calculada:', { posX, posY, x, y, offsetX: this._offsetX });
+        // Obtener posición en pantalla usando el cubo DOM real.
+        // Como el contenedor de burbujas es position:fixed en el body,
+        // necesitamos coordenadas de pantalla (getBoundingClientRect).
+        const claveRef = `${col},${row}`;
+        const cuboEl = this._cubos.get(claveRef);
+        let posX, posY;
+        if (cuboEl) {
+            const rect = cuboEl.getBoundingClientRect();
+            posX = rect.left + rect.width / 2;
+            posY = rect.top + rect.height / 2;
+        } else {
+            // Fallback: calcular con coordenadas isométricas + transform del canvas
+            const canvasWrap = document.getElementById('canvas-wrap');
+            const canvasRect = canvasWrap ? canvasWrap.getBoundingClientRect() : { left: 0, top: 0 };
+            const { x, y } = this._gridToScreen(col, row);
+            const scale = canvasWrap ? parseFloat(canvasWrap.style.transform?.match(/scale\(([^)]+)\)/)?.[1] || '1') : 1;
+            posX = canvasRect.left + (x + this._offsetX + this.TW / 2) * scale;
+            posY = canvasRect.top + (y + this.TH / 2) * scale;
+        }
 
         // Crear elemento de burbuja
         const burbuja = document.createElement('div');
@@ -629,6 +642,7 @@ export default class GridRenderer {
             box-shadow: 0 4px 16px rgba(0,0,0,0.5), inset 0 2px 4px rgba(255,255,255,0.4);
             pointer-events: none;
             z-index: 5001;
+            opacity: 1;
         `;
 
         // Agregar cantidad si es > 1
@@ -647,12 +661,14 @@ export default class GridRenderer {
         // Forzar reflow para que la animación inicial sea visible
         void burbuja.offsetHeight;
 
-        // Aplicar animación
+        // Aplicar animación con doble rAF para garantizar que el estado
+        // inicial (opacity:1) ya esté pintado antes de iniciar la transición
         requestAnimationFrame(() => {
-            burbuja.style.transition = 'all 1.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-            burbuja.style.opacity = '0';
-            burbuja.style.transform = 'translate(-50%, calc(-50% - 120px)) scale(0.8)';
-            console.log('[GridRenderer] Animación iniciada');
+            requestAnimationFrame(() => {
+                burbuja.style.transition = 'opacity 1.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 1.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                burbuja.style.opacity = '0';
+                burbuja.style.transform = 'translate(-50%, calc(-50% - 120px)) scale(0.8)';
+            });
         });
 
         // Limpiar después de la animación
@@ -662,4 +678,3 @@ export default class GridRenderer {
         }, 1800);
     }
 }
-

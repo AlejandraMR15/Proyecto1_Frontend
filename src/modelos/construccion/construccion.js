@@ -39,8 +39,10 @@ export default class Construccion {
      */
     toJSON() {
         return {
-            tipo:  this.constructor.name,
-            costo: this.costo
+            tipo:   this.constructor.name,
+            costo:  this.costo,
+            _coordX: this._coordX,
+            _coordY: this._coordY
         };
     }
 }

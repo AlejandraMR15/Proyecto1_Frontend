@@ -472,6 +472,53 @@ function abrirRanking() {
     }
 }
 
+/**
+ * Bug 2: Abre el ranking como modal centrado (para la pantalla de Game Over).
+ * Reutiliza los datos del rankingManager pero los renderiza en la tabla del modal.
+ */
+function abrirRankingGameOver() {
+    const modal = document.getElementById('modal-ranking-gameover');
+    if (!modal) return;
+
+    const tbody = document.getElementById('ranking-tbody-go');
+    const vacio = document.getElementById('ranking-vacio-go');
+    const tabla = document.getElementById('ranking-tabla-go');
+
+    // Registrar ciudad actual en ranking antes de mostrar
+    registrarEnRanking();
+    guardarRanking();
+
+    const entradas = rankingManager.obtenerTop(10);
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    if (entradas.length === 0) {
+        if (tabla) tabla.style.display = 'none';
+        if (vacio) vacio.style.display = 'block';
+    } else {
+        if (tabla) tabla.style.display = '';
+        if (vacio) vacio.style.display = 'none';
+
+        const ciudadActual = window.juego?.ciudad?.nombre ?? null;
+        entradas.forEach((e, i) => {
+            const tr = document.createElement('tr');
+            if (e.nombreCiudad === ciudadActual) tr.classList.add('ranking-actual');
+            tr.innerHTML = `
+                <td>#${i + 1}</td>
+                <td>${e.nombreCiudad}</td>
+                <td>${e.alcalde}</td>
+                <td>${fmt(e.puntuacion)}</td>
+                <td>${fmt(e.poblacion)}</td>
+                <td>${e.felicidad}%</td>
+                <td>${e.turno}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    modal.dataset.visible = 'true';
+}
+
 /* ================================================================
    FINALIZAR PARTIDA
 ================================================================ */
@@ -490,6 +537,7 @@ function finalizarPartida() {
     detenerAutosave();
     storage.eliminar('partida');
     storage.eliminar('config-turno');
+    storage.eliminar('estado-juego');  // Bug 3: limpiar game_over al salir voluntariamente
     window.location.href = '../vistas/menu.html';
 }
 
@@ -556,42 +604,76 @@ document.getElementById('btn-finalizar-cancelar')?.addEventListener('click', () 
 document.getElementById('btn-game-over-ranking')?.addEventListener('click', () => {
     const modalGameOver = document.getElementById('modal-game-over');
     if (modalGameOver) modalGameOver.dataset.visible = 'false';
-    abrirRanking();
+    // Bug 2: abrir ranking como modal centrado en lugar del panel lateral
+    abrirRankingGameOver();
 });
 
-document.getElementById('btn-game-over-config')?.addEventListener('click', () => {
-    const modalGameOver = document.getElementById('modal-game-over');
-    if (modalGameOver) modalGameOver.dataset.visible = 'false';
-    abrirConfig();
+document.getElementById('btn-game-over-nueva-partida')?.addEventListener('click', () => {
+    // Limpiar partida y llevar al menú
+    const juego = window.juego;
+    if (juego) {
+        registrarEnRanking();
+    }
+    detenerTimerTurno();
+    detenerAutosave();
+    storage.eliminar('partida');
+    storage.eliminar('config-turno');
+    storage.eliminar('estado-juego');
+    window.location.href = '../vistas/menu.html';
 });
 
-document.getElementById('btn-game-over-cerrar')?.addEventListener('click', () => {
-    const modalGameOver = document.getElementById('modal-game-over');
-    if (modalGameOver) modalGameOver.dataset.visible = 'false';
+// Botones del modal de ranking centrado (game over)
+document.getElementById('btn-go-ranking-cerrar')?.addEventListener('click', () => {
+    document.getElementById('modal-ranking-gameover').dataset.visible = 'false';
+    // Volver a mostrar el modal de game over
+    document.getElementById('modal-game-over').dataset.visible = 'true';
 });
 
-// Tecla ESC → pausar/reanudar juego o cerrar modal abierto
+document.getElementById('btn-go-ranking-nueva-partida')?.addEventListener('click', () => {
+    detenerTimerTurno();
+    detenerAutosave();
+    storage.eliminar('partida');
+    storage.eliminar('config-turno');
+    storage.eliminar('estado-juego');
+    window.location.href = '../vistas/menu.html';
+});
+
+// Tecla ESC → cancelar modo actual / cerrar modal abierto (NO pausa)
+// La pausa queda exclusivamente en Space (HU-024)
 document.addEventListener('keydown', (e) => {
     if (e.code !== 'Escape') return;
     if (e.target.tagName === 'INPUT') return;
     e.preventDefault();
 
-    // Si hay algún modal de GAME OVER abierto → cerrarlo
+    // Si hay algún modal de GAME OVER abierto → no hacer nada (el jugador debe elegir una opción)
     const modalGameOver = document.getElementById('modal-game-over');
     if (modalGameOver && modalGameOver.dataset.visible === 'true') {
-        modalGameOver.dataset.visible = 'false';
         return;
     }
 
-    // Si hay algún modal de config, finalizar, etc. abierto → cerrarlo primero
+    // Si el modal de ranking de game over está abierto → cerrarlo y volver al game over
+    const modalRankingGO = document.getElementById('modal-ranking-gameover');
+    if (modalRankingGO && modalRankingGO.dataset.visible === 'true') {
+        modalRankingGO.dataset.visible = 'false';
+        if (modalGameOver) modalGameOver.dataset.visible = 'true';
+        return;
+    }
+
+    // Si hay algún modal de config abierto → cerrarlo y volver a pausa
     if (modalConfig.dataset.visible === 'true') {
         setModal(modalConfig, false);
         setModal(modalPausa, true);
         return;
     }
+    // Si hay modal de finalizar abierto → cerrarlo y volver a pausa
     if (modalFinalizar.dataset.visible === 'true') {
         setModal(modalFinalizar, false);
         setModal(modalPausa, true);
+        return;
+    }
+    // Si el modal de pausa está abierto → cerrarlo (sin reanudar)
+    if (modalPausa.dataset.visible === 'true') {
+        setModal(modalPausa, false);
         return;
     }
     // Si el ranking está abierto → cerrarlo
@@ -600,8 +682,92 @@ document.addEventListener('keydown', (e) => {
         panelRanking.dataset.open = 'false';
         return;
     }
-    // Modal de pausa → reanudar; juego corriendo → pausar
-    togglePausa();
+});
+
+// ── Atajos de teclado desktop (HU-024) ──────────────────────────────────────
+// B → Abrir menú de construcción
+// R → Modo construcción de vías
+// D → Modo demolición
+// Space → Pausar / Reanudar
+// S → Guardar partida
+document.addEventListener('keydown', (e) => {
+    // Ignorar si el foco está en un input / textarea
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+    // No ejecutar atajos si hay un modal visible, EXCEPTO Space que siempre puede reanudar
+    const hayModalVisible = [modalPausa, modalConfig, modalFinalizar].some(
+        m => m && m.dataset.visible === 'true'
+    );
+    const modalGameOver = document.getElementById('modal-game-over');
+    const hayGameOver = modalGameOver && modalGameOver.dataset.visible === 'true';
+
+    // Space puede actuar aunque el modal de pausa esté abierto (para reanudar)
+    if (e.code !== 'Space') {
+        if (hayModalVisible || hayGameOver) return;
+    } else {
+        // Space bloqueado si hay config, finalizar o game over abierto
+        const hayOtroModal = [modalConfig, modalFinalizar].some(
+            m => m && m.dataset.visible === 'true'
+        );
+        if (hayOtroModal || hayGameOver) return;
+    }
+
+    const juego = window.juego;
+
+    switch (e.code) {
+        // B → Abrir / cerrar menú de construcción
+        case 'KeyB': {
+            e.preventDefault();
+            const sidebar = document.getElementById('sidebar');
+            if (!sidebar) break;
+            if (sidebar.dataset.open === 'true') {
+                // Cerrar sidebar (el módulo menuConstruccion escucha este evento de clic)
+                document.getElementById('sidebarClose')?.click();
+            } else {
+                document.getElementById('sidebarTab')?.click();
+            }
+            break;
+        }
+
+        // R → Seleccionar modo construcción de vías
+        case 'KeyR': {
+            e.preventDefault();
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar && sidebar.dataset.open !== 'true') {
+                document.getElementById('sidebarTab')?.click();
+            }
+            // Simular click en el ítem de vía
+            const viaItem = document.querySelector('.build-item[data-id="via-001"]');
+            if (viaItem) viaItem.click();
+            break;
+        }
+
+        // D → Activar / desactivar modo demolición
+        case 'KeyD': {
+            e.preventDefault();
+            document.getElementById('sidebarDemolir')?.click();
+            break;
+        }
+
+        // Space → Pausar / Reanudar
+        // Nota: este bloque también se ejecuta si el modal de pausa está abierto
+        // (el guard de hayModalVisible se evalúa antes, pero Space debe poder reanudar)
+        case 'Space': {
+            e.preventDefault();
+            if (!juego) break;
+            togglePausa();
+            break;
+        }
+
+        // S → Guardar partida
+        case 'KeyS': {
+            e.preventDefault();
+            if (juego && juego.ciudad) {
+                guardarConMensaje();
+            }
+            break;
+        }
+    }
 });
 
 // Cerrar modales al hacer click en el overlay (fuera de la caja)
@@ -641,7 +807,8 @@ function guardarConMensaje() {
 
     // Guardar duración del turno actual junto a la partida
     juego.StorageManager.guardar('config-turno', {
-        duracionTurno: timerEstado.duracionTurno
+        duracionTurno:      timerEstado.duracionTurno,
+        tiempoTranscurrido: timerEstado.tiempoTranscurrido   // Bug 4: persistir tiempo transcurrido
     });
 
     // Guardar
@@ -711,9 +878,28 @@ function initHUD() {
     if (configTurnoGuardada && configTurnoGuardada.duracionTurno) {
         timerEstado.duracionTurno = configTurnoGuardada.duracionTurno;
         juego.SistemaDeTurnos.cambiarDuracion(timerEstado.duracionTurno * 1000);
+        // Bug 4: restaurar tiempo transcurrido del último guardado
+        if (configTurnoGuardada.tiempoTranscurrido != null) {
+            timerEstado.tiempoTranscurrido = configTurnoGuardada.tiempoTranscurrido;
+        }
     } else {
         const durMs = juego.SistemaDeTurnos.duracion;
         timerEstado.duracionTurno = Math.round(durMs / 1000);
+    }
+
+    // Bug 3: detectar si la partida cargada estaba en game_over y mostrar modal
+    const estadoPersistido = juego.StorageManager.cargar('estado-juego');
+    const estaEnGameOverAlCargar = estadoPersistido && estadoPersistido.esGameOver;
+
+    if (estaEnGameOverAlCargar) {
+        // Forzar estado game_over ANTES de que iniciarJuego() pueda arrancar el turno.
+        // Como iniciarJuego() ahora verifica esGameOver(), no arrancará nada.
+        juego.EstadoDeJuego.cambiarEstado('game_over');
+        setTimeout(() => {
+            // Detener movimiento de ciudadanos si ya arrancó
+            if (window.movimientoCiudadanos) window.movimientoCiudadanos.detener();
+            juego._mostrarModalGameOver(estadoPersistido.razon || 'Desconocida');
+        }, 300);
     }
 
     // Cargar ranking guardado
@@ -731,14 +917,34 @@ function initHUD() {
         onNuevoTurno();
     };
 
+    // Bug 3: interceptar finalizarPartida para persistir el estado game_over
+    const finalizarPartidaOriginal = juego.finalizarPartida.bind(juego);
+    juego.finalizarPartida = function (razon = 'Desconocida') {
+        finalizarPartidaOriginal(razon);
+        // Guardar estado game_over en localStorage para que persista al recargar
+        juego.StorageManager.guardar('estado-juego', { esGameOver: true, razon });
+        // Detener el timer visual y el autosave del HUD
+        detenerTimerTurno();
+        detenerAutosave();
+    };
+
     // Arrancar el juego (SistemaTurnos.iniciar captura juego.ejecutarTurno ya wrappeado)
+    // iniciarJuego() internamente verifica esGameOver() y no arranca si está en game_over
     juego.iniciarJuego();
 
-    // Arrancar el timer visual
-    iniciarTimerTurno();
+    if (estaEnGameOverAlCargar) {
+        // En game_over: no arrancar el timer visual ni el autosave.
+        // El timer visual tampoco avanzará (estaJugando() = false), pero lo
+        // detenemos explícitamente para no dejar el intervalo corriendo en vano.
+        detenerTimerTurno();
+        console.info('[HUD] Partida cargada en estado GAME_OVER — timer y autosave no arrancados.');
+    } else {
+        // Arrancar el timer visual
+        iniciarTimerTurno();
 
-    // Arrancar autosave cada 30 segundos
-    iniciarAutosave();
+        // Arrancar autosave cada 30 segundos
+        iniciarAutosave();
+    }
 
     // Observar cambios en el sidebar para reposicionar perfil/bienestar
     _observarSidebar();

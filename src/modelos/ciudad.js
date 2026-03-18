@@ -355,8 +355,52 @@ export default class Ciudad {
 
         // Reconstruir construcciones como instancias tipadas (factory)
         ciudad.construcciones = (json.construcciones || []).map(c => {
-            return Ciudad._reconstruirConstruccion(c);
-        }).filter(Boolean); // Eliminar nulls si algún tipo es desconocido
+            const instancia = Ciudad._reconstruirConstruccion(c);
+            if (instancia && c._coordX !== undefined && c._coordY !== undefined) {
+                instancia._coordX = c._coordX;
+                instancia._coordY = c._coordY;
+            }
+            return instancia;
+        }).filter(Boolean);
+
+        // Recuperar coordenadas desde la matriz del mapa para edificios que no las tienen.
+        // Esto garantiza que funcionen las burbujas visuales incluso con partidas guardadas
+        // antes del fix de coordenadas, o cuando toJSON no las incluyó por algún motivo.
+        if (ciudad.mapa && Array.isArray(ciudad.mapa.matriz)) {
+            // Etiquetas que corresponden a edificios (no vías ni terreno vacío ni parques)
+            const ETIQUETAS_EDIFICIO = new Set(['R1','R2','C1','C2','I1','I2','S1','S2','S3','U1','U2','P1']);
+            // Construir un mapa de etiqueta -> lista de construcciones sin coordenadas de ese tipo
+            const sinCoords = {};
+            for (const inst of ciudad.construcciones) {
+                if (inst._coordX === undefined || inst._coordY === undefined) {
+                    const tipo = inst.constructor.name;
+                    if (!sinCoords[tipo]) sinCoords[tipo] = [];
+                    sinCoords[tipo].push(inst);
+                }
+            }
+            // Mapeo de etiqueta del mapa -> nombre de clase de construcción
+            const etiquetaAClase = {
+                'R1': 'Residencial', 'R2': 'Residencial',
+                'C1': 'Comercial',   'C2': 'Comercial',
+                'I1': 'Industrial',  'I2': 'Industrial',
+                'S1': 'Servicio',    'S2': 'Servicio',    'S3': 'Servicio',
+                'U1': 'PlantasDeUtilidad', 'U2': 'PlantasDeUtilidad',
+                'P1': 'Parques'
+            };
+            // Recorrer la matriz fila por fila, columna por columna
+            for (let row = 0; row < ciudad.mapa.alto; row++) {
+                for (let col = 0; col < ciudad.mapa.ancho; col++) {
+                    const etiqueta = ciudad.mapa.matriz[row]?.[col];
+                    if (!etiqueta || !ETIQUETAS_EDIFICIO.has(etiqueta)) continue;
+                    const clase = etiquetaAClase[etiqueta];
+                    if (!clase || !sinCoords[clase] || sinCoords[clase].length === 0) continue;
+                    // Asignar coordenadas al primer edificio de ese tipo sin coordenadas
+                    const inst = sinCoords[clase].shift();
+                    inst._coordX = col;
+                    inst._coordY = row;
+                }
+            }
+        }
 
         return ciudad;
     }

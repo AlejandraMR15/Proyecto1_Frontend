@@ -552,6 +552,7 @@ document.addEventListener('DOMContentLoaded', function () {
     /* ---- Abrir / cerrar sidebar → activa / desactiva modo construcción ---- */
     function abrirSidebar() {
         sidebar.dataset.open = 'true';
+        document.body.classList.add('sidebar-construccion-abierto');
         modoConstructivo = true;
         desactivarModoDemolicion();
         if (demolirBtn) demolirBtn.classList.remove('demoler-activo');
@@ -559,6 +560,7 @@ document.addEventListener('DOMContentLoaded', function () {
  
     function cerrarSidebar() {
         sidebar.dataset.open = 'false';
+        document.body.classList.remove('sidebar-construccion-abierto');
         modoConstructivo = false;
         desactivarModoDemolicion();
         deseleccionarEdificio();
@@ -567,6 +569,20 @@ document.addEventListener('DOMContentLoaded', function () {
  
     closeBtn.addEventListener('click', cerrarSidebar);
     tabBtn.addEventListener('click',   abrirSidebar);
+
+    /* ---- En móvil el header actúa como toggle ---- */
+    const sidebarHeader = sidebar.querySelector('.sidebar-header');
+    if (sidebarHeader) {
+        sidebarHeader.addEventListener('click', function (e) {
+            if (window.innerWidth >= 768) return;
+            if (e.target.closest('button')) return;
+            if (sidebar.dataset.open === 'true') {
+                cerrarSidebar();
+            } else {
+                abrirSidebar();
+            }
+        });
+    }
 
     /* ---- Botón de demoler ---- */
     if (demolirBtn) {
@@ -579,6 +595,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 activarModoDemolicion();
                 demolirBtn.classList.add('demoler-activo');
                 sidebar.dataset.open = 'true';
+                document.body.classList.add('sidebar-construccion-abierto');
                 modoConstructivo = false;
                 deseleccionarEdificio();
             }

@@ -211,6 +211,12 @@ const clima = (function () {
  
     // Cargar datos iniciales
     cargarClima();
+ 
+    // Actualizar clima cada 30 minutos (1800000ms = 30*60*1000)
+    setInterval(() => {
+      cargarClima();
+      console.log('[WidgetsInfo] Clima actualizado automáticamente');
+    }, 1800000);
   }
  
   /** Alterna visibilidad del info-box */
@@ -344,6 +350,12 @@ const noticias = (function () {
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && abierto) cerrar();
     });
+ 
+    // Actualizar noticias cada 2 horas (7200000ms = 2*60*60*1000)
+    setInterval(() => {
+      cargarNoticias();
+      console.log('[WidgetsInfo] Noticias actualizadas automáticamente');
+    }, 7200000);
   }
  
   /** Alterna visibilidad del panel lateral */

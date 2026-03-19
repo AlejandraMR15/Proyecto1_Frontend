@@ -95,6 +95,8 @@ let modoConstructivo     = false;
 let modoDemolicion       = false;        // NEW: modo demolición activo
 let edificioSeleccionado = null;         // config del edificio elegido en el sidebar
 let itemActivoEl         = null;         // <li> resaltado en el sidebar
+let edificioSeleccionadoAntes = null;    // guardado antes de entrar en demolición
+let itemActivoElAntes = null;             // guardado antes de entrar en demolición
  
 /* ================================================================
    UTILIDAD: id único para cada edificio construido
@@ -230,7 +232,12 @@ function deseleccionarEdificio() {
    FUNCIONES DE DEMOLICIÓN — NEW
 ================================================================ */
 function activarModoDemolicion() {
+    // Guardar el edificio que estaba seleccionado antes de demolición
+    edificioSeleccionadoAntes = edificioSeleccionado;
+    itemActivoElAntes = itemActivoEl;
+    
     modoDemolicion = true;
+    // Si entramos en demolición, desactivar construcción
     modoConstructivo = false;
     deseleccionarEdificio();
     // Cursor tipo herramienta (grab) para indicar modo demolición
@@ -241,6 +248,14 @@ function activarModoDemolicion() {
 function desactivarModoDemolicion() {
     modoDemolicion = false;
     document.body.style.cursor = 'default';
+    // Actualizar modoConstructivo según la regla: true si menú abierto y NO demolición
+    modoConstructivo = (sidebar && sidebar.dataset.open === 'true');
+    // Restaurar el edificio que estaba seleccionado antes si existe
+    if (edificioSeleccionadoAntes) {
+        edificioSeleccionado = edificioSeleccionadoAntes;
+        itemActivoEl = itemActivoElAntes;
+        if (itemActivoEl) itemActivoEl.classList.add('build-item--activo');
+    }
 }
 
 /**
@@ -535,14 +550,17 @@ document.addEventListener('DOMContentLoaded', function () {
     /* ---- Abrir / cerrar sidebar → activa / desactiva modo construcción ---- */
     function abrirSidebar() {
         sidebar.dataset.open = 'true';
-        modoConstructivo = true;
-        desactivarModoDemolicion();
-        if (demolirBtn) demolirBtn.classList.remove('demoler-activo');
+        // modoConstructivo = true SOLO si no estamos en modo demolición
+        modoConstructivo = !modoDemolicion;
     }
  
     function cerrarSidebar() {
         sidebar.dataset.open = 'false';
-        modoConstructivo = false;
+        modoConstructivo = false;  // Menú cerrado = no construir
+        modoDemolicion = false;
+        // Limpiar los datos guardados de demolición
+        edificioSeleccionadoAntes = null;
+        itemActivoElAntes = null;
         desactivarModoDemolicion();
         deseleccionarEdificio();
         if (demolirBtn) demolirBtn.classList.remove('demoler-activo');
@@ -555,21 +573,24 @@ document.addEventListener('DOMContentLoaded', function () {
     if (demolirBtn) {
         demolirBtn.addEventListener('click', function () {
             if (modoDemolicion) {
+                // DESACTIVAR demolición → restaura construcción si el menú está abierto
                 desactivarModoDemolicion();
                 demolirBtn.classList.remove('demoler-activo');
                 mostrarNotificacion('Modo demolición desactivado');
             } else {
+                // ACTIVAR demolición → desactiva construcción
                 activarModoDemolicion();
                 demolirBtn.classList.add('demoler-activo');
+                // Asegurar que el menú está abierto
                 sidebar.dataset.open = 'true';
-                modoConstructivo = false;
-                deseleccionarEdificio();
             }
         });
     }
  
     // Estado inicial según data-open del HTML
-    modoConstructivo = sidebar.dataset.open === 'true';
+    // Menú abierto → modo construcción habilitado
+    // Menú cerrado → sin modo activo
+    modoConstructivo = sidebar.dataset.open === 'true' && !modoDemolicion;
  
     /* ---- ESC cierra el sidebar ---- */
     document.addEventListener('keydown', function (e) {
@@ -592,6 +613,11 @@ document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.build-item').forEach(function (li) {
         li.addEventListener('click', function () {
             seleccionarEdificio(li);
+            modoConstructivo = true;
+            modoDemolicion = false;
+            // Limpiar los datos guardados de demolición
+            edificioSeleccionadoAntes = null;
+            itemActivoElAntes = null;
             desactivarModoDemolicion();
             if (demolirBtn) demolirBtn.classList.remove('demoler-activo');
         });

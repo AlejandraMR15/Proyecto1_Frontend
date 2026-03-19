@@ -210,6 +210,20 @@ function mostrarInfoEdificio(construccion) {
 }
  
 /* ================================================================
+   CURSOR DEL VIEWPORT
+================================================================ */
+
+/**
+ * Cambia el cursor del viewport y de todos los cubos del grid.
+ * @param {'crosshair'|'not-allowed'|''} cursor
+ */
+function aplicarCursorModo(cursor) {
+    const vp = document.getElementById('viewport');
+    if (vp) vp.style.cursor = cursor;
+    document.querySelectorAll('.iso-cube').forEach(el => el.style.cursor = cursor);
+}
+
+/* ================================================================
    SELECCIÓN DE EDIFICIO EN EL SIDEBAR
 ================================================================ */
 function seleccionarEdificio(li) {
@@ -219,6 +233,7 @@ function seleccionarEdificio(li) {
     edificioSeleccionado = config;
     itemActivoEl = li;
     li.classList.add('build-item--activo');
+    aplicarCursorModo('crosshair');
     mostrarNotificacion(`Modo construcción: ${config.label} — haz click en una celda`);
 }
  
@@ -226,6 +241,8 @@ function deseleccionarEdificio() {
     if (itemActivoEl) itemActivoEl.classList.remove('build-item--activo');
     edificioSeleccionado = null;
     itemActivoEl = null;
+    // Solo resetear cursor si no estamos en modo demolición
+    if (!modoDemolicion) aplicarCursorModo('');
 }
 
 /* ================================================================
@@ -240,22 +257,14 @@ function activarModoDemolicion() {
     // Si entramos en demolición, desactivar construcción
     modoConstructivo = false;
     deseleccionarEdificio();
-    // Cursor tipo herramienta (grab) para indicar modo demolición
-    document.body.style.cursor = 'grab';
+    aplicarCursorModo('not-allowed');
     mostrarNotificacion('Modo demolición activado — haz click en un edificio para demoler');
 }
 
 function desactivarModoDemolicion() {
     modoDemolicion = false;
-    document.body.style.cursor = 'default';
-    // Actualizar modoConstructivo según la regla: true si menú abierto y NO demolición
-    modoConstructivo = (sidebar && sidebar.dataset.open === 'true');
-    // Restaurar el edificio que estaba seleccionado antes si existe
-    if (edificioSeleccionadoAntes) {
-        edificioSeleccionado = edificioSeleccionadoAntes;
-        itemActivoEl = itemActivoElAntes;
-        if (itemActivoEl) itemActivoEl.classList.add('build-item--activo');
-    }
+    // Solo resetear cursor si no hay edificio seleccionado para construir
+    if (!edificioSeleccionado) aplicarCursorModo('');
 }
 
 /**
@@ -552,6 +561,10 @@ document.addEventListener('DOMContentLoaded', function () {
         sidebar.dataset.open = 'true';
         // modoConstructivo = true SOLO si no estamos en modo demolición
         modoConstructivo = !modoDemolicion;
+        document.body.classList.add('sidebar-construccion-abierto');
+        modoConstructivo = true;
+        desactivarModoDemolicion();
+        if (demolirBtn) demolirBtn.classList.remove('demoler-activo');
     }
  
     function cerrarSidebar() {
@@ -561,6 +574,8 @@ document.addEventListener('DOMContentLoaded', function () {
         // Limpiar los datos guardados de demolición
         edificioSeleccionadoAntes = null;
         itemActivoElAntes = null;
+        document.body.classList.remove('sidebar-construccion-abierto');
+        modoConstructivo = false;
         desactivarModoDemolicion();
         deseleccionarEdificio();
         if (demolirBtn) demolirBtn.classList.remove('demoler-activo');
@@ -568,6 +583,20 @@ document.addEventListener('DOMContentLoaded', function () {
  
     closeBtn.addEventListener('click', cerrarSidebar);
     tabBtn.addEventListener('click',   abrirSidebar);
+
+    /* ---- En móvil el header actúa como toggle ---- */
+    const sidebarHeader = sidebar.querySelector('.sidebar-header');
+    if (sidebarHeader) {
+        sidebarHeader.addEventListener('click', function (e) {
+            if (window.innerWidth >= 768) return;
+            if (e.target.closest('button')) return;
+            if (sidebar.dataset.open === 'true') {
+                cerrarSidebar();
+            } else {
+                abrirSidebar();
+            }
+        });
+    }
 
     /* ---- Botón de demoler ---- */
     if (demolirBtn) {
@@ -583,6 +612,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 demolirBtn.classList.add('demoler-activo');
                 // Asegurar que el menú está abierto
                 sidebar.dataset.open = 'true';
+                document.body.classList.add('sidebar-construccion-abierto');
+                modoConstructivo = false;
+                deseleccionarEdificio();
             }
         });
     }

@@ -349,6 +349,7 @@ body.sidebar-cerrado #hud-bienestar {
 .ranking-panel-body {
     flex: 1;
     overflow-y: auto;
+    overflow-x: auto;
     padding: 8px;
 }
 
@@ -369,29 +370,47 @@ body.sidebar-cerrado #hud-bienestar {
     padding: 6px 4px;
 }
 
-/* Tabla de ranking en panel lateral (columnas compactas) */
+/* Tabla de ranking en panel lateral */
 #ranking-tabla {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.35rem;
+    font-size: 0.33rem;
     color: #c8d8ff;
+    table-layout: fixed;
 }
 
 #ranking-tabla th {
     background: #14144a;
     color: #ffd700;
-    padding: 5px 6px;
+    padding: 6px 4px;
     border: 1px solid #3a3a9a;
     text-align: left;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
+/* Anchos fijos por columna: #, Ciudad, Alcalde, Score, Pobla., Felicidad, Turnos */
+#ranking-tabla th:nth-child(1),
+#ranking-tabla td:nth-child(1) { width: 36px;  text-align: center; }
+#ranking-tabla th:nth-child(2),
+#ranking-tabla td:nth-child(2) { width: 110px; }
+#ranking-tabla th:nth-child(3),
+#ranking-tabla td:nth-child(3) { width: 100px; }
+#ranking-tabla th:nth-child(4),
+#ranking-tabla td:nth-child(4) { width: 72px;  text-align: right; }
+#ranking-tabla th:nth-child(5),
+#ranking-tabla td:nth-child(5) { width: 64px;  text-align: right; }
+#ranking-tabla th:nth-child(6),
+#ranking-tabla td:nth-child(6) { width: 68px;  text-align: right; }
+#ranking-tabla th:nth-child(7),
+#ranking-tabla td:nth-child(7) { width: 54px;  text-align: right; }
+
 #ranking-tabla td {
-    padding: 5px 6px;
+    padding: 6px 4px;
     border: 1px solid #1e1e5a;
     white-space: nowrap;
     overflow: hidden;
-    max-width: 80px;
     text-overflow: ellipsis;
 }
 

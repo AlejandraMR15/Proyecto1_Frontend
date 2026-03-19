@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="../estilos/Modales.css">
     <link rel="stylesheet" href="../estilos/Widgets.css">
     <link rel="stylesheet" href="../estilos/recoleccionBurbujas.css">
+    <link rel="stylesheet" href="../estilos/responsive.css">
 </head>
 <body>
 
@@ -112,6 +113,8 @@
                 <button class="modal-btn modal-btn-primario" id="btn-reanudar">▶ REANUDAR</button>
                 <button class="modal-btn" id="btn-configuraciones">⚙ CONFIGURACIONES</button>
                 <button class="modal-btn" id="btn-guardar-partida">💾 GUARDAR PARTIDA</button>
+                <button class="modal-btn" id="btn-exportar-ciudad">📤 EXPORTAR CIUDAD</button>
+                <button class="modal-btn" id="btn-importar-ciudad">📥 IMPORTAR CIUDAD</button>
                 <button class="modal-btn modal-btn-peligro" id="btn-finalizar">✕ FINALIZAR PARTIDA</button>
             </div>
         </div>
@@ -182,8 +185,35 @@
             </div>
             <div class="modal-opciones">
                 <button class="modal-btn modal-btn-primario" id="btn-game-over-ranking">🏆 VER RANKING</button>
-                <button class="modal-btn" id="btn-game-over-config">⚙ CONFIGURACIONES</button>
-                <button class="modal-btn modal-btn-peligro" id="btn-game-over-cerrar" style="margin-top:8px;width:100%">✕ CERRAR</button>
+                <button class="modal-btn modal-btn-peligro" id="btn-game-over-nueva-partida">🏙️ NUEVA PARTIDA</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL DE RANKING (centrado, para Game Over) ===== -->
+    <div id="modal-ranking-gameover" class="modal-overlay" data-visible="false">
+        <div class="modal-caja modal-caja-ranking">
+            <div class="modal-titulo">🏆 RANKING</div>
+            <div id="ranking-tabla-wrap">
+                <table id="ranking-tabla-go">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Ciudad</th>
+                            <th>Alcalde</th>
+                            <th>Score</th>
+                            <th>Población</th>
+                            <th>Felicidad</th>
+                            <th>Turnos</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ranking-tbody-go"></tbody>
+                </table>
+                <div id="ranking-vacio-go" style="display:none;">Sin partidas aún.</div>
+            </div>
+            <div class="modal-opciones" style="margin-top:20px">
+                <button class="modal-btn modal-btn-peligro" id="btn-go-ranking-nueva-partida">🏙️ NUEVA PARTIDA</button>
+                <button class="modal-btn" id="btn-go-ranking-cerrar">✕ CERRAR</button>
             </div>
         </div>
     </div>
@@ -200,7 +230,10 @@
                     <tr>
                         <th>#</th>
                         <th>Ciudad</th>
+                        <th>Alcalde</th>
                         <th>Score</th>
+                        <th>Población</th>
+                        <th>Felicidad</th>
                         <th>Turnos</th>
                     </tr>
                 </thead>
@@ -214,7 +247,7 @@
         </div>
     </aside>
 
-    <script type="module" src="../../negocio/HUD.js"></script>
+    <script type="module" src="../../negocio/Hud.js"></script>
     <script type="module" src="../../negocio/grid.js"></script>
 
     <!-- ===== PANEL LATERAL DE CONSTRUCCIÓN ===== -->
@@ -405,6 +438,28 @@
         <span id="guardando-icono">💾</span>
         <span id="guardando-texto">Guardando...</span>
     </div>
+
+    <!-- ===== MODAL IMPORTAR CIUDAD ===== -->
+    <div id="modal-importar" class="modal-overlay" data-visible="false">
+        <div class="modal-caja">
+            <div class="modal-titulo">📥 IMPORTAR CIUDAD</div>
+            <p class="modal-texto">
+                ⚠️ <strong>Tu partida actual se perderá permanentemente.</strong>
+                Esta acción no se puede deshacer. Si quieres conservarla,
+                cancela y usa <em>Exportar Ciudad</em> primero.
+            </p>
+            <div id="importar-aviso-error" class="importar-error" data-visible="false">
+                <span id="importar-error-texto">Error al leer el archivo.</span>
+            </div>
+            <div class="modal-opciones">
+                <button class="modal-btn modal-btn-primario" id="btn-importar-confirmar">📂 SELECCIONAR ARCHIVO</button>
+                <button class="modal-btn" id="btn-importar-cancelar">✕ CANCELAR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Input de archivo oculto para importar ciudad JSON -->
+    <input type="file" id="input-importar-ciudad" accept=".json" style="display:none">
 
     <script type="module" src="../../negocio/menuConstruccion.js"></script>
 

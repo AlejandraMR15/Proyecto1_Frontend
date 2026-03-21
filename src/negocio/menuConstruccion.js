@@ -430,27 +430,52 @@ function buscarEdificioPorCoordenada(col, row) {
 function reconstruirMapaDesdePartida(ciudad) {
     _mapaEdificios.clear();
     if (!ciudad || !ciudad.mapa || !ciudad.construcciones) return;
- 
-    const matriz       = ciudad.mapa.matriz;
-    const construcciones = [...ciudad.construcciones]; // copia para marcar usados
-    const usados       = new Set();
- 
+
+    const matriz = ciudad.mapa.matriz;
+
+    // PASO 1: usar _coordX/_coordY guardados en cada construcción (cubre TODOS los tipos)
+    const sinCoordenadas = [];
+    for (const construccion of ciudad.construcciones) {
+        const col = construccion._coordX;
+        const row = construccion._coordY;
+        if (col !== undefined && row !== undefined) {
+            _mapaEdificios.set(`${col},${row}`, construccion);
+        } else {
+            sinCoordenadas.push(construccion);
+        }
+    }
+
+    // PASO 2: fallback para partidas muy antiguas sin coordenadas guardadas
+    if (sinCoordenadas.length === 0) return;
+
+    const usados = new Set();
     for (let row = 0; row < ciudad.mapa.alto; row++) {
         for (let col = 0; col < ciudad.mapa.ancho; col++) {
+            if (_mapaEdificios.has(`${col},${row}`)) continue;
+
             const etiqueta = matriz[row] && matriz[row][col];
-            if (!etiqueta || etiqueta === 'g' || etiqueta === 'r') continue;
- 
-            // Buscar la config que corresponde a esta etiqueta
+            if (!etiqueta || etiqueta === 'g') continue;
+
             const cfg = Object.values(EDIFICIOS_CONFIG).find(c => c.etiqueta === etiqueta);
             if (!cfg) continue;
- 
-            // Buscar la primera construcción con ese nombre que no esté usada
-            const idx = construcciones.findIndex((c, i) =>
-                !usados.has(i) && c.nombre === cfg.label
-            );
+
+            // Vias y Parques no tienen .nombre, buscar por nombre de clase
+            const claseEsperada = etiqueta === 'r' ? 'Vias' : etiqueta === 'P1' ? 'Parques' : null;
+
+            let idx;
+            if (claseEsperada) {
+                idx = sinCoordenadas.findIndex((c, i) =>
+                    !usados.has(i) && c.constructor.name === claseEsperada
+                );
+            } else {
+                idx = sinCoordenadas.findIndex((c, i) =>
+                    !usados.has(i) && c.nombre === cfg.label
+                );
+            }
+
             if (idx !== -1) {
                 usados.add(idx);
-                _mapaEdificios.set(`${col},${row}`, construcciones[idx]);
+                _mapaEdificios.set(`${col},${row}`, sinCoordenadas[idx]);
             }
         }
     }

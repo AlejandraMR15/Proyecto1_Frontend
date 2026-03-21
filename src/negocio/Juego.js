@@ -104,11 +104,14 @@ export default class Juego {
             const edificiosResidenciales = this.ciudad.obtenerEdificiosResidenciales();
             const edificiosLaborales = this.ciudad.obtenerEdificiosLaborales();
             const valorServicios = produccionPendiente.felicidad;  // Usar el valor calculado en ciudad.procesarTurno()
+            // Reasignar ciudadanos que perdieron vivienda o empleo
+            this.gestorCiudadanos.reasignarCiudadanosSinRecursos(edificiosResidenciales, edificiosLaborales);
             // Recalcular felicidad de toda la población con el estado actual de la ciudad
             this.gestorCiudadanos.recalcularFelicidadCiudadanos(valorServicios);
             // Procesar crecimiento poblacional
             this.gestorCiudadanos.procesarCrecimientoPoblacional(edificiosResidenciales, edificiosLaborales, valorServicios);
         }
+
         let puntaje = 0;
         if (this.administrarPuntaje && this.ciudad) {
             const recursos = this.ciudad.recursos;

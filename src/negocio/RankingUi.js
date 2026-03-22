@@ -53,21 +53,36 @@ export function guardarRanking() {
 }
 
 /**
- * Registra la ciudad actual en el ranking y lo persiste.
+ * Actualiza la entrada existente de la ciudad actual o la crea si no existe.
+ * Evita duplicados y mantiene la persistencia en localStorage.
  */
-export function registrarEnRanking() {
+export function actualizarOAgregarEnRanking() {
     const juego = window.juego;
     if (!juego || !juego.ciudad) return;
 
-    rankingManager.agregarEntrada({
-        nombreCiudad: juego.ciudad.nombre,
-        alcalde:      juego.ciudad.alcalde,
-        puntuacion:   juego.puntaje || 0,
-        poblacion:    juego.gestorCiudadanos.calcularTotalCiudadanos(),
-        felicidad:    Math.round(juego.gestorCiudadanos.calcularFelicidadPromedio()),
-        turno:        juego.numeroTurno,
-        fecha:        new Date().toISOString(),
-    });
+    const nombreCiudad = juego.ciudad.nombre;
+    const datosActualizados = {
+        nombreCiudad,
+        alcalde: juego.ciudad.alcalde,
+        puntuacion: juego.puntaje || 0,
+        poblacion: juego.gestorCiudadanos.calcularTotalCiudadanos(),
+        felicidad: Math.round(juego.gestorCiudadanos.calcularFelicidadPromedio()),
+        turno: juego.numeroTurno,
+        fecha: new Date().toISOString(),
+    };
+
+    const indexExistente = rankingManager.entradas.findIndex(e => e.nombreCiudad === nombreCiudad);
+
+    if (indexExistente !== -1) {
+        const entrada = rankingManager.entradas[indexExistente];
+        const fechaOriginal = entrada.fecha;
+        Object.assign(entrada, datosActualizados);
+        entrada.fecha = fechaOriginal;
+    } else {
+        rankingManager.agregarEntrada(datosActualizados);
+    }
+
+    rankingManager.ordenarPorPuntaje();
     guardarRanking();
 }
 
@@ -151,6 +166,7 @@ export function renderizarRanking() {
 
 /**
  * Abre (o cierra) el panel lateral de ranking.
+ * Al abrir, actualiza la entrada de la ciudad actual antes de renderizar.
  */
 export function abrirRanking() {
     const panel = document.getElementById('panel-ranking');
@@ -158,6 +174,7 @@ export function abrirRanking() {
     if (panel.dataset.open === 'true') {
         panel.dataset.open = 'false';
     } else {
+        actualizarOAgregarEnRanking();
         renderizarRanking();
         panel.dataset.open = 'true';
     }
@@ -175,8 +192,7 @@ export function abrirRankingGameOver() {
     const vacio = document.getElementById('ranking-vacio-go');
     const tabla = document.getElementById('ranking-tabla-go');
 
-    registrarEnRanking();
-    guardarRanking();
+    actualizarOAgregarEnRanking();
 
     const entradas = rankingManager.obtenerTop(10);
     if (!tbody) return;

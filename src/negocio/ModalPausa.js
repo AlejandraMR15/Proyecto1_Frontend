@@ -11,13 +11,13 @@
  * Depende de:
  *  - timerEstado, actualizarTimerDOM (HudPanel.js)
  *  - guardarConMensaje, detenerTimerTurno, detenerAutosave (PartidaManager.js)
- *  - registrarEnRanking (RankingUI.js)
+ *  - actualizarOAgregarEnRanking (RankingUI.js)
  *  - storage (PartidaManager.js)
  */
 
 import { timerEstado, actualizarTimerDOM, detenerTimerTurno } from './HudPanel.js';
 import { detenerAutosave, storage } from './PartidaManager.js';
-import { registrarEnRanking } from './RankingUi.js';
+import { actualizarOAgregarEnRanking } from './RankingUi.js';
 
 /* ================================================================
    ESTADO INTERNO DE CONFIGURACIÓN
@@ -176,7 +176,7 @@ export function finalizarPartida() {
     const juego = window.juego;
     if (juego) {
         juego.pausarJuego();
-        registrarEnRanking();
+        actualizarOAgregarEnRanking();
         juego.guardarPartida();
     }
     detenerTimerTurno();

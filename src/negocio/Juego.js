@@ -9,6 +9,7 @@ import Ciudadano from "../modelos/Ciudadano.js";
 import RecoleccionBurbujas from "./RecoleccionBurbujas.js";
 import Mapa from "../modelos/Mapa.js";
 import MapImporter from "../acceso_datos/MapImporter.js";
+import { actualizarOAgregarEnRanking } from "./RankingUi.js";
 
 /**
  * Clase principal que gestiona la lógica del juego.
@@ -213,12 +214,14 @@ export default class Juego {
         this.ciudad = new Ciudad(nombre, alcalde, ancho, alto, coordenadas,
                                  dineroInicial, electricidadInicial, aguaInicial, comidaInicial);
         this.SistemaDeTurnos.cambiarDuracion(duracionTurno);
+        actualizarOAgregarEnRanking();
         return this.ciudad;
     }
 
     /** Carga una Ciudad serializada y la asigna. */
     cargarCiudad(json) {
         this.ciudad = Ciudad.fromJSON(json);
+        actualizarOAgregarEnRanking();
         return this.ciudad;
     }
 

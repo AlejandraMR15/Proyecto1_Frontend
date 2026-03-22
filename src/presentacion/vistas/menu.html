@@ -79,7 +79,7 @@
                 <p id="region-error" class="campo-error oculto">Selecciona una ciudad de la lista</p>
             </div>
 
-            <!-- Configuración del mapa: manual o desde JSON -->
+            <!-- Configuración del mapa: manual o desde TXT -->
             <div class="campo">
                 <label class="label-opciones">Configuración del mapa</label>
                 <div class="opciones-mapa">
@@ -98,7 +98,7 @@
                             name="mapa-tipo"
                             value="json"
                         />
-                        Cargar desde JSON
+                        Cargar desde TXT
                     </label>
                 </div>
             </div>
@@ -123,19 +123,19 @@
                 </div>
             </div>
 
-            <!-- Cargar desde JSON - oculto por defecto -->
-            <div id="seccion-json" class="campo oculto">
-                <label for="input-json">Archivo JSON del mapa</label>
+            <!-- Cargar desde TXT - oculto por defecto -->
+            <div id="seccion-txt" class="campo oculto">
+                <label for="input-txt">Archivo TXT del mapa</label>
                 <input
                     type="file"
-                    id="input-json"
-                    accept=".json"
+                    id="input-txt"
+                    accept=".txt"
                 />
-                <div id="json-info" class="json-info oculto">
-                    <p id="json-archivo"></p>
-                    <p id="json-dimensiones"></p>
+                <div id="txt-info" class="txt-info oculto">
+                    <p id="txt-archivo"></p>
+                    <p id="txt-dimensiones"></p>
                 </div>
-                <p id="json-error" class="campo-error oculto"></p>
+                <p id="txt-error" class="campo-error oculto"></p>
             </div>
 
             <!-- Duración de turno -->

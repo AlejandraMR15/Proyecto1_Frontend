@@ -274,21 +274,21 @@ export default class Juego {
         console.log("Partida cargada");
     }
     /**
-     * Crea un mapa desde un archivo JSON seleccionado.
+     * Crea un mapa desde un archivo TXT seleccionado.
      *
      * Valida:
-     * - Estructura del JSON (debe tener `map` y `gridSize` o `grid`, `width`, `height`)
+     * - Estructura del TXT (primera línea: "ANCHO ALTO", siguientes líneas: matriz)
      * - Dimensiones del mapa (15x15 mínimo, 30x30 máximo)
      * - Etiquetas válidas de terreno y construcciones
      *
-     * @param {File} archivo Archivo JSON con datos del mapa.
+     * @param {File} archivo Archivo TXT con datos del mapa.
      * @returns {Promise<Mapa>} Promesa que resuelve una instancia de Mapa validada.
      * @throws {Error} Si el archivo no es válido o no cumple validaciones.
      */
-    async crearMapaDesdeJSON(archivo) {
+    async crearMapaDesdeTXT(archivo) {
         try {
-            // Validar y extraer datos del JSON
-            const datosValidados = await MapImporter.procesarArchivoJSON(archivo);
+            // Validar y extraer datos del TXT
+            const datosValidados = await MapImporter.procesarArchivoTXT(archivo);
 
             const { ancho, alto, matriz, metadatos } = datosValidados;
 
@@ -308,7 +308,7 @@ export default class Juego {
             return nuevoMapa;
 
         } catch (error) {
-            console.error('[Juego] Error al cargar mapa desde JSON:', error.message);
+            console.error('[Juego] Error al cargar mapa desde TXT:', error.message);
             throw error;
         }
     }

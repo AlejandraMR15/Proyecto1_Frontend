@@ -489,6 +489,72 @@ export default class Ciudad {
     }
 
     /**
+     * Calcula recursos iniciales basándose en los edificios del mapa cargado.
+     * 
+     * Fases:
+     * 1. Producción de plantas de utilidad (electricidad, agua)
+     * 2. Producción de otros edificios (dinero, comida)
+     * 3. Consumos de todos los edificios
+     * 
+     * @returns {void}
+     */
+    calcularRecursosIniciales() {
+        const produccionPendiente = {
+            dinero: 0,
+            electricidad: 0,
+            agua: 0,
+            comida: 0,
+        };
+
+        // FASE 1: Producción de plantas de utilidad (electricidad, agua)
+        const plantas = this.construcciones.filter(c => c instanceof PlantasDeUtilidad);
+        for (const planta of plantas) {
+            if (typeof planta.procesarProduccion === 'function') {
+                const produccion = planta.procesarProduccion(this.recursos);
+                this._acumularProduccionPendiente(produccionPendiente, produccion);
+            }
+        }
+
+        // Aplicar producción de plantas
+        if (produccionPendiente.electricidad > 0) {
+            this.recursos.actualizarElectricidad(produccionPendiente.electricidad);
+        }
+        if (produccionPendiente.agua > 0) {
+            this.recursos.actualizarAgua(produccionPendiente.agua);
+        }
+
+        // Reset para siguiente fase
+        produccionPendiente.dinero = 0;
+        produccionPendiente.electricidad = 0;
+        produccionPendiente.agua = 0;
+        produccionPendiente.comida = 0;
+
+        // FASE 2: Producción de otros edificios (dinero, comida)
+        const otrosEdificios = this.construcciones.filter(c => !(c instanceof PlantasDeUtilidad));
+        for (const edificio of otrosEdificios) {
+            if (typeof edificio.procesarProduccion === 'function') {
+                const produccion = edificio.procesarProduccion(this.recursos);
+                this._acumularProduccionPendiente(produccionPendiente, produccion);
+            }
+        }
+
+        // Aplicar producción de otros edificios
+        if (produccionPendiente.dinero > 0) {
+            this.recursos.dinero += produccionPendiente.dinero;
+        }
+        if (produccionPendiente.comida > 0) {
+            this.recursos.actualizarComida(produccionPendiente.comida);
+        }
+
+        // FASE 3: Consumos de todos los edificios (mantenimiento, electricidad, agua, comida)
+        for (const edificio of this.construcciones) {
+            if (typeof edificio.procesarConsumo === 'function') {
+                edificio.procesarConsumo(this.recursos);
+            }
+        }
+    }
+
+    /**
      * Factory privado: lee el campo `tipo` del objeto serializado y crea
      * la instancia correcta de la subclase de Construccion correspondiente.
      * Esto es necesario para que instanceof funcione correctamente después

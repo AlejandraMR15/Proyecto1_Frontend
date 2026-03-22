@@ -672,23 +672,29 @@ document.addEventListener('DOMContentLoaded', function () {
     /* ---- Acordeón de categorías ---- */
     document.querySelectorAll('.cat-header').forEach(function (btn) {
         btn.addEventListener('click', function () {
-            // En landscape móvil no hay acordeón — todos los ítems siempre visibles.
+            // En landscape móvil y tablet no hay acordeón — todos los ítems visibles.
             const esLandscapeMovil = window.matchMedia(
                 '(orientation: landscape) and (max-height: 500px)'
             ).matches;
-            if (esLandscapeMovil) return;
+            const esTablet = window.matchMedia(
+                '(min-width: 768px) and (max-width: 1024px)'
+            ).matches;
+            if (esLandscapeMovil || esTablet) return;
 
             const cat = btn.closest('.category');
             cat.dataset.open = cat.dataset.open === 'true' ? 'false' : 'true';
         });
     });
 
-    /* ---- En landscape forzar TODAS las categorías abiertas ---- */
+    /* ---- En landscape y tablet forzar TODAS las categorías abiertas ---- */
     function forzarCategoriasEnLandscape() {
         const esLandscapeMovil = window.matchMedia(
             '(orientation: landscape) and (max-height: 500px)'
         ).matches;
-        if (!esLandscapeMovil) return;
+        const esTablet = window.matchMedia(
+            '(min-width: 768px) and (max-width: 1024px)'
+        ).matches;
+        if (!esLandscapeMovil && !esTablet) return;
         document.querySelectorAll('.category').forEach(function (cat) {
             cat.dataset.open = 'true';
         });

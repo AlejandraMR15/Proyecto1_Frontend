@@ -1,0 +1,107 @@
+/* ============================================================
+   CIUDAD VIRTUAL — responsive-base.css
+   Estilos globales aplicables en todas las resoluciones
+   y badges de atajos exclusivos de desktop (>1024px).
+   ============================================================ */
+
+/* ============================================================
+   PANEL RANKING LATERAL — base para todas las resoluciones
+   ============================================================ */
+#panel-ranking {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 340px;
+    height: 100vh;
+    background: #0f0f2a;
+    border-left: 3px solid #3a3a9a;
+    z-index: 450;
+    display: flex;
+    flex-direction: column;
+    transform: translateX(100%);
+    transition: transform 0.2s ease;
+    font-family: 'Press Start 2P', monospace;
+}
+
+#panel-ranking[data-open="true"] {
+    transform: translateX(0);
+}
+
+.ranking-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    background: #08081c;
+    border-bottom: 2px solid #3a3a9a;
+    font-size: 0.65rem;
+    color: #ffd700;
+    flex-shrink: 0;
+}
+
+.ranking-panel-header button {
+    background: none;
+    border: 1px solid #3a3a9a;
+    color: #c8d8ff;
+    font-size: 0.7rem;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 3px;
+}
+
+.ranking-panel-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px;
+}
+
+.ranking-panel-footer {
+    padding: 12px;
+    display: flex;
+    gap: 8px;
+    border-top: 2px solid #3a3a9a;
+    flex-shrink: 0;
+}
+
+/* ============================================================
+   VISTA DESKTOP >1024px — badges de atajos de teclado (HU-024)
+   ============================================================ */
+@media (min-width: 1025px) {
+    #btn-pausa::after {
+        content: 'SPACE';
+        display: block;
+        font-size: 0.42rem;
+        color: #4a9fb5;
+        letter-spacing: 0.04em;
+        margin-top: 2px;
+    }
+
+    #sidebarTab::after {
+        content: '[B]';
+        display: block;
+        font-size: 0.52rem;
+        color: #4a9fb5;
+        opacity: 0.8;
+    }
+}
+
+/* ============================================================
+   AJUSTES TÁCTILES — todos los dispositivos <=1024px
+   ============================================================ */
+@media (max-width: 1024px) {
+    .build-item,
+    .cat-header,
+    .modal-btn,
+    #zoom-controls button,
+    #hud-controles button {
+        min-height: 44px;
+    }
+
+    .build-item:hover {
+        background: var(--bg-item);
+    }
+
+    button {
+        touch-action: manipulation;
+    }
+}

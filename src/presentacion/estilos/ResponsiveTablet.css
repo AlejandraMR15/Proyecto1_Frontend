@@ -1,0 +1,327 @@
+/* ============================================================
+   CIUDAD VIRTUAL — responsiveTablet.css
+   Vista Tablet — 768px a 1024px  (HU-023)
+   Sidebar lateral fijo + scroll vertical en el menú.
+   ============================================================ */
+@media (min-width: 768px) and (max-width: 1024px) {
+
+    :root { --sb-width: 240px; }
+
+    html, body { overflow: hidden; }
+
+    #zoom-controls { display: none !important; }
+
+    /* ── VIEWPORT ── */
+    #viewport {
+        position: fixed !important;
+        top: 0 !important;
+        left: var(--sb-width) !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        overflow: hidden !important;
+        touch-action: none !important;
+        z-index: 1 !important;
+        transition: left 0.14s steps(4);
+    }
+
+    body.sidebar-cerrado #viewport { left: 0 !important; }
+
+    /* ── SIDEBAR: columna izquierda fija ── */
+    .sidebar {
+        position: fixed !important;
+        top: 0 !important; left: 0 !important;
+        bottom: 0 !important; right: auto !important;
+        width: var(--sb-width) !important;
+        height: 100vh !important;
+        max-height: none !important;
+        overflow: hidden !important;
+        display: flex !important;
+        flex-direction: column !important;
+        transform: translateX(0) !important;
+        pointer-events: auto !important;
+        border-right: 3px solid #3a3a9a !important;
+        border-top: none !important;
+        z-index: 200 !important;
+        transition: transform 0.14s steps(4) !important;
+    }
+
+    .sidebar[data-open="false"] {
+        transform: translateX(calc(-1 * var(--sb-width) - 8px)) !important;
+        pointer-events: none !important;
+    }
+
+    /* ── HEADER: siempre visible ── */
+    .sidebar > .sidebar-header {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        flex-shrink: 0 !important;
+        width: 100% !important;
+        height: 48px !important;
+        min-height: 48px !important;
+        max-height: 48px !important;
+        padding: 0 10px !important;
+        overflow: visible !important;
+        position: relative !important;
+        box-sizing: border-box !important;
+    }
+
+    .sidebar > .sidebar-header .sidebar-title {
+        font-size: 7px !important;
+        letter-spacing: 0.02em !important;
+    }
+
+    .sidebar > .sidebar-header .sidebar-header-buttons {
+        display: flex !important;
+        gap: 6px !important;
+        flex-shrink: 0 !important;
+        align-items: center !important;
+    }
+
+    .sidebar > .sidebar-header #sidebarDemolir,
+    .sidebar > .sidebar-header #sidebarClose {
+        position: static !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 32px !important;
+        height: 32px !important;
+        min-width: 32px !important;
+        padding: 4px !important;
+        font-size: 14px !important;
+        flex-shrink: 0 !important;
+    }
+
+    /* ── BODY: scroll vertical ── */
+    .sidebar > .sidebar-body {
+        display: block !important;
+        flex: 1 1 auto !important;
+        min-height: 0 !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        -webkit-overflow-scrolling: touch !important;
+        padding: 4px 0 120px !important;
+        flex-direction: unset !important;
+        flex-wrap: unset !important;
+        align-items: unset !important;
+    }
+
+    /* ── CATEGORÍAS: sin acordeón, siempre visibles ── */
+    .sidebar .cat-arrow { display: none !important; }
+
+    .sidebar .cat-items,
+    .sidebar .category[data-open="false"] .cat-items,
+    .sidebar .category[data-open="true"]  .cat-items {
+        display: block !important;
+        max-height: 9999px !important;
+        height: auto !important;
+        overflow: visible !important;
+        transition: none !important;
+        padding: 2px 0 !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+
+    /* ── BUILD ITEMS ── */
+    .sidebar .build-item {
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        min-width: unset !important;
+        max-width: unset !important;
+        min-height: 44px !important;
+        padding: 6px 10px !important;
+        gap: 8px !important;
+        text-align: left !important;
+    }
+
+    .sidebar .build-icon { font-size: 1.1rem !important; }
+    .sidebar .build-name { font-size: 0.38rem !important; white-space: nowrap !important; }
+    .sidebar .build-cost { font-size: 0.32rem !important; }
+
+    /* ── BOTÓN CONSTRUIR: abajo izquierda, se mueve con el sidebar ── */
+    #sidebarTab {
+        display: flex !important;
+        position: fixed !important;
+        bottom: 16px !important;
+        left: calc(var(--sb-width) + 10px) !important;
+        width: 160px !important;
+        height: 52px !important;
+        font-size: 0.45rem !important;
+        transition: left 0.14s steps(4), opacity 0.15s ease !important;
+        z-index: 210 !important;
+    }
+
+    body.sidebar-cerrado #sidebarTab { left: 10px !important; }
+
+    #sidebar[data-open="true"] ~ #sidebarTab,
+    body.sidebar-construccion-abierto #sidebarTab {
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }
+
+    /* ── PERFIL: esquina superior izquierda ── */
+    #hud-perfil {
+        position: fixed;
+        top: 8px;
+        left: calc(var(--sb-width) + 10px);
+        padding: 5px 10px;
+        font-size: 0.38rem;
+        z-index: 400;
+        min-width: 0 !important;
+        max-width: 140px;
+        transition: left 0.14s steps(4);
+        background: #0f0f2a;
+        border: 2px solid #3a3a9a;
+        border-radius: 4px;
+    }
+
+    body.sidebar-cerrado #hud-perfil { left: 10px; }
+
+    #perfil-nombre-ciudad,
+    #perfil-alcalde,
+    #perfil-puntuacion {
+        font-size: 0.34rem;
+        margin-bottom: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* ── BIENESTAR: debajo del perfil ── */
+    #hud-bienestar {
+        display: flex !important;
+        flex-direction: column;
+        gap: 3px;
+        position: fixed;
+        top: 96px;
+        left: calc(var(--sb-width) + 10px) !important;
+        background: rgba(15, 15, 42, 0.88);
+        border: 1px solid #3a3a9a;
+        border-radius: 4px;
+        padding: 4px 8px;
+        z-index: 399;
+        min-width: 0;
+        max-width: 140px;
+        transition: left 0.14s steps(4);
+    }
+
+    body.sidebar-cerrado #hud-bienestar { left: 10px !important; }
+
+    .bienestar-fila  { gap: 5px; }
+    .bienestar-icono { font-size: 0.8rem; }
+    .bienestar-label { font-size: 0.28rem; }
+    .bienestar-valor { font-size: 0.38rem; }
+
+    /* ── BOTÓN RUTA: esquina superior derecha junto a controles ── */
+    #btn-calcular-ruta {
+        position: fixed !important;
+        top: 8px !important;
+        right: 112px !important;
+        left: auto !important;
+        bottom: auto !important;
+        width: 48px !important;
+        height: 48px !important;
+        font-size: 0.36rem !important;
+        transition: background 0.14s steps(4),
+                    border-color 0.14s steps(4) !important;
+    }
+
+    /* ── RECURSOS: centrados en la parte superior ── */
+    #hud-recursos {
+        position: fixed !important;
+        top: 8px !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        display: flex;
+        flex-direction: row;
+        gap: 6px;
+        align-items: center;
+        z-index: 400;
+        background: transparent;
+        border: none;
+        padding: 0;
+        max-width: calc(100vw - 500px);
+        overflow: hidden;
+        transition: none !important;
+    }
+
+    body.sidebar-cerrado #hud-recursos {
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+    }
+
+    .hud-recurso       { padding: 4px 8px; min-width: 0; }
+    .hud-recurso-icono { font-size: 0.8rem; }
+    .hud-recurso-label { font-size: 0.32rem; }
+    .hud-recurso-valor { font-size: 0.48rem; }
+
+    /* ── CONTROLES: esquina superior derecha ── */
+    #hud-controles {
+        position: fixed;
+        top: 8px; right: 8px;
+        flex-direction: column;
+        gap: 6px;
+        z-index: 500;
+    }
+
+    #hud-controles button {
+        width: 48px; height: 48px;
+        min-width: 48px; min-height: 48px;
+        font-size: 1rem;
+    }
+
+    /* ── TIMER: encima del botón CONSTRUIR, se mueve con él ── */
+    #hud-turno {
+        position: fixed;
+        /* 16px (bottom botón) + 52px (alto botón) + 8px (gap) = 76px */
+        bottom: 76px;
+        left: calc(var(--sb-width) + 10px);
+        top: auto; transform: none;
+        font-size: 0.38rem;
+        padding: 6px 10px;
+        min-width: 180px;
+        z-index: 400;
+        transition: left 0.14s steps(4);
+    }
+
+    body.sidebar-cerrado #hud-turno { left: 10px; }
+
+    /* ── WIDGETS: esquina inferior derecha ── */
+    #widgets-container {
+        position: fixed;
+        bottom: 16px; right: 8px !important;
+        left: auto; top: auto;
+        flex-direction: column;
+        gap: 6px;
+        z-index: 400;
+        transition: none;
+    }
+
+    .widget-btn        { width: 48px; height: 48px; }
+    .widget-clima-temp { font-size: 0.38rem; }
+
+    .clima-infobox {
+        bottom: 70px; right: 8px !important;
+        left: auto; width: 200px; top: auto;
+    }
+
+    /* ── MODALES ── */
+    .modal-caja { width: 65%; max-width: 560px; }
+
+    /* ── GUARDANDO ── */
+    #hud-guardando {
+        bottom: 20px;
+        left: calc(var(--sb-width) + 190px);
+        right: auto; transform: none;
+        transition: left 0.14s steps(4);
+    }
+
+    body.sidebar-cerrado #hud-guardando { left: 190px; }
+}
+
+/* ── Portrait tablet: sidebar un poco más angosto ── */
+@media (min-width: 768px) and (max-width: 1024px) and (orientation: portrait) {
+    :root { --sb-width: 220px; }
+}

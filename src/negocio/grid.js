@@ -170,6 +170,10 @@ import MovimientoCiudadanos from './MovimientoCiudadanos.js';
                 el = el.parentElement;
             }
             if (el && el !== document.body) {
+                // preventDefault() suprime el click nativo que el navegador
+                // dispararía 300ms después, evitando el doble evento que
+                // causaba mostrar la info del edificio recién construido.
+                e.preventDefault();
                 el.dispatchEvent(new MouseEvent('click', {
                     bubbles: true,
                     cancelable: true,

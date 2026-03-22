@@ -90,100 +90,319 @@
 /* ============================================================
    VISTA TABLET — 768px a 1024px  (HU-023)
    Layout: sidebar izquierdo fijo + mapa central
+   Igual en portrait y landscape: sidebar lateral + mapa
    ============================================================ */
 @media (min-width: 768px) and (max-width: 1024px) {
 
     :root {
         --sb-width: 220px;
+        --tablet-topbar: 56px;
     }
 
     html, body {
         overflow: hidden;
     }
 
+    /* ── BARRA SUPERIOR DE RECURSOS ── */
     #hud-recursos {
         position: fixed;
         top: 0;
-        left: 0;
-        right: 0;
-        height: 56px;
+        left: var(--sb-width);
+        right: 120px; /* dejar espacio para botones control */
+        height: var(--tablet-topbar);
         display: flex;
         flex-direction: row;
         align-items: center;
-        justify-content: center;
-        gap: 8px;
+        justify-content: flex-start;
+        gap: 6px;
         padding: 0 8px;
         background: rgba(8, 8, 24, 0.97);
         border-bottom: 2px solid #1e1e6a;
         z-index: 300;
         overflow-x: auto;
+        /* Ocultar scrollbar pero permitir scroll */
+        scrollbar-width: none;
     }
 
-    .hud-recurso-label { font-size: 0.48rem; }
-    .hud-recurso-valor { font-size: 0.65rem; }
+    #hud-recursos::-webkit-scrollbar { display: none; }
 
+    .hud-recurso {
+        flex-shrink: 0;
+        padding: 4px 8px;
+        min-width: 0;
+    }
+
+    .hud-recurso-icono { font-size: 0.85rem; }
+    .hud-recurso-label { font-size: 0.38rem; }
+    .hud-recurso-valor { font-size: 0.55rem; }
+
+    /* ── BOTONES CONTROL: esquina superior derecha ── */
+    #hud-controles {
+        position: fixed;
+        top: 8px;
+        right: 8px;
+        flex-direction: row;
+        gap: 6px;
+        z-index: 400;
+    }
+
+    #hud-controles button {
+        width: 44px; height: 44px;
+        font-size: 1rem;
+    }
+
+    /* ── PERFIL: debajo de la barra, sobre el sidebar ── */
     #hud-perfil {
         position: fixed;
-        top: 56px;
+        top: var(--tablet-topbar);
         left: 0;
+        width: var(--sb-width);
         display: flex;
-        flex-direction: row;
-        gap: 10px;
-        align-items: center;
-        background: rgba(8, 8, 24, 0.9);
-        padding: 4px 10px;
-        border-bottom-right-radius: 6px;
-        border-right: 1px solid #1e1e6a;
-        border-bottom: 1px solid #1e1e6a;
+        flex-direction: column;
+        gap: 3px;
+        background: rgba(8, 8, 24, 0.95);
+        padding: 6px 10px;
+        border-bottom: 2px solid #1e1e6a;
+        border-right: 3px solid #3a3a9a;
         z-index: 250;
-        font-size: 0.5rem;
+        font-size: 0.42rem;
+        box-sizing: border-box;
+        transition: none !important;
     }
 
-    #hud-bienestar { display: none; }
+    /* anular la transición left del base que mueve el perfil con el sidebar */
+    body.sidebar-cerrado #hud-perfil {
+        left: 0 !important;
+    }
 
+    #perfil-nombre-ciudad { font-size: 0.42rem; margin-bottom: 2px; }
+    #perfil-alcalde       { font-size: 0.38rem; margin-bottom: 2px; }
+    #perfil-puntuacion    { font-size: 0.38rem; }
+
+    /* ── BIENESTAR: pequeño panel debajo del perfil en el sidebar ── */
+    #hud-bienestar {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        position: fixed;
+        top: calc(var(--tablet-topbar) + 72px); /* topbar + alto perfil aprox */
+        left: 0;
+        width: var(--sb-width);
+        background: rgba(8, 8, 24, 0.95);
+        padding: 6px 10px;
+        border-bottom: 2px solid #1e1e6a;
+        border-right: 3px solid #3a3a9a;
+        z-index: 248;
+        box-sizing: border-box;
+    }
+
+    .bienestar-fila { gap: 6px; }
+    .bienestar-icono { font-size: 0.9rem; }
+    .bienestar-label { font-size: 0.32rem; }
+    .bienestar-valor { font-size: 0.45rem; }
+
+    /* ── TIMER: esquina inferior derecha del mapa ── */
     #hud-turno {
+        position: fixed;
         top: auto;
         bottom: 12px;
         right: 12px;
         left: auto;
         transform: none;
-        font-size: 0.52rem;
+        font-size: 0.45rem;
+        padding: 6px 10px;
+        min-width: 160px;
+        z-index: 300;
+        transition: none;
     }
 
+    /* ── SIDEBAR: fijo a la izquierda, debajo de la topbar ──
+       Siempre visible en tablet, no se oculta.
+       El acordeón sigue funcionando para expandir categorías.
+       top: 184px = 56topbar + 72perfil + 56bienestar (aprox).
+       Si el contenido del perfil/bienestar varía, el sidebar puede quedar
+       levemente tapado pero el z-index menor lo permite.
+    ── */
     .sidebar {
-        top: 56px !important;
-        height: calc(100vh - 56px) !important;
+        position: fixed !important;
+        top: 184px !important;
+        left: 0 !important;
+        bottom: 0 !important;
+        right: auto !important;
         width: var(--sb-width) !important;
+        height: auto !important;
+        max-height: none !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
         transform: translateX(0) !important;
+        pointer-events: auto !important;
+        border-right: 3px solid #3a3a9a !important;
+        border-top: 2px solid #1e1e6a !important;
+        box-shadow: 3px 0 0 0 #06061a !important;
+        z-index: 199 !important;
+        transition: none !important;
     }
 
+    /* En tablet el sidebar siempre está "abierto" visualmente */
     .sidebar[data-open="false"] {
         transform: translateX(0) !important;
     }
 
-    #sidebarTab { display: none; }
+    /* Ocultar botón construir (el sidebar siempre está visible) */
+    #sidebarTab { display: none !important; }
 
-    #viewport {
-        position: fixed;
-        top: 56px;
-        left: var(--sb-width);
-        right: 0;
-        bottom: 0;
-        width: auto;
-        height: auto;
+    /* Ocultar la cabecera del sidebar (no necesita botón cerrar en tablet) */
+    .sidebar .sidebar-header {
+        display: none !important;
     }
 
+    /* El cuerpo del sidebar ocupa todo el espacio disponible */
+    .sidebar .sidebar-body {
+        display: block !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        height: 100% !important;
+        padding: 4px 0 !important;
+        flex-direction: unset !important;
+        flex-wrap: unset !important;
+        align-items: unset !important;
+    }
+
+    /* Acordeón normal (vertical) en tablet */
+    .sidebar .category {
+        display: block !important;
+        height: auto !important;
+        border-right: none !important;
+        border-bottom: 2px solid #1e1e6a !important;
+        flex-direction: unset !important;
+    }
+
+    .sidebar .cat-header {
+        flex-direction: row !important;
+        padding: 8px 10px !important;
+        min-width: unset !important;
+        font-size: 0.38rem !important;
+        width: 100% !important;
+        border-bottom: 1px solid #1e1e6a !important;
+        border-top: 2px solid var(--border) !important;
+    }
+
+    .sidebar .cat-arrow { display: inline !important; }
+
+    .sidebar .cat-items {
+        display: block !important;
+        flex-direction: unset !important;
+        flex-wrap: unset !important;
+        max-height: 0 !important;
+        overflow: hidden !important;
+        padding: 0 !important;
+        align-items: unset !important;
+        transition: max-height 0.18s steps(8) !important;
+    }
+
+    .sidebar .category[data-open="true"] .cat-items {
+        max-height: 500px !important;
+        padding: 2px 0 !important;
+    }
+
+    .sidebar .build-item {
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        min-width: unset !important;
+        max-width: unset !important;
+        min-height: 40px !important;
+        padding: 6px 10px !important;
+        gap: 8px !important;
+        text-align: left !important;
+    }
+
+    .sidebar .build-icon { font-size: 1rem !important; }
+    .sidebar .build-name { font-size: 0.35rem !important; white-space: nowrap !important; }
+    .sidebar .build-cost { font-size: 0.30rem !important; }
+
+    /* ── BOTÓN DEMOLER: visible en la barra de recursos (top) ── */
+    #sidebarDemolir {
+        display: flex !important;
+        position: fixed !important;
+        top: 8px !important;
+        left: calc(var(--sb-width) + 8px) !important;
+        width: 40px !important;
+        height: 40px !important;
+        z-index: 350 !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    /* ── VIEWPORT: ocupa el resto de la pantalla ── */
+    #viewport {
+        position: fixed !important;
+        top: var(--tablet-topbar) !important;
+        left: var(--sb-width) !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        width: auto !important;
+        height: auto !important;
+        overflow: hidden !important;
+        touch-action: none !important;
+    }
+
+    /* ── OTROS ELEMENTOS ── */
     #zoom-controls { display: none !important; }
-    #hud-controles button  { width: 44px; height: 44px; font-size: 1rem; }
-    .widget-btn            { width: 52px; height: 52px; }
-    .modal-caja            { width: 60%; max-width: 500px; }
-    .build-item            { min-height: 44px; padding: 8px 10px; }
-    #widgets-container     { bottom: 12px; right: 80px; }
+
+    /* Botón de ruta: arriba a la izquierda del mapa, al lado del demoler */
+    #btn-calcular-ruta {
+        position: fixed !important;
+        top: 8px !important;
+        left: calc(var(--sb-width) + 56px) !important;
+        bottom: auto !important;
+        width: 44px !important;
+        height: 44px !important;
+        font-size: 0.34rem !important;
+        transition: none !important;
+    }
+
+    body.sidebar-cerrado #btn-calcular-ruta {
+        left: calc(var(--sb-width) + 56px) !important;
+    }
+
+    .widget-btn { width: 48px; height: 48px; }
+    .widget-clima-temp { font-size: 0.46rem; }
+
+    #widgets-container {
+        bottom: 12px;
+        right: 12px !important;
+    }
+
+    .clima-infobox {
+        bottom: 76px;
+        right: 12px !important;
+    }
+
+    .modal-caja { width: 70%; max-width: 520px; }
+
+    /* Guardando: abajo, al lado del timer */
+    #hud-guardando {
+        bottom: 16px;
+        left: calc(var(--sb-width) + 12px);
+        right: auto;
+        transform: none;
+    }
 }
 
+/* Portrait: sidebar un poco más angosto */
 @media (min-width: 768px) and (max-width: 1024px) and (orientation: portrait) {
-    :root { --sb-width: 200px; }
-    .sidebar { width: 200px !important; }
+    :root {
+        --sb-width: 200px;
+        --tablet-topbar: 56px;
+    }
+}
+
+/* Landscape tablet: aprovechar más el ancho */
+@media (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) {
+    :root {
+        --sb-width: 220px;
+    }
 }
 
 /* ============================================================
@@ -262,7 +481,33 @@
     }
     #perfil-puntuacion { font-size: 0.27rem; }
 
-    #hud-bienestar { display: none; }
+    /* Bienestar: esquina superior derecha, debajo de los controles */
+    #hud-bienestar {
+        display: flex !important;
+        flex-direction: column;
+        gap: 3px;
+        position: fixed;
+        top: 106px;
+        right: 8px;
+        left: auto !important;
+        background: rgba(15, 15, 42, 0.92);
+        border: 1px solid #3a3a9a;
+        border-radius: 4px;
+        padding: 4px 6px;
+        z-index: 399;
+        min-width: 0;
+        transition: none !important;
+    }
+
+    .bienestar-fila {
+        gap: 4px;
+    }
+
+    .bienestar-icono { font-size: 0.75rem; }
+
+    .bienestar-label { font-size: 0.26rem; }
+
+    .bienestar-valor { font-size: 0.38rem; }
 
     /* Controles: esquina superior derecha */
     #hud-controles {
@@ -391,9 +636,11 @@
         gap: 4px;
         padding: 4px;
         max-height: none !important;
-        overflow: visible;
+        overflow-x: auto;
+        overflow-y: hidden;
         flex: 1;
-        align-items: center;
+        align-items: flex-start;
+        align-content: flex-start;
     }
 
     .build-item {
@@ -531,8 +778,9 @@
         width: var(--sb-width) !important;
         height: 100vh !important;
         max-height: none !important;
-        overflow-y: auto !important;
-        overflow-x: hidden !important;
+        overflow: hidden !important;
+        display: flex !important;
+        flex-direction: column !important;
         transform: translateX(0) !important;
         pointer-events: auto !important;
         border-right: 3px solid #3a3a9a !important;
@@ -546,58 +794,101 @@
         pointer-events: none !important;
     }
 
-    .sidebar-header {
-        height: 40px !important; min-height: 40px !important; max-height: 40px !important;
-        pointer-events: auto !important;
-        cursor: default !important;
-        padding: 0 8px !important;
-        overflow: hidden !important;
+    /* ── HEADER: siempre visible, flex-shrink:0 para que nunca se encoja ── */
+    .sidebar > .sidebar-header {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        flex-shrink: 0 !important;
+        width: 100% !important;
+        height: 40px !important;
+        min-height: 40px !important;
+        max-height: 40px !important;
+        padding: 0 6px !important;
+        overflow: visible !important;
+        position: relative !important;
+        box-sizing: border-box !important;
     }
 
-    .sidebar-body {
+    /* Título más pequeño para que quepan los botones */
+    .sidebar > .sidebar-header .sidebar-title {
+        font-size: 5px !important;
+        letter-spacing: 0 !important;
+        white-space: nowrap !important;
+    }
+
+    /* Botones siempre visibles */
+    .sidebar > .sidebar-header .sidebar-header-buttons {
+        display: flex !important;
+        flex-direction: row !important;
+        gap: 3px !important;
+        flex-shrink: 0 !important;
+        align-items: center !important;
+    }
+
+    .sidebar > .sidebar-header #sidebarDemolir,
+    .sidebar > .sidebar-header #sidebarClose {
+        position: static !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 26px !important;
+        height: 26px !important;
+        min-width: 26px !important;
+        padding: 2px !important;
+        font-size: 11px !important;
+        flex-shrink: 0 !important;
+    }
+
+    /* ── BODY: ocupa el resto y hace scroll ── */
+    .sidebar > .sidebar-body {
         display: block !important;
+        flex: 1 1 auto !important;
+        min-height: 0 !important;
         overflow-y: auto !important;
         overflow-x: hidden !important;
-        height: calc(100vh - 40px) !important;
-        padding: 4px 0 !important;
+        -webkit-overflow-scrolling: touch !important;
+        padding: 4px 0 120px !important;
         flex-direction: unset !important;
         flex-wrap: unset !important;
         align-items: unset !important;
     }
 
-    .category {
+    /* ── CATEGORÍAS: sin acordeón, siempre visibles ──
+       Usar .sidebar .cat-arrow (misma especificidad que la regla tablet que pone inline) */
+    .sidebar .cat-arrow { display: none !important; }
+
+    .sidebar > .sidebar-body .cat-items,
+    .sidebar .cat-items {
         display: block !important;
+        max-height: 9999px !important;
         height: auto !important;
-        border-right: none !important;
-        border-bottom: 2px solid #1e1e6a !important;
-        flex-direction: unset !important;
-    }
-
-    .cat-header {
-        flex-direction: row !important;
-        padding: 6px 8px !important;
-        min-width: unset !important;
-        font-size: 0.34rem !important;
-        width: 100% !important;
-        border-bottom: 1px solid #1e1e6a !important;
-        border-top: 2px solid var(--border) !important;
-    }
-
-    .cat-arrow { display: inline !important; }
-
-    .cat-items {
-        display: block !important;
-        flex-direction: unset !important;
-        flex-wrap: unset !important;
-        max-height: 0 !important;
-        overflow: hidden !important;
-        padding: 0 !important;
-        align-items: unset !important;
-    }
-
-    .category[data-open="true"] .cat-items {
-        max-height: 800px !important;
+        overflow: visible !important;
+        transition: none !important;
         padding: 2px 0 !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+
+    /* Anular la regla tablet que pone max-height:0 en data-open=false */
+    .sidebar .category[data-open="false"] .cat-items,
+    .sidebar > .sidebar-body .category[data-open="false"] .cat-items {
+        display: block !important;
+        max-height: 9999px !important;
+        height: auto !important;
+        overflow: visible !important;
+        transition: none !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+
+    /* Anular la regla tablet que limita max-height:500px en data-open=true */
+    .sidebar .category[data-open="true"] .cat-items,
+    .sidebar > .sidebar-body .category[data-open="true"] .cat-items {
+        max-height: 9999px !important;
+        overflow: visible !important;
+        transition: none !important;
     }
 
     .build-item {
@@ -630,7 +921,7 @@
         pointer-events: none;
     }
 
-    /* ── PERFIL: esquina superior izquierda del área del mapa ── */
+    /* ── PERFIL: esquina superior izquierda del área del mapa, se mueve con sidebar ── */
     #hud-perfil {
         position: fixed;
         top: 6px;
@@ -655,46 +946,74 @@
         white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
 
-    #hud-bienestar { display: none; }
-
-    /* ── RECURSOS: centrados arriba, entre perfil y controles ── */
-    #hud-recursos {
+    /* ── BIENESTAR (felicidad + comida): debajo del perfil, se mueve con él ── */
+    #hud-bienestar {
+        display: flex !important;
+        flex-direction: column;
+        gap: 2px;
         position: fixed;
-        top: 6px;
-        left: calc(var(--sb-width) + 130px);
-        transform: none;
+        top: 78px;
+        left: calc(var(--sb-width) + 8px) !important;
+        background: rgba(15, 15, 42, 0.88);
+        border: 1px solid #3a3a9a;
+        border-radius: 4px;
+        padding: 3px 6px;
+        z-index: 399;
+        min-width: 0;
+        max-width: 120px;
+        transition: left 0.14s steps(4);
+    }
+
+    body.sidebar-cerrado #hud-bienestar { left: 8px !important; }
+
+    .bienestar-fila { gap: 4px; }
+    .bienestar-icono { font-size: 0.65rem; }
+    .bienestar-label { font-size: 0.24rem; }
+    .bienestar-valor { font-size: 0.34rem; }
+
+    /* ── BOTÓN RUTA: estático, centrado arriba entre los controles y el perfil ── */
+    #btn-calcular-ruta {
+        position: fixed !important;
+        top: 6px !important;
+        /* Anclado desde la derecha, junto a los controles */
+        right: 90px !important;
+        left: auto !important;
+        bottom: auto !important;
+        width: 38px; height: 38px;
+        font-size: 0.28rem; padding: 0;
+        transition: background var(--transition, 0.14s steps(4)),
+                    border-color var(--transition, 0.14s steps(4));
+    }
+
+    /* ── RECURSOS (dinero, electricidad, agua): estáticos, centrados en la parte superior ── */
+    #hud-recursos {
+        position: fixed !important;
+        top: 6px !important;
+        /* Centrados entre el perfil y el botón RUTA */
+        left: 50% !important;
+        transform: translateX(-50%) !important;
         display: flex; flex-direction: row;
         gap: 4px; align-items: center;
         z-index: 400;
-        max-width: calc(100vw - var(--sb-width) - 200px);
-        overflow: hidden;
         background: transparent; border: none; padding: 0;
+        /* Sin transición — estáticos */
+        transition: none !important;
+        /* Ancho máximo para no chocar con perfil ni controles */
+        max-width: calc(100vw - 380px);
+        overflow: hidden;
     }
 
+    /* Anular cualquier override de sidebar-cerrado para recursos */
     body.sidebar-cerrado #hud-recursos {
-        left: 130px;
-        max-width: calc(100vw - 200px);
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        max-width: calc(100vw - 380px) !important;
     }
 
     .hud-recurso       { padding: 3px 6px; min-width: 0; }
     .hud-recurso-icono { font-size: 0.65rem; }
     .hud-recurso-label { font-size: 0.26rem; }
     .hud-recurso-valor { font-size: 0.38rem; }
-
-    /* ── BOTÓN RUTA: al lado del perfil ── */
-    #btn-calcular-ruta {
-        position: fixed;
-        top: 6px;
-        left: calc(var(--sb-width) + 8px + 118px);
-        bottom: auto !important;
-        width: 38px; height: 38px;
-        font-size: 0.28rem; padding: 0;
-        transition: background var(--transition, 0.14s steps(4)),
-                    border-color var(--transition, 0.14s steps(4)),
-                    left 0.14s steps(4);
-    }
-
-    body.sidebar-cerrado #btn-calcular-ruta { left: calc(8px + 118px); }
 
     /* ── CONTROLES: esquina superior derecha ── */
     #hud-controles {

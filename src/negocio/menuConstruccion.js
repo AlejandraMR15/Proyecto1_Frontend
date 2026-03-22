@@ -647,12 +647,23 @@ document.addEventListener('DOMContentLoaded', function () {
     // Estado inicial según data-open del HTML
     // Menú abierto → modo construcción habilitado
     // Menú cerrado → sin modo activo
-    modoConstructivo = sidebar.dataset.open === 'true' && !modoDemolicion;
+    // En tablet (768-1024px) el sidebar siempre está visualmente abierto → forzar modo constructivo
+    const esTablet = window.innerWidth >= 768 && window.innerWidth <= 1024;
+    if (esTablet) {
+        sidebar.dataset.open = 'true';
+        modoConstructivo = true;
+        document.body.classList.add('sidebar-construccion-abierto');
+    } else {
+        modoConstructivo = sidebar.dataset.open === 'true' && !modoDemolicion;
+    }
  
-    /* ---- ESC cierra el sidebar ---- */
+    /* ---- ESC cierra el sidebar (no en tablet donde siempre está visible) ---- */
     document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') {
-            cerrarSidebar();
+            const esTabletAhora = window.innerWidth >= 768 && window.innerWidth <= 1024;
+            if (!esTabletAhora) {
+                cerrarSidebar();
+            }
             desactivarModoDemolicion();
             if (demolirBtn) demolirBtn.classList.remove('demoler-activo');
         }
@@ -661,10 +672,39 @@ document.addEventListener('DOMContentLoaded', function () {
     /* ---- Acordeón de categorías ---- */
     document.querySelectorAll('.cat-header').forEach(function (btn) {
         btn.addEventListener('click', function () {
+            // En landscape móvil no hay acordeón — todos los ítems siempre visibles.
+            const esLandscapeMovil = window.matchMedia(
+                '(orientation: landscape) and (max-height: 500px)'
+            ).matches;
+            if (esLandscapeMovil) return;
+
             const cat = btn.closest('.category');
             cat.dataset.open = cat.dataset.open === 'true' ? 'false' : 'true';
         });
     });
+
+    /* ---- En landscape forzar TODAS las categorías abiertas ---- */
+    function forzarCategoriasEnLandscape() {
+        const esLandscapeMovil = window.matchMedia(
+            '(orientation: landscape) and (max-height: 500px)'
+        ).matches;
+        if (!esLandscapeMovil) return;
+        document.querySelectorAll('.category').forEach(function (cat) {
+            cat.dataset.open = 'true';
+        });
+    }
+
+    // Ejecutar al inicio
+    forzarCategoriasEnLandscape();
+
+    // Y al cambiar orientación
+    window.addEventListener('orientationchange', function () {
+        setTimeout(forzarCategoriasEnLandscape, 100);
+    });
+    window.matchMedia('(orientation: landscape) and (max-height: 500px)')
+        .addEventListener('change', function () {
+            setTimeout(forzarCategoriasEnLandscape, 100);
+        });
  
     /* ---- Selección de edificio en el sidebar ---- */
     document.querySelectorAll('.build-item').forEach(function (li) {

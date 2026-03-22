@@ -109,19 +109,40 @@ import MovimientoCiudadanos from './MovimientoCiudadanos.js';
         }
     });
 
-    /* Touch */
-    let lastTouches = null;
+    /* Touch — pan, zoom y tap sobre celdas */
+    let lastTouches  = null;
+    let touchStartX  = 0;
+    let touchStartY  = 0;
+    let touchMoved   = false;
+
+    const TAP_UMBRAL = 8;
 
     viewport.addEventListener('touchstart', function (e) {
         lastTouches = e.touches;
-        e.preventDefault();
+        touchMoved  = false;
+        if (e.touches.length === 1) {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+        }
+        if (e.touches.length > 1) {
+            e.preventDefault();
+        }
     }, { passive: false });
 
     viewport.addEventListener('touchmove', function (e) {
         e.preventDefault();
         if (e.touches.length === 1 && lastTouches?.length === 1) {
-            panX += e.touches[0].clientX - lastTouches[0].clientX;
-            panY += e.touches[0].clientY - lastTouches[0].clientY;
+            const dx = e.touches[0].clientX - lastTouches[0].clientX;
+            const dy = e.touches[0].clientY - lastTouches[0].clientY;
+            if (!touchMoved) {
+                const totalDx = e.touches[0].clientX - touchStartX;
+                const totalDy = e.touches[0].clientY - touchStartY;
+                if (Math.abs(totalDx) > TAP_UMBRAL || Math.abs(totalDy) > TAP_UMBRAL) {
+                    touchMoved = true;
+                }
+            }
+            panX += dx;
+            panY += dy;
             applyTransform();
         } else if (e.touches.length === 2 && lastTouches?.length === 2) {
             const dist = (t) => Math.hypot(
@@ -133,12 +154,33 @@ import MovimientoCiudadanos from './MovimientoCiudadanos.js';
             const rect = viewport.getBoundingClientRect();
             zoomAt(cx - rect.left, cy - rect.top,
                    (dist(e.touches) - dist(lastTouches)) * 0.005);
+            touchMoved = true;
         }
         lastTouches = e.touches;
     }, { passive: false });
 
     viewport.addEventListener('touchend', function (e) {
+        if (!touchMoved && e.changedTouches.length === 1) {
+            const t  = e.changedTouches[0];
+            let   el = document.elementFromPoint(t.clientX, t.clientY);
+            while (el && el !== document.body) {
+                if (el.classList && el.classList.contains('iso-cube')) break;
+                if (el.tagName === 'BUTTON') break;
+                if (el.classList && el.classList.contains('build-item')) break;
+                el = el.parentElement;
+            }
+            if (el && el !== document.body) {
+                el.dispatchEvent(new MouseEvent('click', {
+                    bubbles: true,
+                    cancelable: true,
+                    clientX: t.clientX,
+                    clientY: t.clientY,
+                    view: window,
+                }));
+            }
+        }
         lastTouches = e.touches;
+        touchMoved  = false;
     });
 
     /* ============================================================

@@ -5,7 +5,10 @@ export default class ApiDijkstra extends ApiExternos {
      * @param {Array<Array<number>>} [ruta=[]]
      */
     constructor(ruta = []) {
-        super('http://127.0.0.1:5000');
+        const ipServidor = window.location.hostname;
+        const baseUrl = `http://${ipServidor}:5000`;
+        console.log('ApiDijkstra conectando a:', baseUrl);
+        super(baseUrl);
         this.ruta = ruta;
     }
 

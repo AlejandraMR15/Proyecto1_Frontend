@@ -8,7 +8,10 @@ export default class ApiNoticias extends ApiExternos {
      * @param {Array<object>} [ultimasNoticias=[]]
      */
     constructor(ultimasNoticias = []) {
-        super('https://newsapi.org');
+        // allorigins.win es un proxy CORS público gratuito.
+        // NewsAPI bloquea peticiones directas desde el navegador (plan gratuito),
+        // pero sí permite peticiones desde servidores. El proxy actúa de intermediario.
+        super('https://api.allorigins.win');
         this.apiKey = this.leerApiKey();
         this.ultimasNoticias = ultimasNoticias; 
     }
@@ -48,9 +51,23 @@ export default class ApiNoticias extends ApiExternos {
      * @returns {Promise<any>}
      */
     async obtenerDatosNoticias(pais) {
-        const endpointNoticias = '/v2/everything';
-        const parametrosConsulta = this.crearParametrosConsulta(pais);
-        return super.obtenerInformacion(endpointNoticias, parametrosConsulta);
+        // Construye la URL completa de NewsAPI y la envuelve en el proxy allorigins.
+        // allorigins recibe la URL destino como query param "url" y devuelve
+        // { contents: "<json como string>", status: { ... } }
+        const parametros = this.crearParametrosConsulta(pais);
+        const queryString = new URLSearchParams(parametros).toString();
+        const urlNewsApi = `https://newsapi.org/v2/everything?${queryString}`;
+ 
+        // allorigins envuelve la respuesta en { contents: "..." }
+        const urlProxy = `/get?url=${encodeURIComponent(urlNewsApi)}`;
+        const respuestaProxy = await this.realizarPeticion(urlProxy);
+ 
+        // contents viene como string JSON, hay que parsearlo
+        try {
+            return JSON.parse(respuestaProxy.contents);
+        } catch {
+            throw new Error('No se pudo parsear la respuesta del proxy de noticias.');
+        }
     }
 
     /**
@@ -58,7 +75,7 @@ export default class ApiNoticias extends ApiExternos {
      * @param {string} pais
      * @returns {{q:string, language:string, pageSize:number, apiKey:string}}
      */
-    crearParametrosConsulta(pais) {
+    crearParametrosConsulta() {
         return {
             q: 'Colombia',
             language: 'es',

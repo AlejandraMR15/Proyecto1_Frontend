@@ -29,7 +29,8 @@ export default class Ranking {
             datosCiudad.puntuacion,
             datosCiudad.poblacion,
             datosCiudad.felicidad,
-            datosCiudad.turno
+            datosCiudad.turno,
+            datosCiudad.fecha ? new Date(datosCiudad.fecha) : new Date()
         );
 
         this.entradas.push(nuevaEntrada);

@@ -66,6 +66,7 @@ export function registrarEnRanking() {
         poblacion:    juego.gestorCiudadanos.calcularTotalCiudadanos(),
         felicidad:    Math.round(juego.gestorCiudadanos.calcularFelicidadPromedio()),
         turno:        juego.numeroTurno,
+        fecha:        new Date().toISOString(),
     });
     guardarRanking();
 }
@@ -85,6 +86,7 @@ function _renderizarFilas(entradas, ciudadActual, tbody, prefixExtra = '#') {
     entradas.forEach((e, i) => {
         const tr = document.createElement('tr');
         if (e.nombreCiudad === ciudadActual) tr.classList.add('ranking-actual');
+        const fechaFormato = new Date(e.fecha).toLocaleDateString('es-ES', { year: 'numeric', month: '2-digit', day: '2-digit' });
         tr.innerHTML = `
             <td>${prefixExtra}${i + 1}</td>
             <td>${e.nombreCiudad}</td>
@@ -93,6 +95,7 @@ function _renderizarFilas(entradas, ciudadActual, tbody, prefixExtra = '#') {
             <td>${fmt(e.poblacion)}</td>
             <td>${e.felicidad}%</td>
             <td>${e.turno}</td>
+            <td>${fechaFormato}</td>
         `;
         tbody.appendChild(tr);
     });
@@ -130,6 +133,7 @@ export function renderizarRanking() {
             const trExtra = document.createElement('tr');
             trExtra.classList.add('ranking-actual');
             const e = todas[pos];
+            const fechaFormato = new Date(e.fecha).toLocaleDateString('es-ES', { year: 'numeric', month: '2-digit', day: '2-digit' });
             trExtra.innerHTML = `
                 <td>…#${pos + 1}</td>
                 <td>${e.nombreCiudad}</td>
@@ -138,6 +142,7 @@ export function renderizarRanking() {
                 <td>${fmt(e.poblacion)}</td>
                 <td>${e.felicidad}%</td>
                 <td>${e.turno}</td>
+                <td>${fechaFormato}</td>
             `;
             tbody.appendChild(trExtra);
         }

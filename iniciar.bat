@@ -4,7 +4,7 @@ cd /d "%~dp0"
 echo Iniciando Ciudad Virtual...
 
 start "Microservicio Rutas" cmd /k "cd /d ""%~dp0ms_smart_city"" && py main.py"
-start "Frontend Ciudad Virtual" py -m http.server 8080
+start "Frontend Ciudad Virtual" py -m http.server 8080 --bind 0.0.0.0
 timeout /t 2 /nobreak >nul
 start "" http://localhost:8080/src/presentacion/vistas/menu.html
 

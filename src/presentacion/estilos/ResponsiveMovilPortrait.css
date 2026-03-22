@@ -1,0 +1,332 @@
+/* ============================================================
+   CIUDAD VIRTUAL — responsive-movil-portrait.css
+   Vista Móvil Portrait — menos de 768px, orientación vertical (HU-022)
+   Sidebar como barra inferior deslizable.
+   ============================================================ */
+@media (max-width: 767px) and (orientation: portrait) {
+
+    :root { --mobile-bottombar: 60px; }
+
+    html, body { overflow: hidden; }
+
+    #zoom-controls { display: none !important; }
+
+    /* ── VIEWPORT: pantalla completa menos la barra inferior ── */
+    #viewport {
+        position: fixed;
+        top: 0; left: 0; right: 0;
+        bottom: var(--mobile-bottombar);
+        overflow: hidden;
+        z-index: 1;
+        touch-action: none;
+    }
+
+    /* ── RECURSOS: centrados arriba ── */
+    #hud-recursos {
+        position: fixed;
+        top: 8px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        flex-direction: row;
+        gap: 3px;
+        align-items: center;
+        z-index: 400;
+        background: transparent;
+        border: none;
+        padding: 0;
+        max-width: calc(100vw - 170px);
+        overflow: hidden;
+    }
+
+    .hud-recurso {
+        flex-shrink: 0;
+        padding: 3px 5px;
+        background: rgba(13, 30, 53, 0.92);
+        border: 1px solid #2e7a94;
+        min-width: 0;
+    }
+
+    .hud-recurso-icono { font-size: 0.75rem; }
+    .hud-recurso-label { font-size: 0.28rem; }
+    .hud-recurso-valor { font-size: 0.42rem; }
+
+    /* ── PERFIL: esquina superior izquierda ── */
+    #hud-perfil {
+        display: block;
+        position: fixed;
+        top: 8px; left: 8px;
+        padding: 3px 6px;
+        font-size: 0.30rem;
+        z-index: 400;
+        min-width: 0 !important;
+        max-width: 90px;
+        transition: none;
+    }
+
+    body.sidebar-cerrado #hud-perfil { left: 8px; }
+
+    #perfil-nombre-ciudad {
+        font-size: 0.30rem; margin-bottom: 2px;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    #perfil-alcalde {
+        font-size: 0.27rem; margin-bottom: 2px;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    #perfil-puntuacion { font-size: 0.27rem; }
+
+    /* ── BIENESTAR: esquina superior derecha, bajo los controles ── */
+    #hud-bienestar {
+        display: flex !important;
+        flex-direction: column;
+        gap: 3px;
+        position: fixed;
+        top: 106px;
+        right: 8px;
+        left: auto !important;
+        background: rgba(15, 15, 42, 0.92);
+        border: 1px solid #3a3a9a;
+        border-radius: 4px;
+        padding: 4px 6px;
+        z-index: 399;
+        min-width: 0;
+        transition: none !important;
+    }
+
+    .bienestar-fila  { gap: 4px; }
+    .bienestar-icono { font-size: 0.75rem; }
+    .bienestar-label { font-size: 0.26rem; }
+    .bienestar-valor { font-size: 0.38rem; }
+
+    /* ── CONTROLES: esquina superior derecha ── */
+    #hud-controles {
+        position: fixed;
+        top: 8px; right: 8px;
+        flex-direction: column;
+        gap: 6px;
+        z-index: 500;
+    }
+
+    #hud-controles button {
+        width: 42px; height: 42px;
+        min-width: 42px; min-height: 42px;
+        font-size: 0.85rem;
+    }
+
+    /* ── BOTÓN RUTA: debajo del perfil ── */
+    #btn-calcular-ruta {
+        position: fixed;
+        top: 86px; left: 8px;
+        bottom: auto !important;
+        width: 50px; height: 50px;
+        font-size: 0.34rem;
+        padding: 0;
+        transition: background var(--transition, 0.14s steps(4)),
+                    border-color var(--transition, 0.14s steps(4));
+    }
+
+    body.sidebar-cerrado #btn-calcular-ruta { left: 8px; }
+
+    /* ── TIMER: sobre la barra inferior ── */
+    #hud-turno {
+        position: fixed;
+        bottom: calc(var(--mobile-bottombar) + 6px);
+        left: 8px;
+        top: auto; transform: none;
+        font-size: 0.36rem;
+        padding: 4px 7px;
+        min-width: 130px;
+        z-index: 400;
+        transition: bottom 0.3s ease;
+    }
+
+    /* Timer sube cuando el sidebar se abre */
+    body.sidebar-construccion-abierto #hud-turno {
+        bottom: calc(60vh + 4px);
+    }
+
+    /* ── SIDEBAR: barra inferior deslizable ── */
+    .sidebar {
+        position: fixed !important;
+        top: auto !important; bottom: 0 !important;
+        left: 0 !important; right: 0 !important;
+        width: 100% !important; height: auto !important;
+        max-height: var(--mobile-bottombar);
+        overflow: hidden;
+        transform: none !important;
+        border-right: none !important;
+        border-top: 3px solid #3a3a9a !important;
+        box-shadow: none !important;
+        z-index: 390;
+        transition: max-height 0.3s ease !important;
+        pointer-events: none;
+    }
+
+    .sidebar-header {
+        pointer-events: auto;
+        height: var(--mobile-bottombar);
+        min-height: var(--mobile-bottombar);
+        flex-shrink: 0;
+        padding: 0 12px;
+        cursor: pointer;
+        border-bottom: 2px solid #1e1e6a;
+        border-top: none;
+    }
+
+    .sidebar[data-open="true"] {
+        max-height: 60vh;
+        overflow: hidden;
+        pointer-events: auto;
+    }
+
+    .sidebar-body {
+        display: flex !important;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        padding: 6px 4px;
+        gap: 0;
+        height: calc(60vh - var(--mobile-bottombar));
+        align-items: flex-start;
+    }
+
+    .category {
+        flex-shrink: 0;
+        border-bottom: none;
+        border-right: 2px solid #1e1e6a;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .cat-header {
+        padding: 6px 10px;
+        flex-direction: column;
+        gap: 2px;
+        border: none;
+        border-bottom: 2px solid #1e1e6a;
+        min-width: 70px;
+        font-size: 0.40rem;
+        flex-shrink: 0;
+    }
+
+    .cat-arrow { display: none; }
+
+    .cat-items {
+        display: flex !important;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        gap: 4px;
+        padding: 4px;
+        max-height: none !important;
+        overflow-x: auto;
+        overflow-y: hidden;
+        flex: 1;
+        align-items: flex-start;
+        align-content: flex-start;
+    }
+
+    .build-item {
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-width: 62px; max-width: 72px;
+        min-height: 62px;
+        padding: 5px; gap: 3px;
+        text-align: center; flex-shrink: 0;
+    }
+
+    .build-icon { font-size: 1.2rem; margin: 0; }
+    .build-name { font-size: 0.36rem; white-space: nowrap; }
+    .build-cost { font-size: 0.33rem; }
+
+    #sidebarTab { display: none; }
+
+    /* ── WIDGETS: sobre la barra inferior, derecha ── */
+    #widgets-container {
+        position: fixed;
+        bottom: calc(var(--mobile-bottombar) + 6px);
+        right: 8px !important;
+        left: auto; top: auto;
+        flex-direction: column;
+        gap: 4px;
+        z-index: 400;
+        transition: bottom 0.3s ease;
+    }
+
+    body.sidebar-construccion-abierto #widgets-container {
+        bottom: calc(60vh + 4px);
+    }
+
+    #widgets-container.panel-noticias-abierto { right: 8px !important; }
+
+    .widget-btn        { width: 42px; height: 42px; }
+    .widget-clima-temp { font-size: 0.44rem; }
+
+    .clima-infobox {
+        left: 8px; right: 8px !important;
+        bottom: calc(var(--mobile-bottombar) + 56px);
+        top: auto; width: auto;
+    }
+
+    .clima-infobox.panel-noticias-abierto { right: 8px !important; }
+
+    /* ── PANEL NOTICIAS: entra desde arriba ── */
+    .noticias-panel {
+        position: fixed;
+        top: 0; left: 0; right: 0;
+        width: 100% !important;
+        height: auto !important;
+        max-height: 70vh;
+        border-left: none;
+        border-bottom: 3px solid #3a3a9a;
+        z-index: 450;
+        overflow-y: auto; overflow-x: hidden;
+        transform: translateY(-110%);
+        pointer-events: none;
+        visibility: hidden;
+        transition: transform 0.25s ease, visibility 0s linear 0.25s;
+    }
+
+    .noticias-panel[data-open="true"] {
+        transform: translateY(0);
+        pointer-events: auto;
+        visibility: visible;
+        transition: transform 0.25s ease, visibility 0s linear 0s;
+    }
+
+    /* ── PANEL RANKING: modal centrado ── */
+    #panel-ranking {
+        width: 95%; height: 80vh;
+        top: 50%; right: auto; left: 50%;
+        transform: translate(200vw, -50%);
+        border: 3px solid #3a3a9a; border-radius: 8px;
+        transition: transform 0.25s ease; bottom: auto;
+    }
+
+    #panel-ranking[data-open="true"] { transform: translate(-50%, -50%); }
+
+    /* ── MODALES ── */
+    .modal-caja {
+        width: 92%; max-width: none;
+        max-height: 85vh; overflow-y: auto;
+        margin: 16px auto; padding: 18px 16px;
+    }
+
+    #notif-construccion {
+        top: 60px !important; bottom: auto !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+    }
+
+    #hud-guardando {
+        bottom: calc(var(--mobile-bottombar) + 6px);
+        left: 50%; transform: translateX(-50%); right: auto;
+    }
+
+    /* Ocultar badges de desktop */
+    #btn-pausa::after, #sidebarTab::after { display: none; }
+}

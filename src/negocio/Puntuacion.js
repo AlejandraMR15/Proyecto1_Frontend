@@ -48,7 +48,7 @@ export default class Puntuacion {
         let puntaje = 0;
         puntaje += poblacion    * 10;
         puntaje += felicidad    * 5;
-        puntaje += Math.floor(dinero / 100);
+        puntaje += dinero / 100;
         puntaje += numEdificios * 50;
         puntaje += electricidad * 2;
         puntaje += agua         * 2;
@@ -56,7 +56,12 @@ export default class Puntuacion {
         puntaje = this.aplicarBonificaciones(puntaje, datosCiudad);
         puntaje = this.aplicarPenalizaciones(puntaje, datosCiudad);
 
-        return Math.max(0, Math.round(puntaje));
+        const puntuacionFinal = Math.max(0, Math.round(puntaje));
+        
+        // Mostrar desglose en consola
+        this.obtenerDesglose(datosCiudad);
+        
+        return puntuacionFinal;
     }
 
     /**
@@ -121,5 +126,105 @@ export default class Puntuacion {
         if (desempleados > 0)  puntaje -= desempleados * 10;
 
         return puntaje;
+    }
+
+    /**
+     * Obtiene un desglose detallado de la puntuación.
+     * @param {object} datosCiudad - Objeto con métricas de la ciudad.
+     * @returns {object} Objeto con desglose completo de puntuación e imprime en consola.
+     */
+    obtenerDesglose(datosCiudad) {
+        const {
+            poblacion    = 0,
+            felicidad    = 0,
+            dinero       = 0,
+            numEdificios = 0,
+            electricidad = 0,
+            agua         = 0,
+            desempleados = 0
+        } = datosCiudad;
+
+        // Cálculo de puntos base
+        const puntosPoblacion = poblacion * 10;
+        const puntosFelicidad = felicidad * 5;
+        const puntosDinero = dinero / 100;
+        const puntosEdificios = numEdificios * 50;
+        const puntosElectricidad = electricidad * 2;
+        const puntosAgua = agua * 2;
+
+        const subtotal = puntosPoblacion + puntosFelicidad + puntosDinero + puntosEdificios + puntosElectricidad + puntosAgua;
+
+        // Cálculo de bonificaciones
+        const bonificaciones = {
+            empleadosTodos: (poblacion > 0 && desempleados === 0) ? 500 : 0,
+            felicidadAlta: (felicidad > 80) ? 300 : 0,
+            recursosPositivos: (dinero > 0 && electricidad > 0 && agua > 0) ? 200 : 0,
+            poblacionGrande: (poblacion > 1000) ? 1000 : 0
+        };
+        const totalBonificaciones = Object.values(bonificaciones).reduce((a, b) => a + b, 0);
+
+        // Cálculo de penalizaciones
+        const penalizaciones = {
+            dineroNegativo: (dinero < 0) ? 500 : 0,
+            electricidadNegativa: (electricidad < 0) ? 300 : 0,
+            aguaNegativa: (agua < 0) ? 300 : 0,
+            felicidadBaja: (poblacion > 0 && felicidad < 40) ? 400 : 0,
+            desempleados: (desempleados > 0) ? desempleados * 10 : 0
+        };
+        const totalPenalizaciones = Object.values(penalizaciones).reduce((a, b) => a + b, 0);
+
+        // Total
+        const puntuacionFinal = Math.max(0, Math.round(subtotal + totalBonificaciones - totalPenalizaciones));
+
+        // Desglose completo
+        const desglose = {
+            puntosPoblacion,
+            puntosFelicidad,
+            puntosDinero: Math.round(puntosDinero * 100) / 100,
+            puntosEdificios,
+            puntosElectricidad,
+            puntosAgua,
+            subtotal: Math.round(subtotal * 100) / 100,
+            bonificaciones,
+            totalBonificaciones,
+            penalizaciones,
+            totalPenalizaciones,
+            puntuacionFinal
+        };
+
+        // Imprimir en consola
+        console.log("════════════════════════════════════════");
+        console.log("         DESGLOSE DE PUNTUACIÓN");
+        console.log("════════════════════════════════════════");
+        console.log("\n📊 PUNTOS POR CATEGORÍA:");
+        console.log(`  Población:      ${puntosPoblacion} (${poblacion} × 10)`);
+        console.log(`  Felicidad:      ${puntosFelicidad} (${felicidad} × 5)`);
+        console.log(`  Dinero:         ${Math.round(puntosDinero * 100) / 100} (${dinero} ÷ 100)`);
+        console.log(`  Edificios:      ${puntosEdificios} (${numEdificios} × 50)`);
+        console.log(`  Electricidad:   ${puntosElectricidad} (${electricidad} × 2)`);
+        console.log(`  Agua:           ${puntosAgua} (${agua} × 2)`);
+        console.log(`  ─────────────────────────────`);
+        console.log(`  Subtotal:       ${Math.round(subtotal * 100) / 100}`);
+
+        console.log("\n🎁 BONIFICACIONES: +"+totalBonificaciones);
+        if (bonificaciones.empleadosTodos > 0) console.log(`  ✓ +500 (Todos los ciudadanos empleados)`);
+        if (bonificaciones.felicidadAlta > 0) console.log(`  ✓ +300 (Felicidad promedio > 80)`);
+        if (bonificaciones.recursosPositivos > 0) console.log(`  ✓ +200 (Todos los recursos positivos)`);
+        if (bonificaciones.poblacionGrande > 0) console.log(`  ✓ +1000 (Más de 1.000 habitantes)`);
+        if (totalBonificaciones === 0) console.log(`  Sin bonificaciones`);
+
+        console.log("\n⚠️  PENALIZACIONES: -"+totalPenalizaciones);
+        if (penalizaciones.dineroNegativo > 0) console.log(`  ✗ -500 (Dinero negativo)`);
+        if (penalizaciones.electricidadNegativa > 0) console.log(`  ✗ -300 (Electricidad negativa)`);
+        if (penalizaciones.aguaNegativa > 0) console.log(`  ✗ -300 (Agua negativa)`);
+        if (penalizaciones.felicidadBaja > 0) console.log(`  ✗ -400 (Felicidad promedio < 40)`);
+        if (penalizaciones.desempleados > 0) console.log(`  ✗ -${penalizaciones.desempleados} (${desempleados} desempleados × 10)`);
+        if (totalPenalizaciones === 0) console.log(`  Sin penalizaciones`);
+
+        console.log("\n════════════════════════════════════════");
+        console.log(`  📈 PUNTUACIÓN TOTAL: ${puntuacionFinal}`);
+        console.log("════════════════════════════════════════\n");
+
+        return desglose;
     }
 }

@@ -73,6 +73,32 @@ export default class Juego {
     }
 
     /**
+     * Recalcula la puntuación basada en el estado actual de la ciudad.
+     * Se usa tanto en ejecutarTurno como al cargar/crear ciudades.
+     */
+    recalcularPuntaje() {
+        let puntaje = 0;
+        if (this.administrarPuntaje && this.ciudad) {
+            const recursos = this.ciudad.recursos;
+            const desempleados = this.gestorCiudadanos.ciudadanos.filter(c => !c.empleo).length;
+            const poblacion = this.gestorCiudadanos.calcularTotalCiudadanos();
+            const felicidad = this.gestorCiudadanos.calcularFelicidadPromedio();
+            
+            puntaje = this.administrarPuntaje.calcular({
+                poblacion,
+                felicidad,
+                dinero:       recursos.dinero,
+                numEdificios: this.ciudad.construcciones.length,
+                electricidad: recursos.electricidad,
+                agua:         recursos.agua,
+                desempleados
+            });
+        }
+        this.puntaje = puntaje;
+        return puntaje;
+    }
+
+    /**
      * Ejecuta la lógica completa de un turno y recalcula el puntaje.
      * Valida que dinero, electricidad y agua no sean negativos.
      */
@@ -115,23 +141,8 @@ export default class Juego {
             this.gestorCiudadanos.procesarCrecimientoPoblacional(edificiosResidenciales, edificiosLaborales, valorServicios);
         }
 
-        let puntaje = 0;
-        if (this.administrarPuntaje && this.ciudad) {
-            const recursos = this.ciudad.recursos;
-            // Contar ciudadanos sin empleo
-            const desempleados = this.gestorCiudadanos.ciudadanos.filter(c => !c.empleo).length;
-            puntaje = this.administrarPuntaje.calcular({
-                poblacion:    this.gestorCiudadanos.calcularTotalCiudadanos(),
-                felicidad:    this.gestorCiudadanos.calcularFelicidadPromedio(),
-                dinero:       recursos.dinero,
-                numEdificios: this.ciudad.construcciones.length,
-                electricidad: recursos.electricidad,
-                agua:         recursos.agua,
-                desempleados
-            });
-        }
-        this.puntaje = puntaje;
-        console.log("Puntaje:", puntaje);
+        this.recalcularPuntaje();
+        console.log("Puntaje:", this.puntaje);
     }
 
     /**
@@ -258,6 +269,8 @@ export default class Juego {
         this.gestorCiudadanos.ciudadanos = (data.ciudadanos || []).map(c => Ciudadano.fromJSON(c, edificiosPorId));
         this.ciudad.sincronizarOcupacionDesdeCiudadanos(this.gestorCiudadanos.ciudadanos);
         this.recolectorBurbujas.cargarDesdeJSON(data.recoleccion);
+        // Calcular la puntuación con todos los datos cargados
+        this.recalcularPuntaje();
         console.log("Partida cargada");
     }
     /**

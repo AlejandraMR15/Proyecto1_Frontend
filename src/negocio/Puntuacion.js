@@ -106,6 +106,7 @@ export default class Puntuacion {
      */
     aplicarPenalizaciones(puntaje, datosCiudad = {}) {
         const {
+            poblacion    = 0,
             felicidad    = 0,
             dinero       = 0,
             electricidad = 0,
@@ -116,7 +117,7 @@ export default class Puntuacion {
         if (dinero < 0)        puntaje -= 500;
         if (electricidad < 0)  puntaje -= 300;
         if (agua < 0)          puntaje -= 300;
-        if (felicidad < 40)    puntaje -= 400;
+        if (poblacion > 0 && felicidad < 40)    puntaje -= 400;
         if (desempleados > 0)  puntaje -= desempleados * 10;
 
         return puntaje;

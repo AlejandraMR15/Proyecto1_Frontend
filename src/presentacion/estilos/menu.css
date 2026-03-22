@@ -295,3 +295,110 @@ input[type="range"]::-moz-range-thumb {
 .btn-crear:hover:not(:disabled) {
     background: #2e7a94;
 }
+
+/* ---- Opciones de mapa (manual vs JSON) ---- */
+.label-opciones {
+    display: block;
+    font-size: 0.82rem;
+    color: #4a9fb5;
+    margin-bottom: 12px;
+    letter-spacing: 0.03em;
+}
+
+.opciones-mapa {
+    display: flex;
+    gap: 20px;
+    margin: 0;
+}
+
+.opcion-mapa {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    font-size: 0.92rem;
+    color: #a8dff0;
+    user-select: none;
+    transition: color 0.15s;
+}
+
+.opcion-mapa:hover {
+    color: #fff;
+}
+
+.opcion-mapa input[type="radio"] {
+    cursor: pointer;
+    width: 16px;
+    height: 16px;
+    accent-color: #2e7a94;
+}
+
+/* ---- File input para JSON ---- */
+.campo input[type="file"] {
+    width: 100%;
+    padding: 10px 14px;
+    background: #071018;
+    border: 1px solid #2e7a94;
+    border-radius: 6px;
+    color: #a8dff0;
+    font-size: 0.95rem;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.15s;
+    box-sizing: border-box;
+    cursor: pointer;
+}
+
+.campo input[type="file"]::file-selector-button {
+    background: #2e7a94;
+    color: #a8dff0;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 12px;
+    margin-right: 8px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.85rem;
+    transition: background 0.15s;
+}
+
+.campo input[type="file"]::file-selector-button:hover {
+    background: #7ec8e3;
+    color: #0a1628;
+}
+
+.campo input[type="file"]:focus {
+    border-color: #7ec8e3;
+}
+
+/* ---- Información del JSON cargado ---- */
+.json-info {
+    margin-top: 10px;
+    padding: 10px 12px;
+    background: #071018;
+    border-left: 3px solid #2e7a94;
+    border-radius: 4px;
+}
+
+.json-info.oculto {
+    display: none;
+}
+
+.json-info p {
+    margin: 4px 0;
+    font-size: 0.85rem;
+    color: #7ec8e3;
+}
+
+.json-info p:first-child {
+    margin-top: 0;
+}
+
+.json-info p:last-child {
+    margin-bottom: 0;
+}
+
+/* ---- Clase general para ocultar elementos ---- */
+.oculto {
+    display: none !important;
+}

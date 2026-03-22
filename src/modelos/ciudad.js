@@ -320,6 +320,89 @@ export default class Ciudad {
         }
     }
 
+    /**
+     * Puebla la ciudad con construcciones basadas en la matriz del mapa.
+     *
+     * Lee cada celda de la matriz y crea la construcción correspondiente:
+     * - 'R1', 'R2': Residencial
+     * - 'C1', 'C2': Comercial
+     * - 'I1', 'I2': Industrial
+     * - 'S1', 'S2', 'S3': Servicio
+     * - 'U1', 'U2': Planta de Utilidad
+     * - 'P1': Parque
+     * - 'r': Vía
+     * - 'g': Terreno vacío (se ignora)
+     *
+     * @param {Array<Array<string>>} matriz Matriz con etiquetas de construcciones.
+     * @returns {void}
+     */
+    poblarConstruccionesDesdeMatriz(matriz) {
+        if (!Array.isArray(matriz) || matriz.length === 0) return;
+
+        let ultimoId = 0;
+
+        for (let y = 0; y < matriz.length; y++) {
+            for (let x = 0; x < matriz[y].length; x++) {
+                const etiqueta = matriz[y][x];
+
+                // Ignorar terreno vacío
+                if (etiqueta === 'g') continue;
+
+                let construccion = null;
+                ultimoId++;
+
+                // Mapeo de etiquetas a tipos de construcción
+                if (etiqueta === 'r') {
+                    construccion = new Vias(100);
+
+                } else if (etiqueta === 'R1') {
+                    construccion = new Residencial(1000, ultimoId, 'Casa', 50, 5, 3, true, 4, []);
+
+                } else if (etiqueta === 'R2') {
+                    construccion = new Residencial(3000, ultimoId, 'Apartamento', 100, 15, 10, true, 12, []);
+
+                } else if (etiqueta === 'C1') {
+                    construccion = new Comercial(2000, ultimoId, 'Tienda', 80, 8, 0, true, 6, [], 500);
+
+                } else if (etiqueta === 'C2') {
+                    construccion = new Comercial(8000, ultimoId, 'Centro Comercial', 200, 25, 0, true, 20, [], 2000);
+
+                } else if (etiqueta === 'I1') {
+                    construccion = new Industrial(5000, ultimoId, 'Fábrica', 150, 20, 15, true, 15, [], 'fabrica', 800);
+
+                } else if (etiqueta === 'I2') {
+                    construccion = new Industrial(3000, ultimoId, 'Granja', 100, 0, 10, true, 8, [], 'granja', 50);
+
+                } else if (etiqueta === 'S1') {
+                    construccion = new Servicio(4000, ultimoId, 'Estación de Policía', 120, 15, 0, true, 'policia', 10, 5);
+
+                } else if (etiqueta === 'S2') {
+                    construccion = new Servicio(4000, ultimoId, 'Estación de Bomberos', 120, 15, 0, true, 'bomberos', 10, 5);
+
+                } else if (etiqueta === 'S3') {
+                    construccion = new Servicio(6000, ultimoId, 'Hospital', 200, 20, 10, true, 'hospital', 10, 7);
+
+                } else if (etiqueta === 'U1') {
+                    construccion = new PlantasDeUtilidad(10000, ultimoId, 'Planta Eléctrica', 300, 0, 0, true, 'electrica', 200);
+
+                } else if (etiqueta === 'U2') {
+                    construccion = new PlantasDeUtilidad(8000, ultimoId, 'Planta de Agua', 250, 20, 0, true, 'agua', 150);
+
+                } else if (etiqueta === 'P1') {
+                    construccion = new Parques(1500, 5);
+                }
+
+                // Agregar construcción a la lista y al mapa si fue creada
+                if (construccion) {
+                    this.construcciones.push(construccion);
+                    construccion._coordX = x;
+                    construccion._coordY = y;
+                    this.mapa.agregarElemento(x, y, etiqueta);
+                }
+            }
+        }
+    }
+
     toJSON() {
         return {
             nombre: this.nombre,

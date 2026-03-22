@@ -109,6 +109,9 @@ export default class MapImporter {
         // Validar rango de dimensiones
         this._validarDimensiones(ancho, alto);
 
+        // Validar que sea cuadrado (n x n)
+        this._validarQueSeaCuadrado(ancho, alto);
+
         // Extraer matriz de las siguientes líneas
         const lineasMatriz = lineas.slice(1);
 
@@ -241,6 +244,24 @@ export default class MapImporter {
         if (alto < minimo || alto > maximo) {
             throw new Error(
                 `Alto inválido: ${alto}. Debe estar entre ${minimo} y ${maximo}.`
+            );
+        }
+    }
+
+    /**
+     * Valida que el mapa sea cuadrado (ancho === alto).
+     * El mapa debe ser n x n, de lo contrario se daña la visualización del juego.
+     *
+     * @private
+     * @param {number} ancho Ancho del mapa.
+     * @param {number} alto Alto del mapa.
+     * @throws {Error} Si el mapa no es cuadrado.
+     */
+    static _validarQueSeaCuadrado(ancho, alto) {
+        if (ancho !== alto) {
+            throw new Error(
+                `El mapa debe ser cuadrado (n x n). Se recibió ${ancho} x ${alto}. ` +
+                `El ancho y alto deben ser iguales para evitar problemas de visualización.`
             );
         }
     }

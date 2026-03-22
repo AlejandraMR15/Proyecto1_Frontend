@@ -129,8 +129,7 @@ export default class GestorCiudadano {
             return; // no se cumplen condiciones de crecimiento
         }
 
-        const cantidad = this._calcularCiudadanosACrear();
-        this._crearYAsignarCiudadanos(cantidad, edificiosResidenciales, edificiosLaborales, valorServicios);
+        this._crearYAsignarCiudadanos(this.tasaCrecimiento, edificiosResidenciales, edificiosLaborales, valorServicios);
     }
 
     /**
@@ -139,6 +138,34 @@ export default class GestorCiudadano {
      */
     calcularTotalCiudadanos() {
         return this.ciudadanos.length;
+    }
+
+    /**
+     * Intenta reasignar vivienda y empleo a ciudadanos que quedaron sin ellos.
+     * Se ejecuta cada turno para cubrir casos donde se demolió un edificio
+     * y luego se construyó uno nuevo.
+     *
+     * @param {Array<object>} edificiosResidenciales
+     * @param {Array<object>|object|null} edificiosLaborales
+     * @returns {void}
+     */
+    reasignarCiudadanosSinRecursos(edificiosResidenciales, edificiosLaborales) {
+        this.ciudadanos.forEach(ciudadano => {
+            if (!ciudadano.tieneVivienda()) {
+                const viviendasLibres = this.obtenerViviendaDisponible(edificiosResidenciales);
+                if (viviendasLibres.length > 0) {
+                    ciudadano.asignarVivienda(viviendasLibres[0]);
+                    viviendasLibres[0].añadirResidentes(ciudadano);
+                }
+            }
+            if (!ciudadano.tieneEmpleo()) {
+                const trabajosLibres = this.obtenerEmpleosDisponibles(edificiosLaborales);
+                if (trabajosLibres.length > 0) {
+                    ciudadano.asignarEmpleo(trabajosLibres[0]);
+                    trabajosLibres[0].añadirEmpleado(ciudadano);
+                }
+            }
+        });
     }
 
     /**
@@ -161,19 +188,6 @@ export default class GestorCiudadano {
         
         const felicidadOk = this.ciudadanos.length === 0 || felicidadPromedio > 60;
         return viviendaDisponible && felicidadOk && empleosDisponibles;
-    }
-
-    /**
-     * Calcula cuantos ciudadanos se crean en el turno actual.
-     *
-     * El valor es aleatorio en el rango [1, tasaCrecimiento].
-     * @private
-     * @returns {number} Cantidad de ciudadanos a crear.
-     */
-    _calcularCiudadanosACrear() {
-        const minimo = 1;
-        const maximo = this.tasaCrecimiento;
-        return Math.floor(Math.random() * (maximo - minimo + 1)) + minimo;
     }
 
     /**

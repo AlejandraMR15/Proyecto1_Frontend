@@ -1,0 +1,45 @@
+/* ---- CIUDADANOS ---- */
+.citizen-sprite {
+    position: absolute;
+    width:  10px;
+    height: 10px;
+    border-radius: 50%;
+    pointer-events: none;
+    transition: left 2s linear, top 2s linear,
+                background 1s ease, border-color 1s ease, box-shadow 1s ease;
+    z-index: 1000;
+
+    background: #f0e040;
+    border: 1.5px solid #a89800;
+    box-shadow: 0 0 4px rgba(240, 224, 64, 0.7);
+}
+
+.citizen-sprite.felicidad-critica {
+    background: #e02020;
+    border-color: #900808;
+    box-shadow: 0 0 5px rgba(224, 32, 32, 0.8);
+}
+
+.citizen-sprite.felicidad-baja {
+    background: #e07020;
+    border-color: #a04000;
+    box-shadow: 0 0 4px rgba(224, 112, 32, 0.75);
+}
+
+.citizen-sprite.felicidad-media {
+    background: #d4c030;
+    border-color: #9a8800;
+    box-shadow: 0 0 4px rgba(212, 192, 48, 0.7);
+}
+
+.citizen-sprite.felicidad-buena {
+    background: #60c840;
+    border-color: #308010;
+    box-shadow: 0 0 4px rgba(96, 200, 64, 0.75);
+}
+
+.citizen-sprite.felicidad-alta {
+    background: #30e8a0;
+    border-color: #00a860;
+    box-shadow: 0 0 6px rgba(48, 232, 160, 0.85);
+}

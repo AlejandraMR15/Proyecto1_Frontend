@@ -115,6 +115,8 @@ export default class MovimientoCiudadanos {
         sprite.title      = `Ciudadano #${ciudadano.id}`;
         sprite.dataset.id = ciudadano.id;
 
+        // Aplicar color según felicidad inicial
+        this._actualizarClaseFelicidad(sprite, ciudadano.felicidad);
         // Posicionar en la celda inicial
         this._posicionarSprite(sprite, col, row);
         this._gridEl.appendChild(sprite);
@@ -163,7 +165,17 @@ export default class MovimientoCiudadanos {
     _tick() {
         if (document.hidden) return;
         this._sincronizarSprites();
-        this._sprites.forEach((_, id) => this.moveCitizenVisual(id));
+
+        const ciudadanos = this.gestorCiudadanos?.ciudadanos ?? [];
+        const porId = new Map(ciudadanos.map(c => [c.id, c]));
+
+        this._sprites.forEach((entrada, id) => {
+            const ciudadano = porId.get(id);
+            if (ciudadano) {
+                this._actualizarClaseFelicidad(entrada.sprite, ciudadano.felicidad);
+            }
+            this.moveCitizenVisual(id);
+        });
     }
 
     /* ------------------------------------------------------------------ */
@@ -275,6 +287,27 @@ export default class MovimientoCiudadanos {
             if (c < 0 || r < 0 || c >= this.mapa.ancho || r >= this.mapa.alto) return false;
             return this.mapa.matriz[r][c] === 'r';
         });
+    }
+
+    _actualizarClaseFelicidad(sprite, felicidad = 100) {
+        const CLASES_FELICIDAD = [
+            'felicidad-critica',
+            'felicidad-baja',
+            'felicidad-media',
+            'felicidad-buena',
+            'felicidad-alta',
+        ];
+
+        CLASES_FELICIDAD.forEach(cls => sprite.classList.remove(cls));
+
+        let clase;
+        if      (felicidad < 20) clase = 'felicidad-critica';
+        else if (felicidad < 40) clase = 'felicidad-baja';
+        else if (felicidad < 60) clase = 'felicidad-media';
+        else if (felicidad < 80) clase = 'felicidad-buena';
+        else                     clase = 'felicidad-alta';
+
+        sprite.classList.add(clase);
     }
 
     /* ------------------------------------------------------------------ */

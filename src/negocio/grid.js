@@ -284,8 +284,17 @@ import MovimientoCiudadanos from './MovimientoCiudadanos.js';
 
             // Tomar el Mapa que Ciudad ya creó internamente
             mapa = juego.ciudad.mapa;
-            // generarMatriz() inicializa todas las celdas con 'g'
-            mapa.generarMatriz();
+            
+            // Si se cargó un mapa personalizado desde JSON
+            if (config.matrizJSON) {
+                // Reemplazar la matriz generada con la del JSON
+                mapa.matriz = config.matrizJSON;
+                // Poblar las construcciones a partir de la matriz
+                juego.ciudad.poblarConstruccionesDesdeMatriz(config.matrizJSON);
+            } else {
+                // Modo normal: generar matriz vacía
+                mapa.generarMatriz();
+            }
 
             // Guardar partida inicial via StorageManager para que
             // "Continuar partida" quede disponible en el menú

@@ -75,8 +75,32 @@
                 <p id="region-error" class="campo-error oculto">Selecciona una ciudad de la lista</p>
             </div>
 
-            <!-- Tamaño del mapa -->
+            <!-- Configuración del mapa: manual o desde JSON -->
             <div class="campo">
+                <label class="label-opciones">Configuración del mapa</label>
+                <div class="opciones-mapa">
+                    <label class="opcion-mapa">
+                        <input
+                            type="radio"
+                            name="mapa-tipo"
+                            value="manual"
+                            checked
+                        />
+                        Tamaño manual
+                    </label>
+                    <label class="opcion-mapa">
+                        <input
+                            type="radio"
+                            name="mapa-tipo"
+                            value="json"
+                        />
+                        Cargar desde JSON
+                    </label>
+                </div>
+            </div>
+
+            <!-- Tamaño manual (slider) - visible por defecto -->
+            <div id="seccion-manual" class="campo">
                 <label for="slider-mapa">
                     Tamaño del mapa:
                     <span id="label-mapa">15 × 15</span>
@@ -93,6 +117,21 @@
                     />
                     <span class="slider-extremo">30</span>
                 </div>
+            </div>
+
+            <!-- Cargar desde JSON - oculto por defecto -->
+            <div id="seccion-json" class="campo oculto">
+                <label for="input-json">Archivo JSON del mapa</label>
+                <input
+                    type="file"
+                    id="input-json"
+                    accept=".json"
+                />
+                <div id="json-info" class="json-info oculto">
+                    <p id="json-archivo"></p>
+                    <p id="json-dimensiones"></p>
+                </div>
+                <p id="json-error" class="campo-error oculto"></p>
             </div>
 
             <!-- Duración de turno -->

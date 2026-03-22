@@ -7,6 +7,7 @@
  *  3. Cargar ciudades de Colombia via ApiRegion y manejar el autocompletado.
  *  4. Validar el formulario y guardar la configuración en localStorage
  *     antes de redirigir al juego (index.html).
+ *  5. Permitir cargar mapas desde archivos JSON o definir tamaño manual.
  *
  * Comunicación con index.html (juego):
  *  - Al crear partida nueva: guarda en localStorage la clave 'config-nueva-partida'
@@ -17,6 +18,7 @@
  */
 
 import ApiRegion from '../acceso_datos/API/ApiRegion.js';
+import MapImporter from '../acceso_datos/MapImporter.js';
 
 /* ================================================================
    CONSTANTES
@@ -55,12 +57,25 @@ const labelMapa     = document.getElementById('label-mapa');
 const inputTurno    = document.getElementById('input-turno');
 const formError     = document.getElementById('form-error');
 
+// Elementos para opciones de mapa
+const radiosMapaTipo = document.querySelectorAll('input[name="mapa-tipo"]');
+const seccionManual  = document.getElementById('seccion-manual');
+const seccionJson    = document.getElementById('seccion-json');
+const inputJson      = document.getElementById('input-json');
+const jsonInfo       = document.getElementById('json-info');
+const jsonArchivo    = document.getElementById('json-archivo');
+const jsonDimensiones = document.getElementById('json-dimensiones');
+const jsonError      = document.getElementById('json-error');
+
 /* ================================================================
    ESTADO LOCAL DEL MÓDULO
 ================================================================ */
 let todasLasCiudades = [];   // lista completa cargada desde la API
 let ciudadSeleccionada = null; // objeto ciudad elegido del autocomplete
 let cargandoCiudades = false;
+
+// Estado del mapajson
+let mapaJsonCargado = null;  // objeto con { ancho, alto, matriz, metadatos }
 
 /* ================================================================
    1. VERIFICAR PARTIDA GUARDADA
@@ -295,11 +310,70 @@ inputRegion.addEventListener('keydown', (e) => {
 });
 
 /* ================================================================
-   5. SLIDER DEL MAPA
+   5. SLIDER DEL MAPA Y OPCIONES DE CONFIGURACIÓN
 ================================================================ */
 sliderMapa.addEventListener('input', () => {
     const n = sliderMapa.value;
     labelMapa.textContent = `${n} × ${n}`;
+});
+
+/**
+ * Maneja el cambio entre opciones de mapa (manual vs JSON).
+ */
+function configurarOpcionesMapaTipo() {
+    radiosMapaTipo.forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            const tipo = e.target.value;
+            if (tipo === 'manual') {
+                seccionManual.classList.remove('oculto');
+                seccionJson.classList.add('oculto');
+                mapaJsonCargado = null;
+                inputJson.value = '';
+                jsonInfo.classList.add('oculto');
+                jsonError.classList.add('oculto');
+            } else if (tipo === 'json') {
+                seccionManual.classList.add('oculto');
+                seccionJson.classList.remove('oculto');
+                mapaJsonCargado = null;
+                inputJson.click(); // Abre diálogo de archivo
+            }
+        });
+    });
+}
+
+/**
+ * Procesa el archivo JSON seleccionado.
+ */
+inputJson.addEventListener('change', async (e) => {
+    const archivo = e.target.files[0];
+    if (!archivo) {
+        mapaJsonCargado = null;
+        jsonInfo.classList.add('oculto');
+        jsonError.classList.add('oculto');
+        return;
+    }
+
+    try {
+        jsonError.classList.add('oculto');
+        jsonError.textContent = '';
+
+        // Procesar archivo con MapImporter
+        const datosValidados = await MapImporter.procesarArchivoJSON(archivo);
+        mapaJsonCargado = datosValidados;
+
+        // Mostrar información del mapa
+        jsonArchivo.textContent = `✓ Archivo cargado: ${archivo.name}`;
+        jsonDimensiones.textContent = `Tamaño detectado: ${datosValidados.ancho} × ${datosValidados.alto}`;
+        jsonInfo.classList.remove('oculto');
+
+    } catch (error) {
+        // Si hay error, podemos dejar la opción JSON seleccionada pero mostrar error
+        mapaJsonCargado = null;
+        jsonInfo.classList.add('oculto');
+        jsonError.textContent = `Error al cargar archivo: ${error.message}`;
+        jsonError.classList.remove('oculto');
+        inputJson.value = '';
+    }
 });
 
 /* ================================================================
@@ -307,12 +381,14 @@ sliderMapa.addEventListener('input', () => {
 ================================================================ */
 /**
  * Valida datos del formulario de creación de partida.
+ * Considera ambas opciones: tamaño manual o cargar desde JSON.
  * @returns {boolean}
  */
 function validarFormulario() {
     const alcalde = inputAlcalde.value.trim();
     const ciudad  = inputCiudad.value.trim();
     const turno   = parseInt(inputTurno.value, 10);
+    const mapaType = document.querySelector('input[name="mapa-tipo"]:checked').value;
 
     if (!alcalde) {
         mostrarErrorForm('El nombre del alcalde es obligatorio.');
@@ -334,6 +410,18 @@ function validarFormulario() {
         mostrarErrorForm(`La duración del turno debe ser al menos ${TURNO_MIN_SEG} segundos.`);
         inputTurno.focus();
         return false;
+    }
+
+    // Validar según el tipo de mapa seleccionado
+    if (mapaType === 'manual') {
+        // Si es manual, ya el slider valida el tamaño (15-30)
+        // No hay validación adicional necesaria
+    } else if (mapaType === 'json') {
+        if (!mapaJsonCargado) {
+            mostrarErrorForm('Debes cargar un archivo JSON válido del mapa.');
+            inputJson.focus();
+            return false;
+        }
     }
 
     ocultarErrorForm();
@@ -360,8 +448,18 @@ function ocultarErrorForm() {
 btnCrear.addEventListener('click', () => {
     if (!validarFormulario()) return;
 
-    const tamano = parseInt(sliderMapa.value, 10);
+    const mapaType = document.querySelector('input[name="mapa-tipo"]:checked').value;
     const turnoSegundos = parseInt(inputTurno.value, 10);
+    let ancho, alto;
+
+    // Determinar dimensiones según el tipo de mapa
+    if (mapaType === 'manual') {
+        ancho = parseInt(sliderMapa.value, 10);
+        alto = parseInt(sliderMapa.value, 10);
+    } else if (mapaType === 'json') {
+        ancho = mapaJsonCargado.ancho;
+        alto = mapaJsonCargado.alto;
+    }
 
     // Configuración que leerá grid.js al iniciar el juego
     const config = {
@@ -369,11 +467,16 @@ btnCrear.addEventListener('click', () => {
         nombre:        inputCiudad.value.trim(),
         regionNombre:  ciudadSeleccionada.name,
         regionId:      ciudadSeleccionada.id,
-        ancho:         tamano,
-        alto:          tamano,
+        ancho:         ancho,
+        alto:          alto,
         duracionTurno: turnoSegundos * 1000,   // Juego.crearCiudad espera ms
         dineroInicial: 50000,
     };
+
+    // Si se cargó un mapa desde JSON, incluir los datos del mapa
+    if (mapaType === 'json' && mapaJsonCargado) {
+        config.matrizJSON = mapaJsonCargado.matriz;
+    }
 
     // Limpiar posible acción anterior y guardar la nueva configuración
     localStorage.removeItem(CLAVE_ACCION);
@@ -398,12 +501,21 @@ function limpiarFormulario() {
     labelMapa.textContent = `${MAPA_MIN} × ${MAPA_MIN}`;
     inputTurno.value    = TURNO_MIN_SEG;
     ciudadSeleccionada  = null;
+    mapaJsonCargado     = null;
+    inputJson.value     = '';
     ocultarSugerencias();
     ocultarErrorForm();
     regionError.classList.add('oculto');
+    jsonError.classList.add('oculto');
+    jsonInfo.classList.add('oculto');
+    // Resetear opción de mapa a manual
+    document.querySelector('input[name="mapa-tipo"][value="manual"]').checked = true;
+    seccionManual.classList.remove('oculto');
+    seccionJson.classList.add('oculto');
 }
 
 /* ================================================================
    INIT
 ================================================================ */
 inicializarMenuPrincipal();
+configurarOpcionesMapaTipo();

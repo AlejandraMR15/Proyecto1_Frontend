@@ -7,6 +7,8 @@ import Puntuacion from "./Puntuacion.js";
 import StorageManager from "../acceso_datos/StorageManager.js";
 import Ciudadano from "../modelos/Ciudadano.js";
 import RecoleccionBurbujas from "./RecoleccionBurbujas.js";
+import Mapa from "../modelos/Mapa.js";
+import MapImporter from "../acceso_datos/MapImporter.js";
 
 /**
  * Clase principal que gestiona la lógica del juego.
@@ -255,5 +257,43 @@ export default class Juego {
         this.recolectorBurbujas.cargarDesdeJSON(data.recoleccion);
         console.log("Partida cargada");
     }
+    /**
+     * Crea un mapa desde un archivo JSON seleccionado.
+     *
+     * Valida:
+     * - Estructura del JSON (debe tener `map` y `gridSize` o `grid`, `width`, `height`)
+     * - Dimensiones del mapa (15x15 mínimo, 30x30 máximo)
+     * - Etiquetas válidas de terreno y construcciones
+     *
+     * @param {File} archivo Archivo JSON con datos del mapa.
+     * @returns {Promise<Mapa>} Promesa que resuelve una instancia de Mapa validada.
+     * @throws {Error} Si el archivo no es válido o no cumple validaciones.
+     */
+    async crearMapaDesdeJSON(archivo) {
+        try {
+            // Validar y extraer datos del JSON
+            const datosValidados = await MapImporter.procesarArchivoJSON(archivo);
 
+            const { ancho, alto, matriz, metadatos } = datosValidados;
+
+            // Crear instancia del mapa con los datos validados
+            const nuevoMapa = new Mapa(ancho, alto);
+            nuevoMapa.generarMatriz(matriz);
+
+            // Log con información del mapa cargado
+            console.log(`[Juego] Mapa cargado exitosamente: ${ancho}x${alto}`);
+            if (metadatos.nombre) {
+                console.log(`  Ciudad: ${metadatos.nombre}`);
+            }
+            if (metadatos.alcalde) {
+                console.log(`  Alcalde: ${metadatos.alcalde}`);
+            }
+
+            return nuevoMapa;
+
+        } catch (error) {
+            console.error('[Juego] Error al cargar mapa desde JSON:', error.message);
+            throw error;
+        }
+    }
 }

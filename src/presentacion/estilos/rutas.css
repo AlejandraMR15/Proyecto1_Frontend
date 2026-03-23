@@ -87,9 +87,9 @@ body.sidebar-cerrado #btn-calcular-ruta {
 }
 
 /* ---- Cubo marcado como ORIGEN ---- */
-.iso-cube.ruta-origen .poly-bottom { fill: #00e5ff !important; fill-opacity: 1 !important; }
-.iso-cube.ruta-origen .poly-left   { fill: #009ab8 !important; fill-opacity: 0.18 !important; }
-.iso-cube.ruta-origen .poly-right  { fill: #006e87 !important; fill-opacity: 0.18 !important; }
+.iso-cube.ruta-origen {
+    filter: drop-shadow(0 0 6px rgba(0, 229, 255, 0.9)) brightness(1.3);
+}
 
 /* ---- Cubos de la RUTA — animación de pulso/brillo ---- */
 @keyframes ruta-pulso-cubo {

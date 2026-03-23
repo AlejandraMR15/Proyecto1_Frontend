@@ -234,44 +234,18 @@ export default class GridRenderer {
         const rows  = this.mapa.alto;
         const SX    = this.STEP_X;
         const SY    = this.STEP_Y;
-        const depth = 110;  // píxeles de profundidad visual del bloque
+        const TD    = this.TD;
+        const depth = 110;
 
-        // Esquinas del grid en coordenadas de pantalla (relativas al iso-grid)
-        // Vértice top    = celda (0,0)       → arriba del todo
-        // Vértice right  = celda (cols-1,0)  → derecha
-        // Vértice bottom = celda (cols-1,rows-1) → abajo
-        // Vértice left   = celda (0,rows-1)  → izquierda
-        const toScreen = (col, row) => ({
-            x: (col - row) * SX + this._offsetX,
-            y: (col + row) * SY
-        });
+        // Pico más bajo (centro) de poly-bottom de una celda
+        const picoX = (col, row) => (col - row) * SX + this._offsetX + SX;
+        const picoY = (col, row) => (col + row) * SY + TD + SY;
 
-        // Las esquinas del diamante de poly-bottom del grid completo
-        // están en TD píxeles más abajo que los de la cara superior
-        const TD = this.TD;
-        const top    = toScreen(0,        0       );
-        const right  = toScreen(cols - 1, 0       );
-        const bottom = toScreen(cols - 1, rows - 1);
-        const left   = toScreen(0,        rows - 1);
+        // Los tres picos visibles del borde inferior del grid
+        const rc = { x: picoX(cols-1, 0),      y: picoY(cols-1, 0)      }; // derecha
+        const bc = { x: picoX(cols-1, rows-1), y: picoY(cols-1, rows-1) }; // abajo
+        const lc = { x: picoX(0,      rows-1), y: picoY(0,      rows-1) }; // izquierda
 
-        // Ajustar Y al nivel de poly-bottom (+ TD)
-        const tY = top.y    + TD;
-        const rY = right.y  + TD;
-        const bY = bottom.y + TD;
-        const lY = left.y   + TD;
-
-        // Centro inferior del diamante (punto más bajo de poly-bottom)
-        const bX = bottom.x + SX;   // bottom es la esquina inferior, el pico está SX a la derecha
-        const bYc = bY + SY;         // y el pico está SY más abajo
-
-        // Puntos del borde inferior del grid (poly-bottom completo):
-        //   top-center, right-corner, bottom-center, left-corner
-        const tc = { x: top.x + SX,    y: tY + SY  };  // pico superior
-        const rc = { x: right.x + SX*2, y: rY + SY  };  // esquina derecha
-        const bc = { x: bottom.x + SX,  y: bY + SY  };  // pico inferior (punto más bajo)
-        const lc = { x: left.x,         y: lY + SY  };  // esquina izquierda
-
-        // Cara frontal-izquierda (visible desde abajo-izquierda)
         const faceLeft = [
             `${lc.x},${lc.y}`,
             `${bc.x},${bc.y}`,
@@ -279,7 +253,6 @@ export default class GridRenderer {
             `${lc.x},${lc.y + depth}`
         ].join(' ');
 
-        // Cara frontal-derecha (visible desde abajo-derecha)
         const faceRight = [
             `${bc.x},${bc.y}`,
             `${rc.x},${rc.y}`,
@@ -287,14 +260,10 @@ export default class GridRenderer {
             `${bc.x},${bc.y + depth}`
         ].join(' ');
 
-        // Cara frontal-centro (el triángulo inferior del diamante)
-        // No es necesaria si las dos caras anteriores se unen en bc
-
-        // Dimensiones del SVG contenedor
         const svgW = parseInt(this._gridEl.style.width)  || 2000;
         const svgH = parseInt(this._gridEl.style.height) + depth + 20;
 
-        const ns = 'http://www.w3.org/2000/svg';
+        const ns  = 'http://www.w3.org/2000/svg';
         const svg = document.createElementNS(ns, 'svg');
         svg.id = 'iso-volume';
         svg.setAttribute('width',   svgW);
@@ -308,27 +277,23 @@ export default class GridRenderer {
 
         const mkPoly = (points, fill, stroke) => {
             const p = document.createElementNS(ns, 'polygon');
-            p.setAttribute('points', points);
-            p.setAttribute('fill', fill);
-            p.setAttribute('stroke', stroke);
-            p.setAttribute('stroke-width', '1.5');
+            p.setAttribute('points',          points);
+            p.setAttribute('fill',            fill);
+            p.setAttribute('stroke',          stroke);
+            p.setAttribute('stroke-width',    '1.5');
             p.setAttribute('stroke-linejoin', 'round');
             return p;
         };
 
-        // Cara izquierda: marrón tierra oscuro
         svg.appendChild(mkPoly(faceLeft,  '#7a3b1e', '#3d1a08'));
-        // Cara derecha: marrón tierra más claro
         svg.appendChild(mkPoly(faceRight, '#9b4f28', '#3d1a08'));
 
-        // Insertar ANTES del primer hijo del iso-grid (queda detrás de los cubos)
         if (this._gridEl.firstChild) {
             this._gridEl.insertBefore(svg, this._gridEl.firstChild);
         } else {
             this._gridEl.appendChild(svg);
         }
 
-        // Fade-in justo después de que termina de cargarse el último cubo
         const delay = (this._tiempoUltimoCubo ?? 50) + 80;
         setTimeout(() => { svg.style.opacity = '1'; }, delay);
     }
@@ -362,32 +327,16 @@ export default class GridRenderer {
         cubo.style.opacity    = '0';
         cubo.style.transition = 'opacity 0.25s ease';
 
-        // El SVG se posiciona con offset negativo para que visualmente
-        // siga pintando el cubo completo (incluidas las caras transparentes arriba)
-        // pero el div clickeable solo cubre poly-bottom
         const colores = this._coloresPorEtiqueta(etiqueta);
-        const imagen  = this._obtenerImagenPorEtiqueta(etiqueta);
-
-        if (imagen) {
-            const imgEl = document.createElement('img');
-            imgEl.src = imagen;
-            imgEl.style.cssText = `
-                position:absolute;
-                left:0; top:${-this.TD}px;
-                width:${this.TW}px; height:${this.TH + this.TD}px;
-                object-fit:cover; object-position:center; border-radius:4px;
-                pointer-events:none;
-            `;
-            cubo.appendChild(imgEl);
-        } else {
-            const svg = this._crearSVGCubo(colores.top, colores.left, colores.right);
-            // El SVG empieza TD píxeles más arriba que el div
-            svg.style.position = 'absolute';
-            svg.style.left     = '0';
-            svg.style.top      = (-this.TD) + 'px';
-            svg.style.pointerEvents = 'none';
-            cubo.appendChild(svg);
-        }
+        const svg = this._crearSVGCubo(colores.top, colores.left, colores.right, etiqueta);
+        svg.style.position      = 'absolute';
+        svg.style.left          = '0';
+        svg.style.pointerEvents = 'none';
+        // Edificios suben TH px sobre el suelo; planos solo TD
+        svg.style.top = this._esEdificio(etiqueta)
+            ? (-this.TH / 2) + 'px'
+            : (-this.TD) + 'px';
+        cubo.appendChild(svg);
 
         // Eventos directamente en el cubo — el bounding box ya coincide con poly-bottom
         cubo.style.pointerEvents = 'all';
@@ -419,30 +368,18 @@ export default class GridRenderer {
         cubo.dataset.etiqueta = etiqueta;
 
         const colores = this._coloresPorEtiqueta(etiqueta);
-        const imagen  = this._obtenerImagenPorEtiqueta(etiqueta);
 
-        // Limpiar contenido anterior
+        // Limpiar contenido anterior (ya no usamos imágenes)
         cubo.innerHTML = '';
 
-        if (imagen) {
-            const imgEl = document.createElement('img');
-            imgEl.src = imagen;
-            imgEl.style.cssText = `
-                position:absolute;
-                left:0; top:${-this.TD}px;
-                width:${this.TW}px; height:${this.TH + this.TD}px;
-                object-fit:cover; object-position:center; border-radius:4px;
-                pointer-events:none;
-            `;
-            cubo.appendChild(imgEl);
-        } else {
-            const svg = this._crearSVGCubo(colores.top, colores.left, colores.right);
-            svg.style.position     = 'absolute';
-            svg.style.left         = '0';
-            svg.style.top          = (-this.TD) + 'px';
-            svg.style.pointerEvents = 'none';
-            cubo.appendChild(svg);
-        }
+        const svg = this._crearSVGCubo(colores.top, colores.left, colores.right, etiqueta);
+        svg.style.position      = 'absolute';
+        svg.style.left          = '0';
+        svg.style.pointerEvents = 'none';
+        svg.style.top = this._esEdificio(etiqueta)
+            ? (-this.TH / 2) + 'px'
+            : (-this.TD) + 'px';
+        cubo.appendChild(svg);
 
         // Efecto visual breve para indicar el cambio
         this._animarCambio(cubo);
@@ -478,74 +415,50 @@ export default class GridRenderer {
      */
     _coloresPorEtiqueta(etiqueta) {
         const paletas = {
-            // Terreno vacío — top mantiene '#7ecfe6' para que _crearSVGCubo use verde pasto
+            // Terreno vacío — marcador especial para usar verde pasto
             'g':  { top: '#7ecfe6', left: '#4baec8', right: '#2d8aaa' },
 
-            // Vías (gris asfalto)
-            'r':  { top: '#707880', left: '#505860', right: '#384048' },
+            // Vías — gris
+            'r':  { top: '#909090', left: '#686868', right: '#484848' },
 
-            // Parque (verde más oscuro para diferenciarse del terreno)
-            'P1': { top: '#3da832', left: '#2a7a22', right: '#1a5a14' },
+            // Parque — verde oscuro
+            'P1': { top: '#2e8b2e', left: '#1e6b1e', right: '#104e10' },
 
-            // Residencial (naranja cálido)
-            'R1': { top: '#f0a040', left: '#c07820', right: '#8a5010' },
-            'R2': { top: '#f5b860', left: '#d09030', right: '#9a6818' },
+            // Casas — beige
+            'R1': { top: '#f5e6c8', left: '#d4be98', right: '#b09870' },
 
-            // Comercial (amarillo dorado)
-            'C1': { top: '#f0d040', left: '#c4a820', right: '#9a8010' },
-            'C2': { top: '#f5e060', left: '#d4b830', right: '#a89018' },
+            // Apartamentos — marrón claro
+            'R2': { top: '#c8956a', left: '#a87040', right: '#845020' },
 
-            // Industrial (marrón / óxido)
-            'I1': { top: '#b06030', left: '#804018', right: '#582808' },
-            'I2': { top: '#c07840', left: '#905028', right: '#683010' },
+            // Tienda — rosado
+            'C1': { top: '#f4a0b8', left: '#d87090', right: '#b84870' },
 
-            // Servicios (púrpura)
-            'S1': { top: '#a060d0', left: '#7038a8', right: '#4a1880' },
-            'S2': { top: '#b070e0', left: '#8048b8', right: '#5828a0' },
-            'S3': { top: '#c080f0', left: '#9058c8', right: '#6838b0' },
+            // Centro comercial — naranja
+            'C2': { top: '#ff8c00', left: '#cc6a00', right: '#994800' },
 
-            // Plantas de utilidad (rojo)
-            'U1': { top: '#e04040', left: '#b01818', right: '#800808' },
-            'U2': { top: '#f05050', left: '#c02828', right: '#981010' },
+            // Fábrica — negro claro (gris oscuro)
+            'I1': { top: '#505050', left: '#383838', right: '#202020' },
+
+            // Granja — café tierra
+            'I2': { top: '#8b5e3c', left: '#6b4020', right: '#4a2808' },
+
+            // Estación de policía — azul oscuro
+            'S1': { top: '#1a3a7a', left: '#102860', right: '#081840' },
+
+            // Estación de bomberos — roja
+            'S2': { top: '#e02020', left: '#b00808', right: '#800000' },
+
+            // Hospital — blanco
+            'S3': { top: '#f0f0f0', left: '#d0d0d0', right: '#b0b0b0' },
+
+            // Planta eléctrica — amarillo
+            'U1': { top: '#f5e020', left: '#c8b000', right: '#9a8000' },
+
+            // Planta de agua — azul claro
+            'U2': { top: '#40a8e0', left: '#2080c0', right: '#0858a0' },
         };
 
-        // Fallback: terreno vacío para etiquetas desconocidas
         return paletas[etiqueta] ?? paletas['g'];
-    }
-
-    /**
-     * Mapeo de etiquetas a imágenes                                        
-     * Devuelve la ruta de imagen para una etiqueta dada.
-     * @private
-     * @param {string} etiqueta
-     * @returns {string|null} Ruta de la imagen o null si no existe
-     */
-    _obtenerImagenPorEtiqueta(etiqueta) {
-        const imagenes = {
-            // Terreno vacío
-            'g':  null,
-            // Vías
-            'r':  null,
-            // Parques
-            'P1': '/src/acceso_datos/imagen/parque.avif',
-            // Residencial
-            'R1': '/src/acceso_datos/imagen/casa%20residencial.avif',
-            'R2': '/src/acceso_datos/imagen/edificio%20residencial.jpg',
-            // Comercial
-            'C1': '/src/acceso_datos/imagen/tienda.avif',
-            'C2': '/src/acceso_datos/imagen/centro%20comercial.avif',
-            // Industrial
-            'I1': '/src/acceso_datos/imagen/fabrica.avif',
-            'I2': '/src/acceso_datos/imagen/granja.jpg',
-            // Servicios
-            'S1': '/src/acceso_datos/imagen/policia.png',
-            'S2': '/src/acceso_datos/imagen/bomberos.jpg',
-            'S3': '/src/acceso_datos/imagen/hospital.png',
-            // Plantas de utilidad
-            'U1': '/src/acceso_datos/imagen/planta%20energia.avif',
-            'U2': '/src/acceso_datos/imagen/agua.jpg',
-        };
-        return imagenes[etiqueta] || null;
     }
 
     /* ------------------------------------------------------------------ */
@@ -553,44 +466,39 @@ export default class GridRenderer {
     /* ------------------------------------------------------------------ */
 
     /**
-     * Construye el SVG con las tres caras del cubo isométrico.
-     * Geometría exacta sin huecos (mismos vértices compartidos).
+     * Indica si una etiqueta es un edificio con volumen (no terreno, vía ni parque).
      * @private
      */
-    _crearSVGCubo(colorTop, colorLeft, colorRight) {
+    _esEdificio(etiqueta) {
+        return !['g', 'r', 'P1'].includes(etiqueta);
+    }
+
+    /**
+     * Construye el SVG con las tres caras del cubo isométrico.
+     * - Para terreno/vía/parque: solo cara inferior visible (plana).
+     * - Para edificios: cubo completo con volumen (top + laterales + bottom).
+     * @private
+     */
+    _crearSVGCubo(colorTop, colorLeft, colorRight, etiqueta = 'g') {
+        return this._esEdificio(etiqueta)
+            ? this._crearSVGEdificio(colorTop, colorLeft, colorRight)
+            : this._crearSVGPlano(colorTop, colorLeft, colorRight);
+    }
+
+    /**
+     * SVG plano: solo la cara inferior visible (terreno, vías, parques).
+     * @private
+     */
+    _crearSVGPlano(colorTop, colorLeft, colorRight) {
         const W  = this.TW;
-        const H  = this.TH;   // = TW/2
+        const H  = this.TH;
         const D  = this.TD;
 
-        /*
-         * Vértices del cubo isométrico visto desde arriba-izquierda:
-         *
-         *           A  (W/2, 0)          ← tope de cara superior
-         *          / \
-         *        D2   B  (W, H/2)        ← lados de cara superior
-         *  (0,H/2) \ /
-         *           C  (W/2, H)          ← centro compartido
-         *          / \
-         *        E   G  (W, H/2+D)       ← lados inferiores
-         *  (0,H/2+D)\ /
-         *           F  (W/2, H+D)        ← fondo
-         *
-         * Cara SUPERIOR  = A, B, C, D2   (diamante arriba)
-         * Cara LATERAL-IZQ = D2, C, F, E
-         * Cara LATERAL-DER = C, B, G, F
-         * Cara INFERIOR  = A desplazado D px abajo, B desplazado D, C desplazado D, D2 desplazado D
-         *                = [W/2, D], G, F, E   ← diamante idéntico al superior pero D px más abajo
-         */
-
-        const A   = [W / 2, 0          ];
-        const B   = [W,     H / 2      ];
-        const C   = [W / 2, H          ];
-        const D2  = [0,     H / 2      ];
-        const E   = [0,     H / 2 + D  ];
-        const F   = [W / 2, H + D      ];
-        const G   = [W,     H / 2 + D  ];
-        // Cuarto vértice del diamante inferior (A desplazado D px hacia abajo)
-        const A2  = [W / 2, D          ];
+        // Diamante inferior: A2, G, F, E
+        const A2 = [W / 2, D          ];
+        const E  = [0,     H / 2 + D  ];
+        const F  = [W / 2, H + D      ];
+        const G  = [W,     H / 2 + D  ];
 
         const pts = (arr) => arr.map(p => p.join(',')).join(' ');
 
@@ -601,36 +509,68 @@ export default class GridRenderer {
         svg.style.overflow = 'visible';
         svg.style.display  = 'block';
 
-        // Color de la cara inferior visible:
-        // terreno 'g' → verde pasto; cualquier otro tipo → su color propio
-        const esTerreno    = (colorTop === '#7ecfe6');
-        const colorBottom  = esTerreno ? '#6bbf3e' : colorTop;
+        const esTerreno   = (colorTop === '#7ecfe6');
+        const colorBottom = esTerreno ? '#6bbf3e' : colorTop;
+        const strokeB     = esTerreno ? '#4a8c22' : _darken(colorTop);
 
-        // Borde del diamante inferior: sutil, perceptible pero suave
-        const strokeBottom = esTerreno ? '#4a8c22' : _darken(colorTop);
+        const p = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+        p.setAttribute('points',       pts([A2, G, F, E]));
+        p.setAttribute('fill',         colorBottom);
+        p.setAttribute('fill-opacity', '1');
+        p.setAttribute('stroke',       strokeB);
+        p.setAttribute('stroke-width', '0.6');
+        p.setAttribute('stroke-opacity', '0.5');
+        p.setAttribute('stroke-linejoin', 'round');
+        p.classList.add('poly-bottom');
+        svg.appendChild(p);
 
-        const mkPoly = (points, fill, cls, fillOpacity, stroke, strokeW, strokeOpacity) => {
+        return svg;
+    }
+
+    /**
+     * SVG edificio: cubo isométrico perfecto con volumen.
+     * Solo las tres caras visibles: top, left, right.
+     * @private
+     */
+    _crearSVGEdificio(colorTop, colorLeft, colorRight) {
+        const W  = this.TW;
+        const H  = this.TH;
+        const EH = this.TH / 2;  // mitad de altura — 16px
+
+        const At = [W / 2, 0          ];
+        const Bt = [W,     H / 2      ];
+        const Ct = [W / 2, H          ];
+        const Dt = [0,     H / 2      ];
+        const Bb = [W,     H / 2 + EH ];
+        const Cb = [W / 2, H     + EH ];
+        const Db = [0,     H / 2 + EH ];
+
+        const pts = (arr) => arr.map(p => p.join(',')).join(' ');
+
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('width',   W);
+        svg.setAttribute('height',  H + EH);
+        svg.setAttribute('viewBox', `0 0 ${W} ${H + EH}`);
+        svg.style.overflow = 'visible';
+        svg.style.display  = 'block';
+
+        const stroke = _darken(colorRight);
+
+        const mkPoly = (points, fill, cls) => {
             const p = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
-            p.setAttribute('points',       pts(points));
-            p.setAttribute('fill',         fill);
-            p.setAttribute('fill-opacity', String(fillOpacity));
-            if (stroke) {
-                p.setAttribute('stroke',         stroke);
-                p.setAttribute('stroke-width',   String(strokeW ?? 0.8));
-                p.setAttribute('stroke-opacity', String(strokeOpacity ?? 1));
-                p.setAttribute('stroke-linejoin','round');
-            }
+            p.setAttribute('points',          pts(points));
+            p.setAttribute('fill',            fill);
+            p.setAttribute('stroke',          stroke);
+            p.setAttribute('stroke-width',    '1');
+            p.setAttribute('stroke-linejoin', 'round');
             p.classList.add(cls);
             return p;
         };
 
-        // Caras laterales: fill y stroke completamente invisibles
-        svg.appendChild(mkPoly([D2, C, F, E], colorLeft,  'poly-left',   0, null, 0, 0));
-        svg.appendChild(mkPoly([C, B, G, F],  colorRight, 'poly-right',  0, null, 0, 0));
-        // Cara superior: fill y stroke completamente invisibles
-        svg.appendChild(mkPoly([A, B, C, D2], colorTop,   'poly-top',    0, null, 0, 0));
-        // Cara INFERIOR: diamante visible con borde sutil
-        svg.appendChild(mkPoly([A2, G, F, E], colorBottom,'poly-bottom', 1, strokeBottom, 0.6, 0.5));
+        // Orden Painter: laterales primero, cara superior encima
+        svg.appendChild(mkPoly([Dt, Ct, Cb, Db], colorLeft,  'poly-left' ));
+        svg.appendChild(mkPoly([Ct, Bt, Bb, Cb], colorRight, 'poly-right'));
+        svg.appendChild(mkPoly([At, Bt, Ct, Dt], colorTop,   'poly-top'  ));
 
         return svg;
     }

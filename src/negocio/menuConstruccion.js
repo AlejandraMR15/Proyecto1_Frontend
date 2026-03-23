@@ -736,7 +736,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (window.juego && window.juego.ciudad) {
             reconstruirMapaDesdePartida(window.juego.ciudad);
         }
-    }, 200);
+    }, 500);
  
 });
  

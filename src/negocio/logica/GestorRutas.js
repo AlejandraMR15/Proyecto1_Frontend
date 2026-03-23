@@ -16,7 +16,7 @@
  * exclusivamente a ApiDijkstra.js.
  */
 
-import ApiDijkstra from '../acceso_datos/API/ApiDijkstra.js';
+import ApiDijkstra from '../../acceso_datos/API/ApiDijkstra.js';
 
 /* ================================================================
    ESTADO INTERNO DEL GESTOR

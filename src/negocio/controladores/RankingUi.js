@@ -15,7 +15,7 @@
  *  - fmt (HudPanel.js) — para formatear números
  */
 
-import Ranking from './Ranking.js';
+import Ranking from '../logica/Ranking.js';
 import { storage } from './PartidaManager.js';
 import { fmt } from './HudPanel.js';
 

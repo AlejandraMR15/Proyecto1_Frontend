@@ -2,14 +2,14 @@ import SistemaTurnos from "./SistemaTurnos.js";
 import { EstadoDeJuego } from "./EstadoDeJuego.js";
 import { ESTADOS } from "./estados.js";
 import GestorCiudadano from "./GestorCiudadanos.js";
-import Ciudad from "../modelos/ciudad.js";
+import Ciudad from "../../modelos/ciudad.js";
 import Puntuacion from "./Puntuacion.js";
-import StorageManager from "../acceso_datos/StorageManager.js";
-import Ciudadano from "../modelos/Ciudadano.js";
+import StorageManager from "../../acceso_datos/StorageManager.js";
+import Ciudadano from "../../modelos/Ciudadano.js";
 import RecoleccionBurbujas from "./RecoleccionBurbujas.js";
-import Mapa from "../modelos/Mapa.js";
-import MapImporter from "../acceso_datos/MapImporter.js";
-import { actualizarOAgregarEnRanking } from "./RankingUi.js";
+import Mapa from "../../modelos/Mapa.js";
+import MapImporter from "../../acceso_datos/MapImporter.js";
+import { actualizarOAgregarEnRanking } from "../controladores/RankingUi.js";
 
 /**
  * Clase principal que gestiona la lógica del juego.

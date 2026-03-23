@@ -13,8 +13,8 @@
  *  - DOM insertado en index.html (widgets-container, clima-infobox, noticias-panel)
  */
  
-import ApiClima    from '../acceso_datos/API/ApiClima.js';
-import ApiNoticias from '../acceso_datos/API/ApiNoticias.js';
+import ApiClima from '../../acceso_datos/API/ApiClima.js';
+import ApiNoticias from '../../acceso_datos/API/ApiNoticias.js';
  
 /* ================================================================
    CONSTANTES

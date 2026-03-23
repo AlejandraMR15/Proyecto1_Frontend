@@ -10,10 +10,10 @@
  *  4. Conectar el tooltip con los eventos de GridRenderer.
  */
 
-import Mapa         from '../modelos/Mapa.js';
+import Mapa         from '../../modelos/Mapa.js';
 import GridRenderer  from './GridRenderer.js';
-import Juego         from './Juego.js';
-import MovimientoCiudadanos from './MovimientoCiudadanos.js';
+import Juego         from '../logica/Juego.js';
+import MovimientoCiudadanos from '../logica/MovimientoCiudadanos.js';
 
 (function () {
     "use strict";

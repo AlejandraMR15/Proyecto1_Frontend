@@ -1,4 +1,4 @@
-import RankingEntry from "../modelos/RankingEntry.js";
+import RankingEntry from '../../modelos/RankingEntry.js';
 
 /**
  * Clase que gestiona el ranking de ciudades basado en puntuaciones.

@@ -17,8 +17,8 @@
  *    grid.js la leerá y llamará a Juego.cargarPartida().
  */
 
-import ApiRegion from '../acceso_datos/API/ApiRegion.js';
-import MapImporter from '../acceso_datos/MapImporter.js';
+import ApiRegion from '../../acceso_datos/API/ApiRegion.js';
+import MapImporter from '../../acceso_datos/MapImporter.js';
 
 /* ================================================================
    CONSTANTES

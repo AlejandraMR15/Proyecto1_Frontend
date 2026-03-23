@@ -1,4 +1,4 @@
-import Ciudadano from '../modelos/Ciudadano.js';
+import Ciudadano from '../../modelos/Ciudadano.js';
 
 /**
  * Gestiona la poblacion de ciudadanos.

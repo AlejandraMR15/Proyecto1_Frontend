@@ -13,7 +13,7 @@
  *  - StorageManager (acceso_datos)
  */
 
-import StorageManager from '../acceso_datos/StorageManager.js';
+import StorageManager from '../../acceso_datos/StorageManager.js';
 import { timerEstado, detenerTimerTurno } from './HudPanel.js';
 
 export const storage = new StorageManager();

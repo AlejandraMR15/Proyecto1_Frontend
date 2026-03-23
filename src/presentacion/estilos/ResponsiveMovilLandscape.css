@@ -230,6 +230,36 @@
     .bienestar-label { font-size: 0.24rem; }
     .bienestar-valor { font-size: 0.34rem; }
 
+    /* ── DESGLOSE: a la derecha del perfil, mismo nivel superior ── */
+    #hud-desglose {
+        display: block !important;
+        position: fixed !important;
+        top: 6px !important;
+        left: calc(var(--sb-width) + 8px + 118px) !important;
+        width: 120px !important;
+        z-index: 399 !important;
+        transition: left 0.14s steps(4) !important;
+    }
+
+    body.sidebar-cerrado #hud-desglose {
+        left: calc(8px + 118px) !important;
+    }
+
+    #hud-desglose-toggle { font-size: 0.24rem !important; padding: 4px 6px !important; }
+    #hud-desglose-arrow  { font-size: 0.32rem !important; }
+    #hud-desglose-cuerpo { max-height: 0; overflow: hidden; }
+    #hud-desglose[data-open="true"] #hud-desglose-cuerpo { max-height: 260px !important; overflow-y: auto !important; }
+    .desglose-seccion    { padding: 4px 6px 2px !important; }
+    .desglose-seccion-titulo { font-size: 0.22rem !important; }
+    .desglose-label      { font-size: 0.20rem !important; }
+    .desglose-valor      { font-size: 0.22rem !important; }
+    .desglose-item-bonif,
+    .desglose-item-penal,
+    .desglose-sin-items  { font-size: 0.18rem !important; }
+    .desglose-total-label { font-size: 0.22rem !important; }
+    .desglose-total-valor { font-size: 0.30rem !important; }
+    .desglose-total-wrap  { padding: 5px 6px !important; }
+
     /* ── BOTÓN RUTA: junto a los controles, derecha ── */
     #btn-calcular-ruta {
         position: fixed !important;

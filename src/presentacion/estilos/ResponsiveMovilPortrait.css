@@ -99,6 +99,32 @@
     .bienestar-label { font-size: 0.26rem; }
     .bienestar-valor { font-size: 0.38rem; }
 
+    /* ── DESGLOSE: debajo del botón ruta, izquierda ── */
+    #hud-desglose {
+        position: fixed;
+        top: 144px;
+        left: 8px;
+        width: 140px !important;
+        z-index: 399;
+        transition: none !important;
+    }
+
+    #hud-desglose-toggle { font-size: 0.28rem !important; padding: 5px 7px !important; }
+    #hud-desglose-arrow  { font-size: 0.36rem !important; }
+    .desglose-seccion-titulo { font-size: 0.26rem !important; }
+    .desglose-label          { font-size: 0.22rem !important; }
+    .desglose-valor          { font-size: 0.24rem !important; }
+    .desglose-item-bonif,
+    .desglose-item-penal,
+    .desglose-sin-items      { font-size: 0.20rem !important; }
+    .desglose-total-label    { font-size: 0.24rem !important; }
+    .desglose-total-valor    { font-size: 0.34rem !important; }
+
+    /* Sube el desglose cuando el sidebar está abierto */
+    body.sidebar-construccion-abierto #hud-desglose {
+        display: none !important;
+    }
+
     /* ── CONTROLES: esquina superior derecha ── */
     #hud-controles {
         position: fixed;
@@ -143,7 +169,7 @@
 
     /* Timer sube cuando el sidebar se abre */
     body.sidebar-construccion-abierto #hud-turno {
-        bottom: calc(60vh + 4px);
+        bottom: calc(25vh + 4px);
     }
 
     /* ── SIDEBAR: barra inferior deslizable ── */
@@ -175,7 +201,7 @@
     }
 
     .sidebar[data-open="true"] {
-        max-height: 60vh;
+        max-height: 25vh;
         overflow: hidden;
         pointer-events: auto;
     }
@@ -189,7 +215,7 @@
         -webkit-overflow-scrolling: touch;
         padding: 6px 4px;
         gap: 0;
-        height: calc(60vh - var(--mobile-bottombar));
+        height: calc(25vh - var(--mobile-bottombar));
         align-items: flex-start;
     }
 
@@ -258,7 +284,7 @@
     }
 
     body.sidebar-construccion-abierto #widgets-container {
-        bottom: calc(60vh + 4px);
+        bottom: calc(25vh + 4px);
     }
 
     #widgets-container.panel-noticias-abierto { right: 8px !important; }

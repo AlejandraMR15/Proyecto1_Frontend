@@ -192,39 +192,6 @@ export default class Puntuacion {
             puntuacionFinal
         };
 
-        // Imprimir en consola
-        console.log("════════════════════════════════════════");
-        console.log("         DESGLOSE DE PUNTUACIÓN");
-        console.log("════════════════════════════════════════");
-        console.log("\n📊 PUNTOS POR CATEGORÍA:");
-        console.log(`  Población:      ${puntosPoblacion} (${poblacion} × 10)`);
-        console.log(`  Felicidad:      ${puntosFelicidad} (${felicidad} × 5)`);
-        console.log(`  Dinero:         ${Math.round(puntosDinero * 100) / 100} (${dinero} ÷ 100)`);
-        console.log(`  Edificios:      ${puntosEdificios} (${numEdificios} × 50)`);
-        console.log(`  Electricidad:   ${puntosElectricidad} (${electricidad} × 2)`);
-        console.log(`  Agua:           ${puntosAgua} (${agua} × 2)`);
-        console.log(`  ─────────────────────────────`);
-        console.log(`  Subtotal:       ${Math.round(subtotal * 100) / 100}`);
-
-        console.log("\n🎁 BONIFICACIONES: +"+totalBonificaciones);
-        if (bonificaciones.empleadosTodos > 0) console.log(`  ✓ +500 (Todos los ciudadanos empleados)`);
-        if (bonificaciones.felicidadAlta > 0) console.log(`  ✓ +300 (Felicidad promedio > 80)`);
-        if (bonificaciones.recursosPositivos > 0) console.log(`  ✓ +200 (Todos los recursos positivos)`);
-        if (bonificaciones.poblacionGrande > 0) console.log(`  ✓ +1000 (Más de 1.000 habitantes)`);
-        if (totalBonificaciones === 0) console.log(`  Sin bonificaciones`);
-
-        console.log("\n⚠️  PENALIZACIONES: -"+totalPenalizaciones);
-        if (penalizaciones.dineroNegativo > 0) console.log(`  ✗ -500 (Dinero negativo)`);
-        if (penalizaciones.electricidadNegativa > 0) console.log(`  ✗ -300 (Electricidad negativa)`);
-        if (penalizaciones.aguaNegativa > 0) console.log(`  ✗ -300 (Agua negativa)`);
-        if (penalizaciones.felicidadBaja > 0) console.log(`  ✗ -400 (Felicidad promedio < 40)`);
-        if (penalizaciones.desempleados > 0) console.log(`  ✗ -${penalizaciones.desempleados} (${desempleados} desempleados × 10)`);
-        if (totalPenalizaciones === 0) console.log(`  Sin penalizaciones`);
-
-        console.log("\n════════════════════════════════════════");
-        console.log(`  📈 PUNTUACIÓN TOTAL: ${puntuacionFinal}`);
-        console.log("════════════════════════════════════════\n");
-
         return desglose;
     }
 }

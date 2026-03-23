@@ -78,6 +78,63 @@
         </div>
     </div>
 
+    <!-- ===== PANEL DESGLOSE DE PUNTUACIÓN ===== -->
+    <div id="hud-desglose" data-open="false">
+        <button id="hud-desglose-toggle" title="Ver desglose de puntuación">
+            <span>📊 DESGLOSE</span>
+            <span id="hud-desglose-arrow">▼</span>
+        </button>
+        <div id="hud-desglose-cuerpo">
+            <!-- Puntos base -->
+            <div class="desglose-seccion">
+                <div class="desglose-seccion-titulo">📊 PUNTOS BASE</div>
+                <div class="desglose-fila">
+                    <span class="desglose-label">Población</span>
+                    <span class="desglose-valor" id="dsg-poblacion">0</span>
+                </div>
+                <div class="desglose-fila">
+                    <span class="desglose-label">Felicidad</span>
+                    <span class="desglose-valor" id="dsg-felicidad">0</span>
+                </div>
+                <div class="desglose-fila">
+                    <span class="desglose-label">Dinero</span>
+                    <span class="desglose-valor" id="dsg-dinero">0</span>
+                </div>
+                <div class="desglose-fila">
+                    <span class="desglose-label">Edificios</span>
+                    <span class="desglose-valor" id="dsg-edificios">0</span>
+                </div>
+                <div class="desglose-fila">
+                    <span class="desglose-label">Electricidad</span>
+                    <span class="desglose-valor" id="dsg-electricidad">0</span>
+                </div>
+                <div class="desglose-fila">
+                    <span class="desglose-label">Agua</span>
+                    <span class="desglose-valor" id="dsg-agua">0</span>
+                </div>
+                <div class="desglose-fila desglose-subtotal">
+                    <span class="desglose-label">SUBTOTAL</span>
+                    <span class="desglose-valor" id="dsg-subtotal">0</span>
+                </div>
+            </div>
+            <!-- Bonificaciones -->
+            <div class="desglose-seccion">
+                <div class="desglose-seccion-titulo desglose-titulo-verde">🎁 BONIF. <span id="dsg-total-bonif">+0</span></div>
+                <div id="dsg-bonif-lista"></div>
+            </div>
+            <!-- Penalizaciones -->
+            <div class="desglose-seccion">
+                <div class="desglose-seccion-titulo desglose-titulo-rojo">⚠ PENAL. <span id="dsg-total-penal">-0</span></div>
+                <div id="dsg-penal-lista"></div>
+            </div>
+            <!-- Total -->
+            <div class="desglose-total-wrap">
+                <span class="desglose-total-label">📈 TOTAL</span>
+                <span class="desglose-total-valor" id="dsg-total">0</span>
+            </div>
+        </div>
+    </div>
+
     <!-- ===== TIMER DE TURNO ===== -->
     <div id="hud-turno">
         <div id="turno-numero">TURNO <span id="val-turno">0</span></div>
@@ -430,6 +487,7 @@
                     </li>
                 </ul>
             </div>
+
         </div>
     </aside>
 

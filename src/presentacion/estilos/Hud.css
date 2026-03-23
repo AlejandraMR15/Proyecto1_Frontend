@@ -207,7 +207,7 @@ body.sidebar-cerrado #hud-bienestar {
 #hud-turno {
     position: fixed;
     bottom: 96px;    /* 64px alto botón + 16px bottom + 16px espacio */
-    left: 12px;
+    left: 280px;
     background: #0f0f2a;
     border: 2px solid #3a3a9a;
     border-radius: 6px;
@@ -216,6 +216,11 @@ body.sidebar-cerrado #hud-bienestar {
     min-width: 190px;
     box-shadow: 3px 3px 0 #06061a;
     font-family: 'Press Start 2P', monospace;
+    transition: left 0.14s steps(4);
+}
+
+body.sidebar-cerrado #hud-turno {
+    left: 12px;
 }
 
 #turno-numero {
@@ -283,7 +288,15 @@ body.sidebar-cerrado #hud-bienestar {
         inset 3px 3px 0 #6868cc44,
         inset -3px -3px 0 #06061a,
         4px 4px 0 #06061a;
-    transition: background 0.12s, border-color 0.12s;
+    transition: background 0.12s, border-color 0.12s, opacity 0.12s;
+}
+
+/* Ocultar el botón cuando el sidebar de construcción está abierto en desktop */
+@media (min-width: 1025px) {
+    .sidebar[data-open="true"] ~ #sidebarTab {
+        opacity: 0;
+        pointer-events: none;
+    }
 }
 
 #sidebarTab:hover {
@@ -468,4 +481,182 @@ body.sidebar-cerrado #hud-bienestar {
 
 #hud-guardando.guardado #guardando-icono {
     animation: none;
+}
+
+/* ============================================================
+   PANEL DESGLOSE DE PUNTUACIÓN
+   Desktop: debajo del bienestar, izquierda.
+   Mismo ancho y estilo que #hud-perfil.
+   ============================================================ */
+#hud-desglose {
+    position: fixed;
+    top: 224px;   /* aprox. debajo de bienestar (130px) + altura bienestar (~78px) + 16px gap */
+    left: 280px;
+    width: 210px;
+    background: #0f0f2a;
+    border: 2px solid #3a3a9a;
+    border-radius: 6px;
+    box-shadow: 3px 3px 0 #06061a;
+    font-family: 'Press Start 2P', monospace;
+    z-index: 200;
+    transition: left 0.14s steps(4);
+    overflow: hidden;
+}
+
+body.sidebar-cerrado #hud-desglose {
+    left: 12px;
+}
+
+/* ---- Botón de cabecera / toggle ---- */
+#hud-desglose-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 7px 10px;
+    background: #14144a;
+    border: none;
+    border-bottom: 2px solid #3a3a9a;
+    color: #ffd700;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.38rem;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.12s steps(4);
+}
+
+#hud-desglose-toggle:hover {
+    background: #1e1e6a;
+}
+
+#hud-desglose-arrow {
+    font-size: 0.5rem;
+    color: #6868cc;
+    transition: transform 0.12s steps(3);
+}
+
+#hud-desglose[data-open="true"] #hud-desglose-arrow {
+    transform: rotate(180deg);
+}
+
+/* ---- Cuerpo colapsable ---- */
+#hud-desglose-cuerpo {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.22s steps(8);
+}
+
+#hud-desglose[data-open="true"] #hud-desglose-cuerpo {
+    max-height: 480px;
+    overflow-y: auto;
+}
+
+#hud-desglose-cuerpo::-webkit-scrollbar { width: 5px; background: #06061a; }
+#hud-desglose-cuerpo::-webkit-scrollbar-thumb { background: #3a3a9a; }
+
+/* ---- Secciones internas ---- */
+.desglose-seccion {
+    padding: 6px 10px 4px;
+    border-bottom: 1px solid #1e1e5a;
+}
+
+.desglose-seccion:last-child {
+    border-bottom: none;
+}
+
+.desglose-seccion-titulo {
+    font-size: 0.34rem;
+    color: #a8dff0;
+    letter-spacing: 0.04em;
+    margin-bottom: 5px;
+    padding-bottom: 3px;
+    border-bottom: 1px solid #2a2a6a;
+}
+
+.desglose-titulo-verde { color: #6acc7a; }
+.desglose-titulo-rojo  { color: #e87070; }
+
+/* ---- Filas de dato ---- */
+.desglose-fila {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2px 0;
+    gap: 6px;
+}
+
+.desglose-label {
+    font-size: 0.30rem;
+    color: #6878a8;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+}
+
+.desglose-valor {
+    font-size: 0.32rem;
+    color: #c8d8ff;
+    flex-shrink: 0;
+    text-align: right;
+}
+
+.desglose-valor.pos { color: #6acc7a; }
+.desglose-valor.neg { color: #e87070; }
+
+/* ---- Subtotal ---- */
+.desglose-subtotal {
+    border-top: 1px dashed #2a2a6a;
+    margin-top: 3px;
+    padding-top: 4px;
+}
+
+.desglose-subtotal .desglose-label {
+    color: #a8dff0;
+    font-size: 0.32rem;
+}
+
+.desglose-subtotal .desglose-valor {
+    color: #ffd700;
+    font-size: 0.34rem;
+}
+
+/* ---- Ítem de bonificación / penalización ---- */
+.desglose-item-bonif,
+.desglose-item-penal {
+    font-size: 0.28rem;
+    padding: 2px 0;
+    line-height: 1.5;
+}
+
+.desglose-item-bonif { color: #6acc7a; }
+.desglose-item-penal { color: #e87070; }
+
+.desglose-sin-items {
+    font-size: 0.28rem;
+    color: #4a5a7a;
+    font-style: italic;
+}
+
+/* ---- Total final ---- */
+.desglose-total-wrap {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 7px 10px;
+    background: #08081c;
+    border-top: 2px solid #3a3a9a;
+}
+
+.desglose-total-label {
+    font-size: 0.34rem;
+    color: #a8dff0;
+    letter-spacing: 0.04em;
+}
+
+.desglose-total-valor {
+    font-size: 0.5rem;
+    color: #ffd700;
+    text-shadow: 1px 1px 0 #aa8800;
 }

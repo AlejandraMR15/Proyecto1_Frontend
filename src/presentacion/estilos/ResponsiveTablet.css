@@ -214,6 +214,29 @@
     .bienestar-label { font-size: 0.28rem; }
     .bienestar-valor { font-size: 0.38rem; }
 
+    /* ── DESGLOSE: debajo del bienestar ── */
+    #hud-desglose {
+        position: fixed;
+        top: 168px;
+        left: calc(var(--sb-width) + 10px) !important;
+        width: 150px !important;
+        z-index: 399;
+        transition: left 0.14s steps(4);
+    }
+
+    body.sidebar-cerrado #hud-desglose { left: 10px !important; }
+
+    #hud-desglose-toggle { font-size: 0.30rem !important; padding: 5px 8px !important; }
+    #hud-desglose-arrow  { font-size: 0.40rem !important; }
+    .desglose-seccion-titulo { font-size: 0.28rem !important; }
+    .desglose-label          { font-size: 0.24rem !important; }
+    .desglose-valor          { font-size: 0.26rem !important; }
+    .desglose-item-bonif,
+    .desglose-item-penal,
+    .desglose-sin-items      { font-size: 0.22rem !important; }
+    .desglose-total-label    { font-size: 0.26rem !important; }
+    .desglose-total-valor    { font-size: 0.38rem !important; }
+
     /* ── BOTÓN RUTA: esquina superior derecha junto a controles ── */
     #btn-calcular-ruta {
         position: fixed !important;

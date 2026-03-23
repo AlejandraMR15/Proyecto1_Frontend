@@ -232,19 +232,30 @@ export default class GridRenderer {
     _construirBloqueVolumen() {
         const cols  = this.mapa.ancho;
         const rows  = this.mapa.alto;
-        const SX    = this.STEP_X;
-        const SY    = this.STEP_Y;
         const TD    = this.TD;
+        const TW    = this.TW;
+        const TH    = this.TH;
         const depth = 110;
 
-        // Pico más bajo (centro) de poly-bottom de una celda
-        const picoX = (col, row) => (col - row) * SX + this._offsetX + SX;
-        const picoY = (col, row) => (col + row) * SY + TD + SY;
+        // El div de cada celda se posiciona en:
+        //   left = (col-row)*STEP_X + _offsetX
+        //   top  = (col+row)*STEP_Y + TD   (TD porque el div está desplazado)
+        // Los vértices del diamante dentro del div son:
+        //   Tope     = [TW/2, 0]
+        //   Derecha  = [TW,   TH/2]
+        //   Fondo    = [TW/2, TH]
+        //   Izquierda= [0,    TH/2]
+        // En coordenadas absolutas del #iso-grid:
 
-        // Los tres picos visibles del borde inferior del grid
-        const rc = { x: picoX(cols-1, 0),      y: picoY(cols-1, 0)      }; // derecha
-        const bc = { x: picoX(cols-1, rows-1), y: picoY(cols-1, rows-1) }; // abajo
-        const lc = { x: picoX(0,      rows-1), y: picoY(0,      rows-1) }; // izquierda
+        const dX = (col, row) => (col - row) * this.STEP_X + this._offsetX;
+        const dY = (col, row) => (col + row) * this.STEP_Y + TD;
+
+        // Pico DERECHO: vértice derecho del diamante de la celda (cols-1, 0)
+        const rc = { x: dX(cols-1, 0) + TW,      y: dY(cols-1, 0) + TH / 2 };
+        // Pico INFERIOR: vértice fondo del diamante de la celda (cols-1, rows-1)
+        const bc = { x: dX(cols-1, rows-1) + TW/2, y: dY(cols-1, rows-1) + TH };
+        // Pico IZQUIERDO: vértice izquierdo del diamante de la celda (0, rows-1)
+        const lc = { x: dX(0, rows-1) + 0,         y: dY(0, rows-1) + TH / 2 };
 
         const faceLeft = [
             `${lc.x},${lc.y}`,

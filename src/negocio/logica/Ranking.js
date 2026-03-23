@@ -21,6 +21,7 @@ export default class Ranking {
      * @param {number} datosCiudad.poblacion - Población de la ciudad.
      * @param {number} datosCiudad.felicidad - Felicidad promedio.
      * @param {number} datosCiudad.turno - Número de turno alcanzado.
+     * @param {string} [datosCiudad.ciudadId] - ID único de la ciudad.
      */
     agregarEntrada(datosCiudad) {
         const nuevaEntrada = new RankingEntry(
@@ -30,7 +31,8 @@ export default class Ranking {
             datosCiudad.poblacion,
             datosCiudad.felicidad,
             datosCiudad.turno,
-            datosCiudad.fecha ? new Date(datosCiudad.fecha) : new Date()
+            datosCiudad.fecha ? new Date(datosCiudad.fecha) : new Date(),
+            datosCiudad.ciudadId
         );
 
         this.entradas.push(nuevaEntrada);

@@ -12,8 +12,9 @@ export default class RankingEntry {
      * @param {number} felicidad - Felicidad promedio.
      * @param {number} turno - Número de turno alcanzado.
      * @param {Date} [fecha=new Date()] - Fecha de la entrada.
+     * @param {string} [ciudadId] - ID único de la ciudad para evitar duplicados.
      */
-    constructor(nombreCiudad, alcalde, puntuacion, poblacion, felicidad, turno, fecha = new Date()) {
+    constructor(nombreCiudad, alcalde, puntuacion, poblacion, felicidad, turno, fecha = new Date(), ciudadId = null) {
         this.nombreCiudad = nombreCiudad;
         this.alcalde = alcalde;
         this.puntuacion = puntuacion;
@@ -21,6 +22,7 @@ export default class RankingEntry {
         this.felicidad = felicidad;
         this.turno = turno;
         this.fecha = fecha;
+        this.ciudadId = ciudadId;
     }
 
     /**
@@ -35,7 +37,8 @@ export default class RankingEntry {
             poblacion: this.poblacion,
             felicidad: this.felicidad,
             turno: this.turno,
-            fecha: this.fecha
+            fecha: this.fecha,
+            ciudadId: this.ciudadId
         };
     }
 }

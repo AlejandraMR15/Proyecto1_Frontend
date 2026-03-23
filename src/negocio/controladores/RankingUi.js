@@ -54,31 +54,41 @@ export function guardarRanking() {
 
 /**
  * Actualiza la entrada existente de la ciudad actual o la crea si no existe.
- * Evita duplicados y mantiene la persistencia en localStorage.
+ * Busca por nombre + alcalde (combinación única que funcionaba bien).
+ * Preserva el ciudadId para identificar la partida actual.
  */
 export function actualizarOAgregarEnRanking() {
     const juego = window.juego;
     if (!juego || !juego.ciudad) return;
 
+    const ciudadId = juego.ciudad.ciudadId;
     const nombreCiudad = juego.ciudad.nombre;
+    const alcaldeActual = juego.ciudad.alcalde;
     const datosActualizados = {
         nombreCiudad,
-        alcalde: juego.ciudad.alcalde,
+        alcalde: alcaldeActual,
         puntuacion: juego.puntaje || 0,
         poblacion: juego.gestorCiudadanos.calcularTotalCiudadanos(),
         felicidad: Math.round(juego.gestorCiudadanos.calcularFelicidadPromedio()),
         turno: juego.numeroTurno,
         fecha: new Date().toISOString(),
+        ciudadId: ciudadId
     };
 
-    const indexExistente = rankingManager.entradas.findIndex(e => e.nombreCiudad === nombreCiudad);
+    // Buscar entrada por nombre + alcalde (combinación única)
+    // Esto evita duplicados cuando se actualiza durante la partida activa
+    const indexExistente = rankingManager.entradas.findIndex(
+        e => e.nombreCiudad === nombreCiudad && e.alcalde === alcaldeActual
+    );
 
     if (indexExistente !== -1) {
+        // Actualizar entrada existente, preservando fecha original (fecha de inicio de esta partida)
         const entrada = rankingManager.entradas[indexExistente];
         const fechaOriginal = entrada.fecha;
         Object.assign(entrada, datosActualizados);
         entrada.fecha = fechaOriginal;
     } else {
+        // Crear nueva entrada si no existe
         rankingManager.agregarEntrada(datosActualizados);
     }
 

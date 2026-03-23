@@ -573,7 +573,6 @@ export default class GridRenderer {
      * @param {number} cantidad - Cantidad del recurso
      */
     mostrarBurbuja(col, row, tipo, cantidad) {
-        console.log('[GridRenderer] Burbuja solicitada:', { col, row, tipo, cantidad });
         
         if (!this._burbujesEl) {
             console.error('[GridRenderer] ERROR: _burbujesEl no existe. El contenedor no fue inicializado.');
@@ -656,7 +655,6 @@ export default class GridRenderer {
         }
 
         this._burbujesEl.appendChild(burbuja);
-        console.log('[GridRenderer] Burbuja agregada al DOM');
 
         // Forzar reflow para que la animación inicial sea visible
         void burbuja.offsetHeight;
@@ -674,7 +672,6 @@ export default class GridRenderer {
         // Limpiar después de la animación
         setTimeout(() => {
             burbuja.remove();
-            console.log('[GridRenderer] Burbuja removida del DOM');
         }, 1800);
     }
 }

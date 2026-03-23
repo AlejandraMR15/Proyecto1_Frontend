@@ -190,11 +190,19 @@ export default class Ciudad {
             comida: 0,
         };
 
+        // Guardar producción total de plantas (FASE 1)
+        let produccionPlantasElectricidad = 0;
+        let produccionPlantasAgua = 0;
+
         // ===== FASE 1: PRODUCCIÓN de plantas de utilidad =====
         const plantas = this.construcciones.filter(c => c instanceof PlantasDeUtilidad);
         for (const planta of plantas) {
             const produccion = planta.procesarProduccion(this.recursos);
             this._acumularProduccionPendiente(produccionPendiente, produccion);
+            
+            // Guardar producción de plantas para retornar después
+            if (produccion?.electricidad) produccionPlantasElectricidad += produccion.electricidad;
+            if (produccion?.agua) produccionPlantasAgua += produccion.agua;
             
             // Mostrar burbuja visual si produjo algo
             this._mostrarBurbujaProduccion(planta, produccion);
@@ -247,8 +255,8 @@ export default class Ciudad {
 
         return {
             dinero: produccionPendiente.dinero,
-            electricidad: produccionPendiente.electricidad,
-            agua: produccionPendiente.agua,
+            electricidad: produccionPlantasElectricidad,
+            agua: produccionPlantasAgua,
             felicidad: produccionPendiente.felicidad,
         };
     }
@@ -276,14 +284,7 @@ export default class Ciudad {
      * @param {object} edificio - El edificio que produjo
      * @param {object} produccion - Objeto con dinero, electricidad, agua, comida
      */
-    _mostrarBurbujaProduccion(edificio, produccion) {
-        console.log('[Ciudad._mostrarBurbujaProduccion] Llamada con:', { 
-            gridRenderer: !!window.gridRenderer, 
-            coordX: edificio._coordX, 
-            coordY: edificio._coordY,
-            produccion 
-        });
-
+    _mostrarBurbujaProduccion(edificio, produccion) {  
         if (!window.gridRenderer) {
             console.warn('[Ciudad._mostrarBurbujaProduccion] window.gridRenderer no existe');
             return;
@@ -299,23 +300,17 @@ export default class Ciudad {
         const col = edificio._coordX;
         const row = edificio._coordY;
 
-        console.log('[Ciudad._mostrarBurbujaProduccion] Mostrando burbujas en:', col, row);
-
         // Mapeo de tipos a nombres para mostrarBurbuja
         if (produccion.dinero > 0) {
-            console.log('[Ciudad] Mostrando burbuja dinero:', produccion.dinero);
             window.gridRenderer.mostrarBurbuja(col, row, 'dinero', produccion.dinero);
         }
         if (produccion.electricidad > 0) {
-            console.log('[Ciudad] Mostrando burbuja electricidad:', produccion.electricidad);
             window.gridRenderer.mostrarBurbuja(col, row, 'electricidad', produccion.electricidad);
         }
         if (produccion.agua > 0) {
-            console.log('[Ciudad] Mostrando burbuja agua:', produccion.agua);
             window.gridRenderer.mostrarBurbuja(col, row, 'agua', produccion.agua);
         }
         if (produccion.comida > 0) {
-            console.log('[Ciudad] Mostrando burbuja comida:', produccion.comida);
             window.gridRenderer.mostrarBurbuja(col, row, 'produccion', produccion.comida);
         }
     }

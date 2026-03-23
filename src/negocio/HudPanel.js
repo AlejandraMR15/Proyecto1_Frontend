@@ -129,6 +129,60 @@ function _actualizarRecurso(contenedorId, el, texto) {
     }
 }
 
+/**
+ * Actualiza los tooltips de recursos con información de producción y consumo del turno.
+ * Lee los datos de window.estadisticasRecursos que se crea en Juego.ejecutarTurno()
+ */
+export function actualizarTooltipsRecursos() {
+    // Inicializar con valores por defecto si no existen
+    if (!window.estadisticasRecursos) {
+        window.estadisticasRecursos = {
+            produccion: { dinero: 0, electricidad: 0, agua: 0, comida: 0 },
+            consumo: { dinero: 0, electricidad: 0, agua: 0, comida: 0 },
+            actual: { dinero: 0, electricidad: 0, agua: 0, comida: 0 }
+        };
+    }
+
+    const stats = window.estadisticasRecursos;
+    
+    // Configuración de recursos: [id-tooltip, tipo-recurso, sufijo]
+    const recursos = [
+        ['tooltip-dinero', 'dinero', ''],
+        ['tooltip-electricidad', 'electricidad', ' u'],
+        ['tooltip-agua', 'agua', ' u']
+    ];
+
+    recursos.forEach(([tooltipId, tipo, sufijo]) => {
+        const tooltip = document.getElementById(tooltipId);
+        if (!tooltip) {
+            console.warn(`[Tooltip] No se encontró elemento: #${tooltipId}`);
+            return;
+        }
+
+        const produccion = stats.produccion[tipo] || 0;
+        const consumo = stats.consumo[tipo] || 0;
+        const balance = produccion - consumo;
+
+        // Formatear valores
+        const prodText = produccion > 0 ? `+${produccion}` : `${produccion}`;
+        const consText = consumo > 0 ? `-${consumo}` : `${consumo}`;
+        const balText = balance > 0 ? `+${balance}` : `${balance}`;
+
+        // Actualizar el tooltip
+        const prodSpan = tooltip.querySelector('.tooltip-prod');
+        const consSpan = tooltip.querySelector('.tooltip-cons');
+        const balSpan = tooltip.querySelector('.tooltip-balance-val');
+
+        if (prodSpan) prodSpan.textContent = prodText + sufijo;
+        if (consSpan) consSpan.textContent = consText + sufijo;
+        if (balSpan) {
+            balSpan.textContent = balText + sufijo;
+            // Cambiar color del balance según si es positivo o negativo
+            balSpan.style.color = balance > 0 ? '#4ade80' : balance < 0 ? '#ff6b6b' : '#fbbf24';
+        }
+    });
+}
+
 /* ================================================================
    TIMER VISUAL DEL TURNO
 ================================================================ */
@@ -185,6 +239,32 @@ export function onNuevoTurno() {
     timerEstado.tiempoTranscurrido = 0;
     actualizarTimerDOM();
     actualizarHUD();
+    actualizarTooltipsRecursos();
+}
+
+/* ================================================================
+   POSICIONAMIENTO DINÁMICO DE TOOLTIPS
+================================================================ */
+
+/**
+ * Configura los listeners de mouse para mostrar/ocultar tooltips.
+ * El posicionamiento es automático con position: absolute + bottom: 100%
+ */
+export function configurarTooltipsRecursos() {
+    const recursos = document.querySelectorAll('.hud-recurso');
+    
+    recursos.forEach(recurso => {
+        const tooltip = recurso.querySelector('.hud-recurso-tooltip');
+        if (!tooltip) return;
+        
+        recurso.addEventListener('mouseenter', () => {
+            tooltip.classList.add('visible');
+        });
+        
+        recurso.addEventListener('mouseleave', () => {
+            tooltip.classList.remove('visible');
+        });
+    });
 }
 
 /* ================================================================

@@ -80,9 +80,43 @@ export default class Juego {
         this.numeroTurno++;
         console.log("Turno:", this.numeroTurno);
         if (this.ciudad) {
+            // Guardar estado anterior de recursos antes de procesar el turno
+            const recursoAnterior = {
+                dinero: this.ciudad.recursos.dinero,
+                electricidad: this.ciudad.recursos.electricidad,
+                agua: this.ciudad.recursos.agua,
+                comida: this.ciudad.recursos.comida
+            };
+
             // Procesar turno en la ciudad
             const produccionPendiente = this.ciudad.procesarTurno(this.gestorCiudadanos.ciudadanos);
             this.recolectorBurbujas.registrarProduccionLote(produccionPendiente);
+
+            // Calcular consumo real de este turno
+            const recursoActual = {
+                dinero: this.ciudad.recursos.dinero,
+                electricidad: this.ciudad.recursos.electricidad,
+                agua: this.ciudad.recursos.agua,
+                comida: this.ciudad.recursos.comida
+            };
+
+            // Guardar estadísticas en variable global para mostrar en HUD
+            window.estadisticasRecursos = {
+                produccion: {
+                    dinero: produccionPendiente.dinero || 0,
+                    electricidad: produccionPendiente.electricidad || 0,
+                    agua: produccionPendiente.agua || 0,
+                    comida: produccionPendiente.comida || 0
+                },
+                consumo: {
+                    dinero: (produccionPendiente.dinero || 0) - (recursoActual.dinero - recursoAnterior.dinero),
+                    electricidad: (produccionPendiente.electricidad || 0) - (recursoActual.electricidad - recursoAnterior.electricidad),
+                    agua: (produccionPendiente.agua || 0) - (recursoActual.agua - recursoAnterior.agua),
+                    comida: (produccionPendiente.comida || 0) - (recursoActual.comida - recursoAnterior.comida)
+                },
+                actual: recursoActual
+            };
+
 
             // VALIDACIÓN: Verificar si algún recurso crítico es negativo → GAME OVER
             const recursos = this.ciudad.recursos;

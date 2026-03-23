@@ -20,6 +20,8 @@ import {
     detenerTimerTurno,
     onNuevoTurno,
     observarSidebar,
+    configurarTooltipsRecursos,
+    actualizarTooltipsRecursos,
 } from './HudPanel.js';
 
 import {
@@ -96,6 +98,7 @@ function initHUD() {
     ---------------------------------------------------------- */
     actualizarHUD();
     actualizarTimerDOM();
+    actualizarTooltipsRecursos();
 
     /* ----------------------------------------------------------
        5. Interceptar ejecutarTurno para refrescar el HUD
@@ -144,6 +147,11 @@ function initHUD() {
        9. Observar sidebar
     ---------------------------------------------------------- */
     observarSidebar();
+
+    /* ----------------------------------------------------------
+       10. Configurar posicionamiento dinámico de tooltips
+    ---------------------------------------------------------- */
+    configurarTooltipsRecursos();
 
     console.info('[HUD] Inicializado. Duración turno:', timerEstado.duracionTurno + 's');
 }

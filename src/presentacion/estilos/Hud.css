@@ -14,6 +14,7 @@
     gap: 6px;
     align-items: center;
     z-index: 210;
+    overflow: visible;
 }
 
 .hud-recurso {
@@ -79,6 +80,72 @@
 .hud-recurso-valor.dinero-rojo {
     color: #ff4444;
     text-shadow: 0 0 8px rgba(255, 68, 68, 0.5);
+}
+
+/* ---- TOOLTIPS DE RECURSOS ---- */
+.hud-recurso {
+    position: relative;
+}
+
+.hud-recurso-tooltip {
+    visibility: hidden;
+    opacity: 0;
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 8px;
+    background: #0a0f1a;
+    border: 1px solid #2e7a94;
+    border-radius: 6px;
+    padding: 6px 10px;
+    min-width: 140px;
+    z-index: 1000;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.8);
+    pointer-events: none;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.30rem;
+    color: #a8dff0;
+    line-height: 1.4;
+    white-space: normal;
+    word-break: break-word;
+    transition: opacity 0.2s ease;
+}
+
+.hud-recurso-tooltip.visible {
+    visibility: visible;
+    opacity: 1;
+}
+
+.tooltip-item {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.tooltip-prod {
+    color: #4ade80;
+    font-weight: bold;
+}
+
+.tooltip-cons {
+    color: #ff6b6b;
+    font-weight: bold;
+}
+
+.tooltip-separator {
+    height: 1px;
+    background: #2e7a94;
+    margin: 4px 0;
+}
+
+.tooltip-balance {
+    color: #fbbf24;
+}
+
+.tooltip-balance-val {
+    color: #fbbf24;
+    font-weight: bold;
 }
 
 /* ---- BOTONES CONTROL (esquina superior derecha) ---- */

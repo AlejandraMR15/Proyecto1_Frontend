@@ -92,11 +92,8 @@ const EDIFICIOS_CONFIG = {
    ESTADO DEL MÓDULO
 ================================================================ */
 let modoConstructivo     = false;
-let modoDemolicion       = false;        // NEW: modo demolición activo
 let edificioSeleccionado = null;         // config del edificio elegido en el sidebar
 let itemActivoEl         = null;         // <li> resaltado en el sidebar
-let edificioSeleccionadoAntes = null;    // guardado antes de entrar en demolición
-let itemActivoElAntes = null;             // guardado antes de entrar en demolición
  
 /* ================================================================
    UTILIDAD: id único para cada edificio construido
@@ -109,22 +106,13 @@ function generarId() {
    NOTIFICACIÓN en pantalla (sin alert)
 ================================================================ */
 function mostrarNotificacion(mensaje, tipo = 'info') {
-    let notif = document.getElementById('notif-construccion');
-    if (!notif) {
-        notif = document.createElement('div');
-        notif.id = 'notif-construccion';
-        notif.style.cssText = [
-            'position:fixed', 'bottom:80px', 'left:50%', 'transform:translateX(-50%)',
-            'background:#0a1628', 'border:1px solid #2e7a94', 'color:#a8dff0',
-            'padding:10px 20px', 'border-radius:6px', 'font-size:0.82rem',
-            'z-index:9999', 'pointer-events:none', 'transition:opacity 0.3s',
-            'white-space:nowrap', 'box-shadow:0 4px 16px rgba(0,0,0,0.6)'
-        ].join(';');
-        document.body.appendChild(notif);
-    }
+    const notif = document.getElementById('notif-construccion');
+    if (!notif) return; // Template debe estar en HTML
+    
     notif.style.borderColor = tipo === 'error' ? '#e05555' : '#2e7a94';
     notif.style.color       = tipo === 'error' ? '#f08080' : '#a8dff0';
     notif.textContent = mensaje;
+    notif.style.display = 'block';
     notif.style.opacity = '1';
     clearTimeout(notif._timeout);
     notif._timeout = setTimeout(() => { notif.style.opacity = '0'; }, 2800);
@@ -133,9 +121,9 @@ function mostrarNotificacion(mensaje, tipo = 'info') {
 /* ================================================================
    MODAL DE INFORMACIÓN DEL EDIFICIO
 ================================================================ */
-function mostrarInfoEdificio(construccion) {
-    const previo = document.getElementById('modal-info-edificio');
-    if (previo) previo.remove();
+function mostrarInfoEdificio(construccion, col, row) {
+    const modal = document.getElementById('modal-info-edificio');
+    if (!modal) return; // Template debe estar en HTML
  
     const info = typeof construccion.getInformacion === 'function'
         ? construccion.getInformacion()
@@ -176,37 +164,31 @@ function mostrarInfoEdificio(construccion) {
             </tr>`;
         }).join('');
  
-    const modal = document.createElement('div');
-    modal.id = 'modal-info-edificio';
-    modal.style.cssText = [
-        'position:fixed', 'top:50%', 'left:50%', 'transform:translate(-50%,-50%)',
-        'background:#0a1628', 'border:1px solid #2e7a94', 'border-radius:10px',
-        'padding:24px 28px', 'z-index:10000', 'min-width:280px', 'max-width:420px',
-        'box-shadow:0 8px 32px rgba(0,0,0,0.75)', 'color:#a8dff0',
-        'font-family:Segoe UI,system-ui,sans-serif'
-    ].join(';');
- 
-    modal.innerHTML = `
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-            <h3 style="font-size:1rem;color:#a8dff0;margin:0">${info.nombre ?? 'Edificio'}</h3>
-            <button id="modal-cerrar" style="background:none;border:none;color:#4a9fb5;
-                font-size:1.2rem;cursor:pointer;line-height:1;padding:0">✕</button>
-        </div>
-        <table style="border-collapse:collapse;width:100%">${filas}</table>
-    `;
- 
-    document.body.appendChild(modal);
-    document.getElementById('modal-cerrar').addEventListener('click', () => modal.remove());
+    // Actualizar el título y la tabla del modal
+    document.getElementById('modal-info-titulo').textContent = info.nombre ?? 'Edificio';
+    document.getElementById('modal-info-tabla').innerHTML = filas;
+    
+    // Mostrar el modal
+    modal.style.display = 'block';
+    
+    // Cerrar al hacer click en la X
+    const btnCerrar = document.getElementById('modal-cerrar');
+    btnCerrar.onclick = () => modal.style.display = 'none';
+    
+    // Botón de demoler
+    const btnDemoler = document.getElementById('modal-info-demoler');
+    btnDemoler.onclick = () => {
+        modal.style.display = 'none';
+        mostrarConfirmacionDemolicion(construccion, col, row);
+    };
  
     // Cerrar al hacer click fuera
-    setTimeout(() => {
-        document.addEventListener('click', function cerrarFuera(e) {
-            if (!modal.contains(e.target)) {
-                modal.remove();
-                document.removeEventListener('click', cerrarFuera);
-            }
-        });
-    }, 100);
+    const cerrarAlClickFuera = (e) => {
+        if (!modal.contains(e.target)) {
+            modal.style.display = 'none';
+        }
+    };
+    document.addEventListener('click', cerrarAlClickFuera, true);
 }
  
 /* ================================================================
@@ -241,31 +223,10 @@ function deseleccionarEdificio() {
     if (itemActivoEl) itemActivoEl.classList.remove('build-item--activo');
     edificioSeleccionado = null;
     itemActivoEl = null;
-    // Solo resetear cursor si no estamos en modo demolición
-    if (!modoDemolicion) aplicarCursorModo('');
+    aplicarCursorModo('');
 }
 
-/* ================================================================
-   FUNCIONES DE DEMOLICIÓN — NEW
-================================================================ */
-function activarModoDemolicion() {
-    // Guardar el edificio que estaba seleccionado antes de demolición
-    edificioSeleccionadoAntes = edificioSeleccionado;
-    itemActivoElAntes = itemActivoEl;
-    
-    modoDemolicion = true;
-    // Si entramos en demolición, desactivar construcción
-    modoConstructivo = false;
-    deseleccionarEdificio();
-    aplicarCursorModo('not-allowed');
-    mostrarNotificacion('Modo demolición activado — haz click en un edificio para demoler');
-}
 
-function desactivarModoDemolicion() {
-    modoDemolicion = false;
-    // Solo resetear cursor si no hay edificio seleccionado para construir
-    if (!edificioSeleccionado) aplicarCursorModo('');
-}
 
 /**
  * Muestra modal de confirmación de demolición.
@@ -274,8 +235,8 @@ function desactivarModoDemolicion() {
  * @param {number} row - Fila del edificio
  */
 function mostrarConfirmacionDemolicion(construccion, col, row) {
-    const previo = document.getElementById('modal-confirmar-demolicion');
-    if (previo) previo.remove();
+    const modal = document.getElementById('modal-confirmar-demolicion');
+    if (!modal) return; // Template debe estar en HTML
 
     const info = typeof construccion.getInformacion === 'function'
         ? construccion.getInformacion()
@@ -286,7 +247,7 @@ function mostrarConfirmacionDemolicion(construccion, col, row) {
     if (Array.isArray(construccion.residentes)) {
         const num = construccion.residentes.length;
         if (num > 0) {
-            mensajeCiudadanos = `<p style="color:#f08080;margin-top:8px">⚠️ Hay ${num} ciudadano(s) viviendo aquí. Quedarán sin hogar.</p>`;
+            mensajeCiudadanos += `<p style="color:#f08080;margin-top:8px">⚠️ Hay ${num} ciudadano(s) viviendo aquí. Quedarán sin hogar.</p>`;
         }
     }
     if (Array.isArray(construccion.empleados)) {
@@ -299,57 +260,34 @@ function mostrarConfirmacionDemolicion(construccion, col, row) {
     const reembolso = Math.floor(info.costo * 0.5);
     const textoReembolso = `Recibirás $${reembolso} (50% del costo)`;
 
-    const modal = document.createElement('div');
-    modal.id = 'modal-confirmar-demolicion';
-    modal.style.cssText = [
-        'position:fixed', 'top:50%', 'left:50%', 'transform:translate(-50%,-50%)',
-        'background:#0a1628', 'border:2px solid #e05555', 'border-radius:10px',
-        'padding:24px 28px', 'z-index:10000', 'min-width:320px', 'max-width:450px',
-        'box-shadow:0 8px 32px rgba(0,0,0,0.9)', 'color:#a8dff0',
-        'font-family:Segoe UI,system-ui,sans-serif'
-    ].join(';');
+    // Actualizar contenido del modal
+    document.getElementById('modal-demolicion-titulo').textContent = `🗑️ ¿DEMOLER ${info.nombre.toUpperCase()}?`;
+    document.getElementById('modal-demolicion-ubicacion').textContent = `Ubicación: (${col}, ${row})`;
+    document.getElementById('modal-demolicion-reembolso').textContent = textoReembolso;
+    document.getElementById('modal-demolicion-ciudadanos').innerHTML = mensajeCiudadanos;
 
-    modal.innerHTML = `
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-            <h3 style="font-size:1rem;color:#f08080;margin:0">🗑️ ¿DEMOLER ${info.nombre.toUpperCase()}?</h3>
-            <button id="modal-demolicion-cerrar" style="background:none;border:none;color:#4a9fb5;
-                font-size:1.2rem;cursor:pointer;line-height:1;padding:0">✕</button>
-        </div>
-        <div style="background:#1a2a38;padding:12px;border-radius:6px;margin-bottom:16px">
-            <p style="margin:0;font-size:0.9rem">Ubicación: (${col}, ${row})</p>
-            <p style="margin:8px 0 0 0;font-size:0.9rem;color:#2e7a94">${textoReembolso}</p>
-        </div>
-        ${mensajeCiudadanos}
-        <div style="display:flex;gap:8px;margin-top:16px">
-            <button id="modal-demolicion-confirmar" style="flex:1;padding:10px;background:#e05555;
-                border:none;color:#fff;cursor:pointer;border-radius:6px;font-weight:bold">
-                ✔ CONFIRMAR DEMOLICIÓN
-            </button>
-            <button id="modal-demolicion-cancelar" style="flex:1;padding:10px;background:#2a3a48;
-                border:1px solid #2e7a94;color:#a8dff0;cursor:pointer;border-radius:6px">
-                ✕ CANCELAR
-            </button>
-        </div>
-    `;
+    // Mostrar el modal
+    modal.style.display = 'block';
 
-    document.body.appendChild(modal);
+    // Usar onclick para evitar acumulación de listeners
+    const btnCerrar = document.getElementById('modal-demolicion-cerrar');
+    const btnCancelar = document.getElementById('modal-demolicion-cancelar');
+    const btnConfirmar = document.getElementById('modal-demolicion-confirmar');
 
-    document.getElementById('modal-demolicion-cerrar').addEventListener('click', () => modal.remove());
-    document.getElementById('modal-demolicion-cancelar').addEventListener('click', () => modal.remove());
-    document.getElementById('modal-demolicion-confirmar').addEventListener('click', () => {
+    btnCerrar.onclick = () => modal.style.display = 'none';
+    btnCancelar.onclick = () => modal.style.display = 'none';
+    btnConfirmar.onclick = () => {
         ejecutarDemolicion(construccion, col, row);
-        modal.remove();
-    });
+        modal.style.display = 'none';
+    };
 
     // Cerrar al hacer click fuera
-    setTimeout(() => {
-        document.addEventListener('click', function cerrarAlClickFuera(e) {
-            if (!modal.contains(e.target) && e.target !== modal) {
-                modal.remove();
-                document.removeEventListener('click', cerrarAlClickFuera);
-            }
-        });
-    }, 100);
+    const cerrarAlClickFuera = (e) => {
+        if (!modal.contains(e.target)) {
+            modal.style.display = 'none';
+        }
+    };
+    document.addEventListener('click', cerrarAlClickFuera, true);
 }
 
 /**
@@ -398,8 +336,10 @@ function ejecutarDemolicion(construccion, col, row) {
     // 6. Persistir
     juego.guardarPartida();
 
-    // 7. Actualizar HUD para que se vea inmediatamente
-    actualizarRecursos();
+    // 7. Actualizar HUD completo (recursos, ciudadanos, viviendas, etc.)
+    if (typeof window.refrescarHUD === 'function') {
+        window.refrescarHUD();
+    }
 
     mostrarNotificacion(`✔ Demolido. Recuperaste $${reembolso}`);
     // Nota: NO desactivamos el modo, el usuario lo hace con el botón
@@ -492,22 +432,6 @@ function manejarClickCelda(e) {
     if (!juego || !juego.ciudad || !gridRenderer) return;
  
     const ciudad = juego.ciudad;
- 
-    /* -- MODO DEMOLICIÓN → detectar celda ocupada -- */
-    if (modoDemolicion) {
-        if (etiqueta === 'g') {
-            mostrarNotificacion('⚠ No hay nada que demoler ahí', 'error');
-            return;
-        }
-        // Buscar construcción en esa coordenada
-        const construccion = buscarEdificioPorCoordenada(col, row);
-        if (construccion) {
-            mostrarConfirmacionDemolicion(construccion, col, row);
-        } else {
-            mostrarNotificacion('⚠ No se encontró el edificio', 'error');
-        }
-        return;
-    }
 
     /* -- Celda OCUPADA → mostrar información (NO si estamos en modo ruta) -- */
     if (etiqueta !== 'g') {
@@ -517,7 +441,7 @@ function manejarClickCelda(e) {
         }
         const construccion = buscarEdificioPorCoordenada(col, row);
         if (construccion) {
-            mostrarInfoEdificio(construccion);
+            mostrarInfoEdificio(construccion, col, row);
         } else {
             mostrarNotificacion(`Celda (${col},${row}): ${etiqueta}`);
         }
@@ -564,8 +488,13 @@ function manejarClickCelda(e) {
  
     // 6. Repintar el cubo en el grid
     gridRenderer._actualizarCubo(col, row);
+
+    // 7. Actualizar HUD (recursos, ciudadanos, edificios, etc.)
+    if (typeof window.refrescarHUD === 'function') {
+        window.refrescarHUD();
+    }
  
-    // 7. Persistir
+    // 8. Persistir
     juego.guardarPartida();
  
     mostrarNotificacion(`✔ ${edificioSeleccionado.label} construido en (${col}, ${row})`);
@@ -579,35 +508,29 @@ document.addEventListener('DOMContentLoaded', function () {
     const sidebar  = document.getElementById('sidebar');
     const closeBtn = document.getElementById('sidebarClose');
     const tabBtn   = document.getElementById('sidebarTab');
-    const demolirBtn = document.getElementById('sidebarDemolir');
  
     /* ---- Abrir / cerrar sidebar → activa / desactiva modo construcción ---- */
     function abrirSidebar() {
         sidebar.dataset.open = 'true';
-        // modoConstructivo = true SOLO si no estamos en modo demolición
-        modoConstructivo = !modoDemolicion;
-        document.body.classList.add('sidebar-construccion-abierto');
         modoConstructivo = true;
-        desactivarModoDemolicion();
-        if (demolirBtn) demolirBtn.classList.remove('demoler-activo');
+        document.body.classList.add('sidebar-construccion-abierto');
     }
  
     function cerrarSidebar() {
         sidebar.dataset.open = 'false';
         modoConstructivo = false;  // Menú cerrado = no construir
-        modoDemolicion = false;
-        // Limpiar los datos guardados de demolición
-        edificioSeleccionadoAntes = null;
-        itemActivoElAntes = null;
         document.body.classList.remove('sidebar-construccion-abierto');
-        modoConstructivo = false;
-        desactivarModoDemolicion();
         deseleccionarEdificio();
-        if (demolirBtn) demolirBtn.classList.remove('demoler-activo');
     }
  
     closeBtn.addEventListener('click', cerrarSidebar);
-    tabBtn.addEventListener('click',   abrirSidebar);
+    tabBtn.addEventListener('click', function() {
+        if (sidebar.dataset.open === 'true') {
+            cerrarSidebar();
+        } else {
+            abrirSidebar();
+        }
+    });
 
     /* ---- En móvil el header actúa como toggle ---- */
     const sidebarHeader = sidebar.querySelector('.sidebar-header');
@@ -623,28 +546,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    /* ---- Botón de demoler ---- */
-    if (demolirBtn) {
-        demolirBtn.addEventListener('click', function () {
-            if (modoDemolicion) {
-                // DESACTIVAR demolición → restaura construcción si el menú está abierto
-                desactivarModoDemolicion();
-                demolirBtn.classList.remove('demoler-activo');
-                mostrarNotificacion('Modo demolición desactivado');
-            } else {
-                // ACTIVAR demolición → desactiva construcción
-                activarModoDemolicion();
-                demolirBtn.classList.add('demoler-activo');
-                // Asegurar que el menú está abierto
-                sidebar.dataset.open = 'true';
-                document.body.classList.add('sidebar-construccion-abierto');
-                modoConstructivo = false;
-                deseleccionarEdificio();
-            }
-        });
-    }
- 
-    // Estado inicial según data-open del HTML
+    /* ---- Acordeón de categorías ---- */
     // Menú abierto → modo construcción habilitado
     // Menú cerrado → sin modo activo
     // En tablet (768-1024px) el sidebar siempre está visualmente abierto → forzar modo constructivo
@@ -654,7 +556,7 @@ document.addEventListener('DOMContentLoaded', function () {
         modoConstructivo = true;
         document.body.classList.add('sidebar-construccion-abierto');
     } else {
-        modoConstructivo = sidebar.dataset.open === 'true' && !modoDemolicion;
+        modoConstructivo = sidebar.dataset.open === 'true';
     }
  
     /* ---- ESC cierra el sidebar (no en tablet donde siempre está visible) ---- */
@@ -664,8 +566,6 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!esTabletAhora) {
                 cerrarSidebar();
             }
-            desactivarModoDemolicion();
-            if (demolirBtn) demolirBtn.classList.remove('demoler-activo');
         }
     });
  
@@ -717,12 +617,6 @@ document.addEventListener('DOMContentLoaded', function () {
         li.addEventListener('click', function () {
             seleccionarEdificio(li);
             modoConstructivo = true;
-            modoDemolicion = false;
-            // Limpiar los datos guardados de demolición
-            edificioSeleccionadoAntes = null;
-            itemActivoElAntes = null;
-            desactivarModoDemolicion();
-            if (demolirBtn) demolirBtn.classList.remove('demoler-activo');
         });
     });
  

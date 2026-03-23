@@ -35,6 +35,10 @@ const elElectricidad = document.getElementById('val-electricidad');
 const elAgua         = document.getElementById('val-agua');
 const elComida       = document.getElementById('val-comida');
 const elFelicidad    = document.getElementById('val-felicidad');
+const elCiudadanos   = document.getElementById('val-ciudadanos');
+const elEmpleados    = document.getElementById('val-empleados');
+const elDesempleados = document.getElementById('val-desempleados');
+const elResidenciales = document.getElementById('val-residenciales');
 
 const elTurnoNum     = document.getElementById('val-turno');
 const elBarraFill    = document.getElementById('turno-barra-fill');
@@ -84,6 +88,19 @@ export function actualizarHUD() {
     // --- Bienestar ---
     if (elComida)    elComida.textContent    = fmt(recursos.comida) + ' u';
     if (elFelicidad) elFelicidad.textContent = Math.round(gestor.calcularFelicidadPromedio()) + '%';
+
+    // --- Ciudadanos, empleados, desempleados, edificios residenciales ---
+    // Siempre calculado en tiempo real: funciona al crear ciudad, recargar y con mapa JSON
+    const estadPob = gestor.obtenerEstadisticasCiudadanos();
+    const estadEd  = gestor.obtenerEstadisticasEdificios();
+
+    if (elCiudadanos)    elCiudadanos.textContent    = fmt(estadPob.total);
+    if (elEmpleados)     elEmpleados.textContent     = fmt(estadPob.empleados);
+    if (elDesempleados) {
+        elDesempleados.textContent = fmt(estadPob.desempleados);
+        elDesempleados.classList.toggle('bienestar-valor--alerta', estadPob.desempleados > 0);
+    }
+    if (elResidenciales) elResidenciales.textContent = fmt(estadEd.residenciales);
 
     // --- Turno ---
     if (elTurnoNum) elTurnoNum.textContent = juego.numeroTurno;

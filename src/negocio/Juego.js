@@ -212,6 +212,7 @@ export default class Juego {
 
         this.ciudad = new Ciudad(nombre, alcalde, ancho, alto, coordenadas,
                                  dineroInicial, electricidadInicial, aguaInicial, comidaInicial);
+        this.gestorCiudadanos.ciudad = this.ciudad;
         this.SistemaDeTurnos.cambiarDuracion(duracionTurno);
         return this.ciudad;
     }
@@ -250,6 +251,7 @@ export default class Juego {
             return;
         }
         this.ciudad = Ciudad.fromJSON(data.ciudad);
+        this.gestorCiudadanos.ciudad = this.ciudad;
         this.numeroTurno = data.numeroTurno;
         const edificiosPorId = this.ciudad.crearIndiceConstruccionesPorId();
         this.gestorCiudadanos.ciudadanos = (data.ciudadanos || []).map(c => Ciudadano.fromJSON(c, edificiosPorId));

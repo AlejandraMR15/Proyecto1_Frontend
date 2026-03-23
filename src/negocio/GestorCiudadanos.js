@@ -20,6 +20,9 @@ export default class GestorCiudadano {
         this.ciudadanos = ciudadanos;
         // tasa de crecimiento configurable (valor mínimo 1, máximo 3)
         this.tasaCrecimiento = Math.max(1, Math.min(3, tasaCrecimiento));
+        // Referencia a la ciudad — se inyecta desde Juego.js
+        // para poder calcular edificios residenciales en tiempo real
+        this.ciudad = null;
     }
 
     /**
@@ -31,6 +34,32 @@ export default class GestorCiudadano {
         if (ciudadano) {
             this.ciudadanos.push(ciudadano);
         }
+    }
+
+    /**
+     * Calcula estadísticas de ciudadanos en tiempo real desde el array.
+     * No usa contadores — siempre refleja el estado real aunque se recargue.
+     * @returns {{total: number, empleados: number, desempleados: number}}
+     */
+    obtenerEstadisticasCiudadanos() {
+        const total = this.ciudadanos.length;
+        const empleados = this.ciudadanos.filter(c =>
+            typeof c.tieneEmpleo === 'function' ? c.tieneEmpleo() : !!c.empleo
+        ).length;
+        return { total, empleados, desempleados: total - empleados };
+    }
+
+    /**
+     * Calcula la cantidad de edificios residenciales en tiempo real desde ciudad.
+     * Solo cuenta Casas y Apartamentos (los que tienen `residentes[]`).
+     * No usa contadores — sobrevive recargas porque lee ciudad.construcciones.
+     * @returns {{residenciales: number}}
+     */
+    obtenerEstadisticasEdificios() {
+        const residenciales = this.ciudad
+            ? this.ciudad.obtenerEdificiosResidenciales().length
+            : 0;
+        return { residenciales };
     }
 
     /**

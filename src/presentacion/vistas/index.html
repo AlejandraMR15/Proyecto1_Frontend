@@ -60,7 +60,7 @@
         <div id="perfil-puntuacion">⭐ <span id="perfil-score">0</span></div>
     </div>
 
-    <!-- ===== PANEL BIENESTAR: felicidad y comida (separado del perfil) ===== -->
+    <!-- ===== PANEL BIENESTAR: felicidad, comida y ciudadanos (separado del perfil) ===== -->
     <div id="hud-bienestar">
         <div class="bienestar-fila">
             <span class="bienestar-icono">😊</span>
@@ -74,6 +74,34 @@
             <div class="bienestar-datos">
                 <span class="bienestar-label">COMIDA</span>
                 <span class="bienestar-valor" id="val-comida">0 u</span>
+            </div>
+        </div>
+        <div class="bienestar-fila">
+            <span class="bienestar-icono">👥</span>
+            <div class="bienestar-datos">
+                <span class="bienestar-label">CIUDADANOS</span>
+                <span class="bienestar-valor" id="val-ciudadanos">0</span>
+            </div>
+        </div>
+        <div class="bienestar-fila">
+            <span class="bienestar-icono">✓</span>
+            <div class="bienestar-datos">
+                <span class="bienestar-label">EMPLEADOS</span>
+                <span class="bienestar-valor" id="val-empleados">0</span>
+            </div>
+        </div>
+        <div class="bienestar-fila">
+            <span class="bienestar-icono">✗</span>
+            <div class="bienestar-datos">
+                <span class="bienestar-label">DESEMPLEADOS</span>
+                <span class="bienestar-valor" id="val-desempleados">0</span>
+            </div>
+        </div>
+        <div class="bienestar-fila">
+            <span class="bienestar-icono">🏠</span>
+            <div class="bienestar-datos">
+                <span class="bienestar-label">VIVIENDAS</span>
+                <span class="bienestar-valor" id="val-residenciales">0</span>
             </div>
         </div>
     </div>
@@ -262,7 +290,6 @@
                 <h2 class="sidebar-title">CONSTRUIR</h2>
             </div>
             <div class="sidebar-header-buttons">
-                <button class="sidebar-btn-demoler" id="sidebarDemolir" title="Modo demolición">🗑️</button>
                 <button class="sidebar-close" id="sidebarClose" title="Cerrar panel">✕</button>
             </div>
         </div>
@@ -511,6 +538,44 @@
     <section id="recoleccion-burbujas-ui" aria-live="polite" aria-atomic="true">
         <div id="recoleccion-burbujas-toast" class="recoleccion-burbujas-toast" data-visible="false"></div>
     </section>
+
+    <!-- ===== TEMPLATE: NOTIFICACIÓN DE CONSTRUCCIÓN ===== -->
+    <div id="notif-construccion" style="display:none;position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#0a1628;border:1px solid #2e7a94;color:#a8dff0;padding:10px 20px;border-radius:6px;font-size:0.82rem;z-index:9999;pointer-events:none;transition:opacity 0.3s;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,0.6)"></div>
+
+    <!-- ===== TEMPLATE: MODAL DE INFORMACIÓN DE EDIFICIO ===== -->
+    <div id="modal-info-edificio" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#0a1628;border:1px solid #2e7a94;border-radius:10px;padding:24px 28px;z-index:10000;min-width:280px;max-width:420px;box-shadow:0 8px 32px rgba(0,0,0,0.75);color:#a8dff0;font-family:Segoe UI,system-ui,sans-serif">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+            <h3 style="font-size:1rem;color:#a8dff0;margin:0" id="modal-info-titulo">Edificio</h3>
+            <button id="modal-cerrar" style="background:none;border:none;color:#4a9fb5;font-size:1.2rem;cursor:pointer;line-height:1;padding:0">✕</button>
+        </div>
+        <table id="modal-info-tabla" style="border-collapse:collapse;width:100%"></table>
+        <div style="display:flex;gap:8px;margin-top:16px">
+            <button id="modal-info-demoler" style="flex:1;padding:10px;background:#e05555;border:none;color:#fff;cursor:pointer;border-radius:6px;font-weight:bold;font-size:0.9rem">
+                🗑️ DEMOLER
+            </button>
+        </div>
+    </div>
+
+    <!-- ===== TEMPLATE: MODAL DE CONFIRMACIÓN DE DEMOLICIÓN ===== -->
+    <div id="modal-confirmar-demolicion" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#0a1628;border:2px solid #e05555;border-radius:10px;padding:24px 28px;z-index:10000;min-width:320px;max-width:450px;box-shadow:0 8px 32px rgba(0,0,0,0.9);color:#a8dff0;font-family:Segoe UI,system-ui,sans-serif">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+            <h3 style="font-size:1rem;color:#f08080;margin:0" id="modal-demolicion-titulo">🗑️ ¿DEMOLER?</h3>
+            <button id="modal-demolicion-cerrar" style="background:none;border:none;color:#4a9fb5;font-size:1.2rem;cursor:pointer;line-height:1;padding:0">✕</button>
+        </div>
+        <div style="background:#1a2a38;padding:12px;border-radius:6px;margin-bottom:16px">
+            <p style="margin:0;font-size:0.9rem" id="modal-demolicion-ubicacion">Ubicación: (0, 0)</p>
+            <p style="margin:8px 0 0 0;font-size:0.9rem;color:#2e7a94" id="modal-demolicion-reembolso">Recibirás $0 (50% del costo)</p>
+        </div>
+        <div id="modal-demolicion-ciudadanos"></div>
+        <div style="display:flex;gap:8px;margin-top:16px">
+            <button id="modal-demolicion-confirmar" style="flex:1;padding:10px;background:#e05555;border:none;color:#fff;cursor:pointer;border-radius:6px;font-weight:bold">
+                ✔ CONFIRMAR DEMOLICIÓN
+            </button>
+            <button id="modal-demolicion-cancelar" style="flex:1;padding:10px;background:#2a3a48;border:1px solid #2e7a94;color:#a8dff0;cursor:pointer;border-radius:6px">
+                ✕ CANCELAR
+            </button>
+        </div>
+    </div>
 
     <script type="module" src="../../negocio/WidgetsInfo.js"></script>
 </body>

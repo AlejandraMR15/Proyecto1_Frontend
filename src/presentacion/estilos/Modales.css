@@ -13,7 +13,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: 'Press Start 2P', monospace;
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif !important;
 }
 
 .modal-overlay[data-visible="false"] {
@@ -22,14 +22,15 @@
 
 /* ---- CAJA DEL MODAL ---- */
 .modal-caja {
-    background: #0f0f2a;
-    border: 3px solid #3a3a9a;
+    background: #1c2b3a;
+    border: 3px solid #3d6b8a;
     border-radius: 6px;
     padding: 28px 32px;
     min-width: 300px;
     max-width: 480px;
     width: 90%;
-    box-shadow: 6px 6px 0 #06061a, inset 2px 2px 0 #6868cc44;
+    box-shadow: 6px 6px 0 #0a1520, inset 2px 2px 0 #5a9abf44;
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif !important;
 }
 
 .modal-caja-config {
@@ -43,20 +44,23 @@
 
 /* ---- TÍTULO Y TEXTO ---- */
 .modal-titulo {
-    font-size: 0.75rem;
+    font-size: 0.96rem;
     color: #ffd700;
     text-align: center;
     margin-bottom: 22px;
-    letter-spacing: 0.06em;
-    text-shadow: 2px 2px 0 #aa8800;
+    letter-spacing: 0.04em;
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif !important;
+    font-weight: 700;
+    text-shadow: none;
 }
 
 .modal-texto {
-    font-size: 0.5rem;
-    color: #c8d8ff;
+    font-size: 0.64rem;
+    color: #e8f0f7;
     text-align: center;
     line-height: 1.8;
     margin-bottom: 20px;
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif !important;
 }
 
 /* ---- BOTONES ---- */
@@ -80,26 +84,27 @@
 .modal-btn {
     width: 100%;
     padding: 10px 16px;
-    background: #14144a;
-    border: 2px solid #3a3a9a;
-    color: #c8d8ff;
-    font-family: 'Press Start 2P', monospace;
-    font-size: 0.5rem;
+    background: #223344;
+    border: 2px solid #3d6b8a;
+    color: #e8f0f7;
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif !important;
+    font-size: 0.64rem;
+    font-weight: 600;
     cursor: pointer;
     border-radius: 4px;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.02em;
     transition: background 0.12s, border-color 0.12s;
-    box-shadow: inset 2px 2px 0 #6868cc44, inset -2px -2px 0 #06061a, 3px 3px 0 #06061a;
+    box-shadow: inset 2px 2px 0 #5a9abf44, inset -2px -2px 0 #0a1520, 3px 3px 0 #0a1520;
 }
 
 .modal-btn:hover {
-    background: #1e1e6a;
-    border-color: #6868cc;
+    background: #2e4460;
+    border-color: #5a9abf;
 }
 
 .modal-btn:active {
     transform: translate(2px, 2px);
-    box-shadow: inset -2px -2px 0 #6868cc44, inset 2px 2px 0 #06061a;
+    box-shadow: inset -2px -2px 0 #5a9abf44, inset 2px 2px 0 #0a1520;
 }
 
 .modal-btn-primario {
@@ -141,17 +146,17 @@
 }
 
 .config-label {
-    font-size: 0.42rem;
+    font-size: 0.54rem;
     color: #7ec8e3;
     line-height: 1.6;
 }
 
 .config-input {
-    background: #06061a;
-    border: 2px solid #3a3a9a;
+    background: #0a1520;
+    border: 2px solid #3d6b8a;
     color: #ffd700;
-    font-family: 'Press Start 2P', monospace;
-    font-size: 0.55rem;
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    font-size: 0.7rem;
     padding: 6px 10px;
     border-radius: 4px;
     width: 100%;
@@ -159,7 +164,7 @@
 }
 
 .config-input:focus {
-    border-color: #6868cc;
+    border-color: #5a9abf;
 }
 
 /* ---- RANKING — tabla ---- */
@@ -171,31 +176,31 @@
 #ranking-tabla {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.38rem;
-    color: #c8d8ff;
+    font-size: 0.49rem;
+    color: #e8f0f7;
 }
 
 #ranking-tabla th {
-    background: #14144a;
+    background: #223344;
     color: #ffd700;
     padding: 7px 8px;
-    border: 1px solid #3a3a9a;
+    border: 1px solid #3d6b8a;
     text-align: left;
     white-space: nowrap;
 }
 
 #ranking-tabla td {
     padding: 6px 8px;
-    border: 1px solid #1e1e5a;
+    border: 1px solid #1a3050;
     white-space: nowrap;
 }
 
 #ranking-tabla tbody tr:nth-child(even) {
-    background: #0d0d22;
+    background: #111b24;
 }
 
 #ranking-tabla tbody tr:hover {
-    background: #1a1a4a;
+    background: #1a2838;
 }
 
 #ranking-tabla tbody tr.ranking-actual {
@@ -210,7 +215,7 @@
 
 #ranking-vacio {
     text-align: center;
-    color: #6878a8;
-    font-size: 0.45rem;
+    color: #7aaabf;
+    font-size: 0.58rem;
     padding: 24px 0;
 }

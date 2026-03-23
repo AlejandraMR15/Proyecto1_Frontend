@@ -19,18 +19,18 @@
 
     width: 64px;
     height: 64px;
-    background: var(--bg-cat, #14144a);
-    border: 3px solid var(--border, #3a3a9a);
-    color: var(--text-primary, #c8d8ff);
-    font-family: 'Press Start 2P', 'Courier New', monospace;
-    font-size: 0.4rem;
+    background: var(--bg-cat, #223344);
+    border: 3px solid var(--border, #3d6b8a);
+    color: var(--text-primary, #e8f0f7);
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    font-size: 0.51rem;
     letter-spacing: 0.04em;
     cursor: pointer;
 
     box-shadow:
-        inset 2px 2px 0 var(--border-hi, #6868cc),
-        inset -2px -2px 0 var(--border-dk, #06061a),
-        3px 3px 0 var(--border-dk, #06061a);
+        inset 2px 2px 0 var(--border-hi, #5a9abf),
+        inset -2px -2px 0 var(--border-dk, #0a1520),
+        3px 3px 0 var(--border-dk, #0a1520);
 
     transition: background var(--transition, 0.14s steps(4)),
                 border-color var(--transition, 0.14s steps(4)),
@@ -43,14 +43,14 @@ body.sidebar-cerrado #btn-calcular-ruta {
 }
 
 #btn-calcular-ruta:hover {
-    background: var(--bg-cat-hover, #1e1e6a);
-    border-color: var(--border-hi, #6868cc);
+    background: var(--bg-cat-hover, #2e4460);
+    border-color: var(--border-hi, #5a9abf);
 }
 
 #btn-calcular-ruta:active {
     box-shadow:
-        inset -2px -2px 0 var(--border-hi, #6868cc),
-        inset 2px 2px 0 var(--border-dk, #06061a);
+        inset -2px -2px 0 var(--border-hi, #5a9abf),
+        inset 2px 2px 0 var(--border-dk, #0a1520);
 }
 
 /* Icono del botón */
@@ -114,12 +114,12 @@ body.sidebar-cerrado #btn-calcular-ruta {
     z-index: 9000;
 
     padding: 9px 18px;
-    background: #071018;
-    border: 1px solid #2e7a94;
+    background: #0f1e2e;
+    border: 1px solid #3d6b8a;
     border-radius: 6px;
-    color: #a8dff0;
-    font-size: 0.55rem;
-    font-family: 'Press Start 2P', 'Courier New', monospace;
+    color: #c8e8f8;
+    font-size: 0.7rem;
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
     white-space: nowrap;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
     pointer-events: none;

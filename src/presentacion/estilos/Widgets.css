@@ -27,7 +27,7 @@
   background: var(--bg-cat);
   border: 3px solid var(--border);
   color: var(--text-primary);
-  font-family: 'Press Start 2P', monospace;
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
   cursor: pointer;
   display: flex;
   flex-direction: column;
@@ -166,7 +166,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid rgba(58, 58, 154, 0.35);
+  border-bottom: 1px solid rgba(61, 107, 138, 0.35);
   padding-bottom: 5px;
 }
 

@@ -679,6 +679,10 @@ export default class GridRenderer {
     _cuboHover    = null;
 
     _onEnter(e) {
+        // Ignorar eventos simulados por touch (el navegador genera mouseenter
+        // después de un tap en tablets, lo que causaría el hovered azul en lugar del selected dorado)
+        if (e.sourceCapabilities?.firesTouchEvents) return;
+
         // No procesar si hay botón presionado (drag)
         if (e.buttons !== 0) return;
 

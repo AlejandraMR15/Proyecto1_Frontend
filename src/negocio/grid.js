@@ -128,7 +128,8 @@ import MovimientoCiudadanos from './MovimientoCiudadanos.js';
     let touchStartY  = 0;
     let touchMoved   = false;
 
-    const TAP_UMBRAL = 8;
+    // En tablet hay más micro-movimiento al tocar, usamos umbral más alto
+    const TAP_UMBRAL = window.matchMedia('(min-width: 768px)').matches ? 14 : 8;
 
     viewport.addEventListener('touchstart', function (e) {
         lastTouches = e.touches;
@@ -175,25 +176,48 @@ import MovimientoCiudadanos from './MovimientoCiudadanos.js';
     viewport.addEventListener('touchend', function (e) {
         if (!touchMoved && e.changedTouches.length === 1) {
             const t  = e.changedTouches[0];
-            let   el = document.elementFromPoint(t.clientX, t.clientY);
+
+            // Buscar el iso-cube correcto usando elementFromPoint
+            // Puede que el punto caiga sobre un elemento hijo (svg, img) — subimos al padre .iso-cube
+            let el = document.elementFromPoint(t.clientX, t.clientY);
             while (el && el !== document.body) {
                 if (el.classList && el.classList.contains('iso-cube')) break;
                 if (el.tagName === 'BUTTON') break;
                 if (el.classList && el.classList.contains('build-item')) break;
                 el = el.parentElement;
             }
+
             if (el && el !== document.body) {
-                // preventDefault() suprime el click nativo que el navegador
-                // dispararía 300ms después, evitando el doble evento que
-                // causaba mostrar la info del edificio recién construido.
                 e.preventDefault();
-                el.dispatchEvent(new MouseEvent('click', {
-                    bubbles: true,
-                    cancelable: true,
-                    clientX: t.clientX,
-                    clientY: t.clientY,
-                    view: window,
-                }));
+
+                if (el.classList.contains('iso-cube')) {
+                    // Para iso-cube: disparar click sintético con clientX/Y del touch
+                    // _onClick verifica _mouseDownX/_mouseDownY — los seteamos primero
+                    // via mousedown sintético para que pase la verificación de drag
+                    const renderer = window.gridRenderer;
+                    if (renderer && renderer._getMouseDown) {
+                        // Sobreescribir temporalmente _getMouseDown para que devuelva
+                        // exactamente el punto del touch (distancia = 0, no es drag)
+                        const _origGetMouseDown = renderer._getMouseDown;
+                        renderer._getMouseDown = () => ({ x: t.clientX, y: t.clientY });
+                        el.dispatchEvent(new MouseEvent('click', {
+                            bubbles: true, cancelable: true,
+                            clientX: t.clientX, clientY: t.clientY, view: window,
+                        }));
+                        renderer._getMouseDown = _origGetMouseDown;
+                    } else {
+                        el.dispatchEvent(new MouseEvent('click', {
+                            bubbles: true, cancelable: true,
+                            clientX: t.clientX, clientY: t.clientY, view: window,
+                        }));
+                    }
+                } else {
+                    // Para botones y build-items: click normal
+                    el.dispatchEvent(new MouseEvent('click', {
+                        bubbles: true, cancelable: true,
+                        clientX: t.clientX, clientY: t.clientY, view: window,
+                    }));
+                }
             }
         }
         lastTouches = e.touches;

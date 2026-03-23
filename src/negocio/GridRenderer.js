@@ -110,6 +110,8 @@ export default class GridRenderer {
         }
 
         this._construirGrid();
+        this._construirBloqueVolumen();
+        this._registrarEventosGrid();
     }
 
     /**
@@ -216,6 +218,119 @@ export default class GridRenderer {
             this._gridEl.appendChild(cubo);
             this._cubos.set(`${col},${row}`, cubo);
         });
+
+        // Tiempo en que termina de cargarse el último cubo (mismo cálculo que en _crearCubo)
+        this._tiempoUltimoCubo = (celdas.length - 1) * 3 + 50;
+    }
+
+    /**
+     * Crea un SVG decorativo detrás del grid que da la ilusión de un bloque
+     * con volumen (cara izquierda, cara derecha y cara frontal en marrón tierra).
+     * No afecta eventos ni lógica — puramente visual.
+     * @private
+     */
+    _construirBloqueVolumen() {
+        const cols  = this.mapa.ancho;
+        const rows  = this.mapa.alto;
+        const SX    = this.STEP_X;
+        const SY    = this.STEP_Y;
+        const depth = 110;  // píxeles de profundidad visual del bloque
+
+        // Esquinas del grid en coordenadas de pantalla (relativas al iso-grid)
+        // Vértice top    = celda (0,0)       → arriba del todo
+        // Vértice right  = celda (cols-1,0)  → derecha
+        // Vértice bottom = celda (cols-1,rows-1) → abajo
+        // Vértice left   = celda (0,rows-1)  → izquierda
+        const toScreen = (col, row) => ({
+            x: (col - row) * SX + this._offsetX,
+            y: (col + row) * SY
+        });
+
+        // Las esquinas del diamante de poly-bottom del grid completo
+        // están en TD píxeles más abajo que los de la cara superior
+        const TD = this.TD;
+        const top    = toScreen(0,        0       );
+        const right  = toScreen(cols - 1, 0       );
+        const bottom = toScreen(cols - 1, rows - 1);
+        const left   = toScreen(0,        rows - 1);
+
+        // Ajustar Y al nivel de poly-bottom (+ TD)
+        const tY = top.y    + TD;
+        const rY = right.y  + TD;
+        const bY = bottom.y + TD;
+        const lY = left.y   + TD;
+
+        // Centro inferior del diamante (punto más bajo de poly-bottom)
+        const bX = bottom.x + SX;   // bottom es la esquina inferior, el pico está SX a la derecha
+        const bYc = bY + SY;         // y el pico está SY más abajo
+
+        // Puntos del borde inferior del grid (poly-bottom completo):
+        //   top-center, right-corner, bottom-center, left-corner
+        const tc = { x: top.x + SX,    y: tY + SY  };  // pico superior
+        const rc = { x: right.x + SX*2, y: rY + SY  };  // esquina derecha
+        const bc = { x: bottom.x + SX,  y: bY + SY  };  // pico inferior (punto más bajo)
+        const lc = { x: left.x,         y: lY + SY  };  // esquina izquierda
+
+        // Cara frontal-izquierda (visible desde abajo-izquierda)
+        const faceLeft = [
+            `${lc.x},${lc.y}`,
+            `${bc.x},${bc.y}`,
+            `${bc.x},${bc.y + depth}`,
+            `${lc.x},${lc.y + depth}`
+        ].join(' ');
+
+        // Cara frontal-derecha (visible desde abajo-derecha)
+        const faceRight = [
+            `${bc.x},${bc.y}`,
+            `${rc.x},${rc.y}`,
+            `${rc.x},${rc.y + depth}`,
+            `${bc.x},${bc.y + depth}`
+        ].join(' ');
+
+        // Cara frontal-centro (el triángulo inferior del diamante)
+        // No es necesaria si las dos caras anteriores se unen en bc
+
+        // Dimensiones del SVG contenedor
+        const svgW = parseInt(this._gridEl.style.width)  || 2000;
+        const svgH = parseInt(this._gridEl.style.height) + depth + 20;
+
+        const ns = 'http://www.w3.org/2000/svg';
+        const svg = document.createElementNS(ns, 'svg');
+        svg.id = 'iso-volume';
+        svg.setAttribute('width',   svgW);
+        svg.setAttribute('height',  svgH);
+        svg.setAttribute('viewBox', `0 0 ${svgW} ${svgH}`);
+        svg.style.cssText = `
+            position:absolute; top:0; left:0;
+            pointer-events:none; overflow:visible; z-index:0;
+            opacity:0; transition: opacity 0.4s ease;
+        `;
+
+        const mkPoly = (points, fill, stroke) => {
+            const p = document.createElementNS(ns, 'polygon');
+            p.setAttribute('points', points);
+            p.setAttribute('fill', fill);
+            p.setAttribute('stroke', stroke);
+            p.setAttribute('stroke-width', '1.5');
+            p.setAttribute('stroke-linejoin', 'round');
+            return p;
+        };
+
+        // Cara izquierda: marrón tierra oscuro
+        svg.appendChild(mkPoly(faceLeft,  '#7a3b1e', '#3d1a08'));
+        // Cara derecha: marrón tierra más claro
+        svg.appendChild(mkPoly(faceRight, '#9b4f28', '#3d1a08'));
+
+        // Insertar ANTES del primer hijo del iso-grid (queda detrás de los cubos)
+        if (this._gridEl.firstChild) {
+            this._gridEl.insertBefore(svg, this._gridEl.firstChild);
+        } else {
+            this._gridEl.appendChild(svg);
+        }
+
+        // Fade-in justo después de que termina de cargarse el último cubo
+        const delay = (this._tiempoUltimoCubo ?? 50) + 80;
+        setTimeout(() => { svg.style.opacity = '1'; }, delay);
     }
 
     /**
@@ -227,42 +342,55 @@ export default class GridRenderer {
         const { x, y } = this._gridToScreen(col, row);
         const etiqueta = this.mapa.matriz[row][col] ?? 'g';
 
+        // Wrapper: posicionado en la cara INFERIOR (poly-bottom)
+        // poly-bottom empieza en y + TD dentro del SVG, y tiene alto TH
+        // Al mover el div TD píxeles hacia abajo y reducir su alto a TH,
+        // el bounding box coincide exactamente con el diamante visible.
         const cubo = document.createElement('div');
         cubo.className = 'iso-cube';
         cubo.dataset.col = col;
         cubo.dataset.row = row;
         cubo.dataset.etiqueta = etiqueta;
         cubo.style.left   = (x + offsetX) + 'px';
-        cubo.style.top    = y + 'px';
+        cubo.style.top    = (y + this.TD) + 'px';          // ← bajar TD para coincidir con poly-bottom
         cubo.style.width  = this.TW + 'px';
-        cubo.style.height = (this.TH + this.TD) + 'px';
+        cubo.style.height = this.TH + 'px';                // ← solo la altura del diamante inferior
         cubo.style.zIndex = row + col;
+        cubo.style.overflow = 'visible';
 
         // Animación de entrada escalonada
         cubo.style.opacity    = '0';
         cubo.style.transition = 'opacity 0.25s ease';
 
+        // El SVG se posiciona con offset negativo para que visualmente
+        // siga pintando el cubo completo (incluidas las caras transparentes arriba)
+        // pero el div clickeable solo cubre poly-bottom
         const colores = this._coloresPorEtiqueta(etiqueta);
-        const imagen = this._obtenerImagenPorEtiqueta(etiqueta);
-        
-        
+        const imagen  = this._obtenerImagenPorEtiqueta(etiqueta);
+
         if (imagen) {
-            // Mostrar imagen como fondo del cubo
             const imgEl = document.createElement('img');
             imgEl.src = imagen;
-            imgEl.style.width = '100%';
-            imgEl.style.height = '100%';
-            imgEl.style.objectFit = 'cover';
-            imgEl.style.objectPosition = 'center';
-            imgEl.style.borderRadius = '4px';
+            imgEl.style.cssText = `
+                position:absolute;
+                left:0; top:${-this.TD}px;
+                width:${this.TW}px; height:${this.TH + this.TD}px;
+                object-fit:cover; object-position:center; border-radius:4px;
+                pointer-events:none;
+            `;
             cubo.appendChild(imgEl);
         } else {
-            // Mostrar SVG coloreado
             const svg = this._crearSVGCubo(colores.top, colores.left, colores.right);
+            // El SVG empieza TD píxeles más arriba que el div
+            svg.style.position = 'absolute';
+            svg.style.left     = '0';
+            svg.style.top      = (-this.TD) + 'px';
+            svg.style.pointerEvents = 'none';
             cubo.appendChild(svg);
         }
 
-        // Eventos
+        // Eventos directamente en el cubo — el bounding box ya coincide con poly-bottom
+        cubo.style.pointerEvents = 'all';
         cubo.addEventListener('mouseenter', (e) => this._onEnter(e));
         cubo.addEventListener('mouseleave', ()  => this._onLeave());
         cubo.addEventListener('click',      (e) => this._onClick(e));
@@ -291,24 +419,28 @@ export default class GridRenderer {
         cubo.dataset.etiqueta = etiqueta;
 
         const colores = this._coloresPorEtiqueta(etiqueta);
-        const imagen = this._obtenerImagenPorEtiqueta(etiqueta);
+        const imagen  = this._obtenerImagenPorEtiqueta(etiqueta);
 
         // Limpiar contenido anterior
         cubo.innerHTML = '';
 
         if (imagen) {
-            // Mostrar imagen como fondo del cubo
             const imgEl = document.createElement('img');
             imgEl.src = imagen;
-            imgEl.style.width = '100%';
-            imgEl.style.height = '100%';
-            imgEl.style.objectFit = 'cover';
-            imgEl.style.objectPosition = 'center';
-            imgEl.style.borderRadius = '4px';
+            imgEl.style.cssText = `
+                position:absolute;
+                left:0; top:${-this.TD}px;
+                width:${this.TW}px; height:${this.TH + this.TD}px;
+                object-fit:cover; object-position:center; border-radius:4px;
+                pointer-events:none;
+            `;
             cubo.appendChild(imgEl);
         } else {
-            // Mostrar SVG coloreado
             const svg = this._crearSVGCubo(colores.top, colores.left, colores.right);
+            svg.style.position     = 'absolute';
+            svg.style.left         = '0';
+            svg.style.top          = (-this.TD) + 'px';
+            svg.style.pointerEvents = 'none';
             cubo.appendChild(svg);
         }
 
@@ -330,18 +462,15 @@ export default class GridRenderer {
     /* ------------------------------------------------------------------ */
 
     /**
-     * Devuelve las tres caras de color (top, left, right) para una etiqueta dada.
-     * Centraliza aquí toda la lógica visual de tipos de celda.
+     * Devuelve los colores de cara para una etiqueta dada.
+     * Con el nuevo sistema visual:
+     *  - 'top'   → color de la cara inferior visible (poly-bottom) y referencia para detectar terreno
+     *  - 'left'  → color de cara lateral izquierda (solo borde, fill transparente)
+     *  - 'right' → color de cara lateral derecha   (solo borde, fill transparente)
      *
-     * Grupos de colores:
-     *  'g'        → terreno (azul claro — color base de la demo)
-     *  'r'        → vía (gris oscuro)
-     *  'P1'       → parque (verde)
-     *  'R1','R2'  → residencial (naranja cálido)
-     *  'C1','C2'  → comercial (amarillo dorado)
-     *  'I1','I2'  → industrial (marrón / óxido)
-     *  'S1'–'S3'  → servicio (púrpura)
-     *  'U1','U2'  → planta de utilidad (rojo)
+     * Para terreno 'g': top debe ser '#7ecfe6' para que _crearSVGCubo
+     * lo detecte y use verde pasto (#6bbf3e) como color de la cara inferior.
+     * Para el resto: top es el color de la cara inferior del edificio/vía.
      *
      * @private
      * @param {string} etiqueta
@@ -349,14 +478,14 @@ export default class GridRenderer {
      */
     _coloresPorEtiqueta(etiqueta) {
         const paletas = {
-            // Terreno vacío (azul-celeste, igual que la demo original)
+            // Terreno vacío — top mantiene '#7ecfe6' para que _crearSVGCubo use verde pasto
             'g':  { top: '#7ecfe6', left: '#4baec8', right: '#2d8aaa' },
 
-            // Vías (gris carbón)
-            'r':  { top: '#8a9099', left: '#5c6169', right: '#3d4147' },
+            // Vías (gris asfalto)
+            'r':  { top: '#707880', left: '#505860', right: '#384048' },
 
-            // Parque (verde)
-            'P1': { top: '#6ecf5a', left: '#46a834', right: '#2d7a20' },
+            // Parque (verde más oscuro para diferenciarse del terreno)
+            'P1': { top: '#3da832', left: '#2a7a22', right: '#1a5a14' },
 
             // Residencial (naranja cálido)
             'R1': { top: '#f0a040', left: '#c07820', right: '#8a5010' },
@@ -429,18 +558,39 @@ export default class GridRenderer {
      * @private
      */
     _crearSVGCubo(colorTop, colorLeft, colorRight) {
-        const W = this.TW;
-        const H = this.TH;
-        const D = this.TD;
+        const W  = this.TW;
+        const H  = this.TH;   // = TW/2
+        const D  = this.TD;
 
-        // Vértices
-        const A  = [W / 2, 0          ];
-        const B  = [W,     H / 2      ];
-        const C  = [W / 2, H          ];
-        const D2 = [0,     H / 2      ];
-        const E  = [0,     H / 2 + D  ];
-        const F  = [W / 2, H + D      ];
-        const G  = [W,     H / 2 + D  ];
+        /*
+         * Vértices del cubo isométrico visto desde arriba-izquierda:
+         *
+         *           A  (W/2, 0)          ← tope de cara superior
+         *          / \
+         *        D2   B  (W, H/2)        ← lados de cara superior
+         *  (0,H/2) \ /
+         *           C  (W/2, H)          ← centro compartido
+         *          / \
+         *        E   G  (W, H/2+D)       ← lados inferiores
+         *  (0,H/2+D)\ /
+         *           F  (W/2, H+D)        ← fondo
+         *
+         * Cara SUPERIOR  = A, B, C, D2   (diamante arriba)
+         * Cara LATERAL-IZQ = D2, C, F, E
+         * Cara LATERAL-DER = C, B, G, F
+         * Cara INFERIOR  = A desplazado D px abajo, B desplazado D, C desplazado D, D2 desplazado D
+         *                = [W/2, D], G, F, E   ← diamante idéntico al superior pero D px más abajo
+         */
+
+        const A   = [W / 2, 0          ];
+        const B   = [W,     H / 2      ];
+        const C   = [W / 2, H          ];
+        const D2  = [0,     H / 2      ];
+        const E   = [0,     H / 2 + D  ];
+        const F   = [W / 2, H + D      ];
+        const G   = [W,     H / 2 + D  ];
+        // Cuarto vértice del diamante inferior (A desplazado D px hacia abajo)
+        const A2  = [W / 2, D          ];
 
         const pts = (arr) => arr.map(p => p.join(',')).join(' ');
 
@@ -451,17 +601,36 @@ export default class GridRenderer {
         svg.style.overflow = 'visible';
         svg.style.display  = 'block';
 
-        const mkPoly = (points, fill, cls) => {
+        // Color de la cara inferior visible:
+        // terreno 'g' → verde pasto; cualquier otro tipo → su color propio
+        const esTerreno    = (colorTop === '#7ecfe6');
+        const colorBottom  = esTerreno ? '#6bbf3e' : colorTop;
+
+        // Borde del diamante inferior: sutil, perceptible pero suave
+        const strokeBottom = esTerreno ? '#4a8c22' : _darken(colorTop);
+
+        const mkPoly = (points, fill, cls, fillOpacity, stroke, strokeW, strokeOpacity) => {
             const p = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
-            p.setAttribute('points', pts(points));
-            p.setAttribute('fill', fill);
+            p.setAttribute('points',       pts(points));
+            p.setAttribute('fill',         fill);
+            p.setAttribute('fill-opacity', String(fillOpacity));
+            if (stroke) {
+                p.setAttribute('stroke',         stroke);
+                p.setAttribute('stroke-width',   String(strokeW ?? 0.8));
+                p.setAttribute('stroke-opacity', String(strokeOpacity ?? 1));
+                p.setAttribute('stroke-linejoin','round');
+            }
             p.classList.add(cls);
             return p;
         };
 
-        svg.appendChild(mkPoly([D2, C, F, E], colorLeft,  'poly-left' ));
-        svg.appendChild(mkPoly([C, B, G, F],  colorRight, 'poly-right'));
-        svg.appendChild(mkPoly([A, B, C, D2], colorTop,   'poly-top'  ));
+        // Caras laterales: fill y stroke completamente invisibles
+        svg.appendChild(mkPoly([D2, C, F, E], colorLeft,  'poly-left',   0, null, 0, 0));
+        svg.appendChild(mkPoly([C, B, G, F],  colorRight, 'poly-right',  0, null, 0, 0));
+        // Cara superior: fill y stroke completamente invisibles
+        svg.appendChild(mkPoly([A, B, C, D2], colorTop,   'poly-top',    0, null, 0, 0));
+        // Cara INFERIOR: diamante visible con borde sutil
+        svg.appendChild(mkPoly([A2, G, F, E], colorBottom,'poly-bottom', 1, strokeBottom, 0.6, 0.5));
 
         return svg;
     }
@@ -485,57 +654,69 @@ export default class GridRenderer {
     /*  Eventos del grid                                                     */
     /* ------------------------------------------------------------------ */
 
-    /**
-     * Referencia al cubo actualmente seleccionado.
-     * @private
-     */
-    _seleccionado = null;
+    _registrarEventosGrid() {
+        // Los eventos hover y click se manejan directamente en cada cubo
+        // via _onEnter/_onClick/_onLeave registrados en _crearCubo().
+        // Aquí solo registramos mousedown a nivel de grid para detectar drag.
+        let _mouseDownX = 0;
+        let _mouseDownY = 0;
+        this._gridEl.addEventListener('mousedown', (e) => {
+            _mouseDownX = e.clientX;
+            _mouseDownY = e.clientY;
+        });
+        this._getMouseDown = () => ({ x: _mouseDownX, y: _mouseDownY });
 
-    /**
-     * Emite evento de entrada de puntero sobre celda.
-     * @param {MouseEvent} e
-     * @private
-     */
+        this._gridEl.addEventListener('mouseleave', () => {
+            if (this._cuboHover) {
+                this._cuboHover.classList.remove('hovered');
+                this._cuboHover = null;
+            }
+            this._gridEl.dispatchEvent(new CustomEvent('celda-leave', { bubbles: true }));
+        });
+    }
+
+    _seleccionado = null;
+    _cuboHover    = null;
+
     _onEnter(e) {
-        // El tooltip es gestionado externamente (grid.js / main); aquí solo
-        // emitimos el evento con los datos de la celda para que quien quiera
-        // lo consuma.
-        const cubo = e.currentTarget;
-        const col  = parseInt(cubo.dataset.col,  10);
-        const row  = parseInt(cubo.dataset.row,  10);
+        // No procesar si hay botón presionado (drag)
+        if (e.buttons !== 0) return;
+
+        const cubo     = e.currentTarget;
+        const col      = parseInt(cubo.dataset.col, 10);
+        const row      = parseInt(cubo.dataset.row, 10);
         const etiqueta = cubo.dataset.etiqueta ?? 'g';
 
-        // Disparar evento personalizado para que código externo (p. ej. tooltip)
-        // pueda suscribirse sin acoplar este módulo.
+        if (this._cuboHover && this._cuboHover !== cubo) {
+            this._cuboHover.classList.remove('hovered');
+        }
+        cubo.classList.add('hovered');
+        this._cuboHover = cubo;
+
         this._gridEl.dispatchEvent(new CustomEvent('celda-enter', {
             bubbles: true,
             detail: { col, row, etiqueta, originalEvent: e }
         }));
     }
 
-    /**
-     * Emite evento de salida de puntero de una celda.
-     * @private
-     */
     _onLeave() {
+        if (this._cuboHover) {
+            this._cuboHover.classList.remove('hovered');
+            this._cuboHover = null;
+        }
         this._gridEl.dispatchEvent(new CustomEvent('celda-leave', { bubbles: true }));
     }
 
-    /**
-     * Gestiona el click sobre un cubo.
-     * - Actualiza la selección visual.
-     * - Llama al callback `onCeldaClick` si fue provisto.
-     * - No escribe nada en Mapa por sí solo; eso corresponde a la capa de UI
-     *   que decide qué etiqueta colocar.
-     * @private
-     */
     _onClick(e) {
-        const cubo = e.currentTarget;
-        const col  = parseInt(cubo.dataset.col,  10);
-        const row  = parseInt(cubo.dataset.row,  10);
+        // Ignorar si fue un drag
+        const md = this._getMouseDown ? this._getMouseDown() : { x: e.clientX, y: e.clientY };
+        if (Math.abs(e.clientX - md.x) > 6 || Math.abs(e.clientY - md.y) > 6) return;
+
+        const cubo     = e.currentTarget;
+        const col      = parseInt(cubo.dataset.col, 10);
+        const row      = parseInt(cubo.dataset.row, 10);
         const etiqueta = cubo.dataset.etiqueta ?? 'g';
 
-        // Gestión de selección visual
         if (this._seleccionado && this._seleccionado !== cubo) {
             this._seleccionado.classList.remove('selected');
         }
@@ -547,12 +728,10 @@ export default class GridRenderer {
             this._seleccionado = cubo;
         }
 
-        // Notificar a la capa superior
         if (typeof this.onCeldaClick === 'function') {
             this.onCeldaClick(col, row, etiqueta);
         }
 
-        // También como evento del DOM para suscriptores desacoplados
         this._gridEl.dispatchEvent(new CustomEvent('celda-click', {
             bubbles: true,
             detail: { col, row, etiqueta }
@@ -677,4 +856,20 @@ export default class GridRenderer {
             console.log('[GridRenderer] Burbuja removida del DOM');
         }, 1800);
     }
+}
+
+/**
+ * Oscurece un color hex aproximadamente un 35% para usarlo como borde.
+ * @param {string} hex  Color en formato #rrggbb
+ * @returns {string}    Color oscurecido en formato #rrggbb
+ */
+function _darken(hex) {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    const factor = 0.55;
+    const rr = Math.round(r * factor).toString(16).padStart(2, '0');
+    const gg = Math.round(g * factor).toString(16).padStart(2, '0');
+    const bb = Math.round(b * factor).toString(16).padStart(2, '0');
+    return `#${rr}${gg}${bb}`;
 }

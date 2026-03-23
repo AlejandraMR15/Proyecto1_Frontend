@@ -104,17 +104,22 @@ function desactivarModoRuta() {
 function manejarClickCelda(e) {
     const { col, row, etiqueta } = e.detail;
 
-    // Si hay ruta animada y el modo no está activo, limpiar al hacer click
+    // Si el modo ruta no está activo, solo limpiar la ruta animada si la hay
     if (!modoRutaActivo) {
         if (cubosRuta.size > 0) limpiarRuta();
         return;
     }
 
-    // Las vías y el terreno vacío no pueden ser origen ni destino
+    // Modo ruta activo: cualquier click en vía o terreno vacío CANCELA el modo
+    // (no bloquea la construcción — el jugador claramente quiere hacer otra cosa)
     if (etiqueta === 'r' || etiqueta === 'g') {
-        _mostrarNotificacionRuta('⚠ Selecciona un edificio (no una vía ni terreno vacío)', 'error');
+        desactivarModoRuta();
         return;
     }
+
+    // A partir de aquí: click en un edificio con modo ruta activo
+    // Detener la propagación para que menuConstruccion no lo interprete
+    e.stopPropagation();
 
     if (origen === null) {
         // ----- PRIMER CLICK: fijar origen -----
@@ -125,8 +130,6 @@ function manejarClickCelda(e) {
 
     } else {
         // ----- SEGUNDO CLICK: fijar destino y calcular -----
-
-        // Evitar origen == destino
         if (origen.col === col && origen.row === row) {
             _mostrarNotificacionRuta('⚠ El destino debe ser diferente al origen', 'error');
             return;
@@ -134,8 +137,6 @@ function manejarClickCelda(e) {
 
         const destino = { col, row };
         _calcularYAnimarRuta(origen, destino);
-
-        // Reiniciar selección para permitir calcular otra ruta sin desactivar el modo
         _reiniciarSeleccion();
     }
 }

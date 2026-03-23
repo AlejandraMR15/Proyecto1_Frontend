@@ -12,7 +12,7 @@
 html, body {
     width: 100%;
     height: 100%;
-    background: #0d1b2a;
+    background: #87ceeb;
     overflow: hidden;
     font-family: 'Segoe UI', system-ui, sans-serif;
     color: #7ec8e3;
@@ -97,27 +97,63 @@ html, body {
 /* ---- CUBO (SVG inline, sin skewY) ---- */
 .iso-cube {
     position: absolute;
-    cursor: pointer;
     overflow: visible;
+    cursor: pointer;
+    /* pointer-events: all — el div está posicionado sobre poly-bottom exactamente,
+       así que el hit-test nativo del navegador ya es correcto. */
+    pointer-events: all;
 }
 
 .iso-cube svg {
     overflow: visible;
     display: block;
+    pointer-events: none;
 }
 
-.iso-cube:hover svg {
-    filter: brightness(1.28) drop-shadow(0 0 3px rgba(126,200,227,0.5));
+/* El grid no necesita capturar eventos directamente */
+#iso-grid {
+    position: relative;
 }
 
-.iso-cube:hover {
+/* Hover controlado por JS via hit-test: solo poly-bottom baja a 50% opacidad */
+.iso-cube.hovered .poly-bottom {
+    fill-opacity: 0.5;
+}
+
+/* Las caras fantasma NUNCA se revelan */
+.iso-cube.hovered .poly-top,
+.iso-cube.hovered .poly-left,
+.iso-cube.hovered .poly-right {
+    fill-opacity: 0 !important;
+}
+
+.iso-cube.hovered {
+    z-index: 9999 !important;
+    filter: drop-shadow(0 0 5px rgba(150, 255, 100, 0.6));
+}
+
+/* ---- SELECTED: overlay CSS puro, sin tocar el SVG ---- */
+.iso-cube.selected::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(240, 208, 64, 0.45);
+    pointer-events: none;
+    /* Diamante isométrico exacto: cubre todo el div de poly-bottom */
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+}
+
+.iso-cube.selected {
+    filter: drop-shadow(0 0 8px rgba(240, 208, 64, 0.9));
     z-index: 9999 !important;
 }
 
-/* selected = dorado */
-.iso-cube.selected .poly-top   { fill: #f0d040; }
-.iso-cube.selected .poly-left  { fill: #c4a820; }
-.iso-cube.selected .poly-right { fill: #9a8010; }
+/* ---- BLOQUE DE VOLUMEN (caras laterales decorativas del mapa) ---- */
+#iso-volume {
+    position: absolute;
+    pointer-events: none;
+    z-index: 0;
+}
 
 /* ---- TOOLTIP ---- */
 #tooltip {

@@ -42,9 +42,22 @@ import MovimientoCiudadanos from './MovimientoCiudadanos.js';
     const zoomLabel  = document.getElementById('zoom-label');
 
     /**
-     * Aplica transformación CSS de pan y zoom al canvas.
+     * Aplica transformación CSS de pan y zoom al canvas,
+     * con límites para que la matriz siempre ocupa al menos 50% de la pantalla.
      */
     function applyTransform() {
+        const scene = document.getElementById('iso-scene');
+        if (scene) {
+            const sw = scene.offsetWidth  * scale;
+            const sh = scene.offsetHeight * scale;
+            const vw = viewport.clientWidth;
+            const vh = viewport.clientHeight;
+            // Margen holgado: la escena puede salir hasta el 50% de su tamaño
+            const marginX = sw * 0.5;
+            const marginY = sh * 0.5;
+            panX = Math.min(marginX,        Math.max(vw - sw - marginX, panX));
+            panY = Math.min(marginY,        Math.max(vh - sh - marginY, panY));
+        }
         canvasWrap.style.transform =
             `translate(${panX}px, ${panY}px) scale(${scale})`;
         zoomLabel.textContent = Math.round(scale * 100) + '%';

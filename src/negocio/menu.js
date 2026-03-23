@@ -160,7 +160,6 @@ async function cargarCiudadesAPI() {
         acSpinner.classList.add('oculto');
         inputRegion.disabled = false;
         inputRegion.placeholder = 'Escribe para buscar...';
-        inputRegion.focus();
     }
 }
 

@@ -436,7 +436,7 @@ const noticias = (function () {
   function renderizarError() {
     if (bodyEl) {
       bodyEl.innerHTML =
-        '<div class="noticias-error">⚠ No se pudieron cargar<br>las noticias.<br><br>Verifica la clave API.</div>';
+        '<div class="noticias-error">⚠ No se pudieron cargar<br>las noticias.<br><br>Intenta más tarde o verifica<br>tu conexión a internet.</div>';
     }
   }
  

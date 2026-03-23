@@ -8,10 +8,10 @@ export default class ApiNoticias extends ApiExternos {
      * @param {Array<object>} [ultimasNoticias=[]]
      */
     constructor(ultimasNoticias = []) {
-        // allorigins.win es un proxy CORS público gratuito.
+        // api.codetabs.com es un proxy CORS público gratuito más estable que allorigins.
         // NewsAPI bloquea peticiones directas desde el navegador (plan gratuito),
         // pero sí permite peticiones desde servidores. El proxy actúa de intermediario.
-        super('https://api.allorigins.win');
+        super('https://api.codetabs.com/v1/proxy');
         this.apiKey = this.leerApiKey();
         this.ultimasNoticias = ultimasNoticias; 
     }
@@ -51,23 +51,18 @@ export default class ApiNoticias extends ApiExternos {
      * @returns {Promise<any>}
      */
     async obtenerDatosNoticias(pais) {
-        // Construye la URL completa de NewsAPI y la envuelve en el proxy allorigins.
-        // allorigins recibe la URL destino como query param "url" y devuelve
-        // { contents: "<json como string>", status: { ... } }
+        // Construye la URL completa de NewsAPI y la envuelve en el proxy api.codetabs.com.
+        // codetabs recibe la URL destino como query param "quest" y devuelve el JSON directamente.
         const parametros = this.crearParametrosConsulta(pais);
         const queryString = new URLSearchParams(parametros).toString();
         const urlNewsApi = `https://newsapi.org/v2/everything?${queryString}`;
  
-        // allorigins envuelve la respuesta en { contents: "..." }
-        const urlProxy = `/get?url=${encodeURIComponent(urlNewsApi)}`;
+        // codetabs usa "quest" y devuelve JSON directamente
+        const urlProxy = `?quest=${encodeURIComponent(urlNewsApi)}`;
         const respuestaProxy = await this.realizarPeticion(urlProxy);
  
-        // contents viene como string JSON, hay que parsearlo
-        try {
-            return JSON.parse(respuestaProxy.contents);
-        } catch {
-            throw new Error('No se pudo parsear la respuesta del proxy de noticias.');
-        }
+        // codetabs devuelve directamente el JSON de NewsAPI
+        return respuestaProxy;
     }
 
     /**

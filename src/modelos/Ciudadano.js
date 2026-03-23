@@ -57,11 +57,13 @@ export default class Ciudadano {
      * - Tener vivienda: +20, no tener: -20
      * - Tener empleo: +15, no tener: -15
      * - Servicios cercanos: suma del atributo `servicios`
+     * - Alimentos negativos: -5, alimentos positivos: +5
      * - Resultado final acotado al rango [0, 100]
      *
+     * @param {number} [comidaCiudad=0] Nivel de alimentos disponibles en la ciudad.
      * @returns {number} Nuevo valor de felicidad calculado.
      */
-    calcularFelicidad() {
+    calcularFelicidad(comidaCiudad = 0) {
         let positivos = 0;
         let negativos = 0;
 
@@ -79,6 +81,13 @@ export default class Ciudadano {
 
         // sumar el valor de servicios (suma de felicidad de parques, hospitales, policía, etc.)
         positivos += this._valorServicios();
+
+        // Ajustar felicidad según alimentos disponibles
+        if (comidaCiudad < 0) {
+            negativos += 5;
+        } else if (comidaCiudad > 0) {
+            positivos += 5;
+        }
 
         let total = positivos - negativos;
         // acotar entre 0 y 100

@@ -136,7 +136,7 @@ export default class Juego {
             // Reasignar ciudadanos que perdieron vivienda o empleo
             this.gestorCiudadanos.reasignarCiudadanosSinRecursos(edificiosResidenciales, edificiosLaborales);
             // Recalcular felicidad de toda la población con el estado actual de la ciudad
-            this.gestorCiudadanos.recalcularFelicidadCiudadanos(valorServicios);
+            this.gestorCiudadanos.recalcularFelicidadCiudadanos(valorServicios, this.ciudad.recursos.comida);
             // Procesar crecimiento poblacional
             this.gestorCiudadanos.procesarCrecimientoPoblacional(edificiosResidenciales, edificiosLaborales, valorServicios);
         }

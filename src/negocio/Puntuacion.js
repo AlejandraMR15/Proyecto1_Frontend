@@ -77,6 +77,7 @@ export default class Puntuacion {
             dinero       = 0,
             electricidad = 0,
             agua         = 0,
+            comida       = 0,
             desempleados = 0
         } = datosCiudad;
 
@@ -91,7 +92,7 @@ export default class Puntuacion {
         }
 
         // +200: Todos los recursos positivos
-        if (dinero > 0 && electricidad > 0 && agua > 0) {
+        if (dinero > 0 && electricidad > 0 && agua > 0 && comida > 0) {
             puntaje += 200;
         }
 
@@ -141,6 +142,7 @@ export default class Puntuacion {
             numEdificios = 0,
             electricidad = 0,
             agua         = 0,
+            comida       = 0,
             desempleados = 0
         } = datosCiudad;
 
@@ -158,7 +160,7 @@ export default class Puntuacion {
         const bonificaciones = {
             empleadosTodos: (poblacion > 0 && desempleados === 0) ? 500 : 0,
             felicidadAlta: (felicidad > 80) ? 300 : 0,
-            recursosPositivos: (dinero > 0 && electricidad > 0 && agua > 0) ? 200 : 0,
+            recursosPositivos: (dinero > 0 && electricidad > 0 && agua > 0 && comida > 0) ? 200 : 0,
             poblacionGrande: (poblacion > 1000) ? 1000 : 0
         };
         const totalBonificaciones = Object.values(bonificaciones).reduce((a, b) => a + b, 0);

@@ -39,6 +39,7 @@ body.panel-noticias-abierto #hud-controles {
     padding: 5px 10px;
     min-width: 100px;
     box-shadow: 2px 2px 0 #0a1520;
+    cursor: pointer;
 }
 
 .hud-recurso-icono {
@@ -105,7 +106,7 @@ body.panel-noticias-abierto #hud-controles {
     position: absolute;
     top: 100%;
     left: 50%;
-    transform: translateX(-50%);
+    transform: translateX(-50%) translateY(6px);
     margin-top: 8px;
     background: #0a0f1a;
     border: 1px solid #2e7a94;
@@ -121,12 +122,27 @@ body.panel-noticias-abierto #hud-controles {
     line-height: 1.6;
     white-space: normal;
     word-break: break-word;
-    transition: opacity 0.2s ease;
+    transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
+/* Touch toggle */
+.hud-recurso.is-open .hud-recurso-tooltip,
 .hud-recurso-tooltip.visible {
     visibility: visible;
     opacity: 1;
+    transform: translateX(-50%) translateY(0);
+    pointer-events: auto;
+}
+
+/* Desktop hover + focus teclado */
+@media (hover: hover) and (pointer: fine) {
+    .hud-recurso:hover .hud-recurso-tooltip,
+    .hud-recurso:focus-within .hud-recurso-tooltip {
+        visibility: visible;
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+        pointer-events: auto;
+    }
 }
 
 .tooltip-item {
@@ -789,4 +805,13 @@ body.sidebar-cerrado #hud-desglose {
     font-size: 0.64rem;
     color: #ffd700;
     text-shadow: 1px 1px 0 #aa8800;
+}
+
+@media (hover: none), (pointer: coarse) {
+  .hud-recurso.is-open .hud-recurso-tooltip,
+  [data-resource].is-open [data-resource-panel] {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+  }
 }

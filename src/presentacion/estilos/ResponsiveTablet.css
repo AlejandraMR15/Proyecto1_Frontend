@@ -214,21 +214,22 @@
     .bienestar-label { font-size: 0.36rem; }
     .bienestar-valor { font-size: 0.49rem; }
 
-    /* ── DESGLOSE: a la derecha del bienestar, mismo nivel ── */
+    /* ── DESGLOSE: encima del turno (bloque inferior izquierdo) ── */
     #hud-desglose {
-        position: fixed;
-        top: 96px;
-        /* Bienestar está en left=var(--sb-width)+10px, ancho ~140px → desglose empieza 8px después */
-        left: calc(var(--sb-width) + 10px + 148px) !important;
-        width: 150px !important;
+        position: fixed !important;
+        bottom: calc(76px + 56px + 8px) !important;
+        left: calc(var(--sb-width) + 10px) !important;
+        top: auto !important;
+        width: 180px !important;
         z-index: 399;
-        transition: left 0.14s steps(4);
+        transition: left 0.14s steps(4) !important;
     }
 
-    body.sidebar-cerrado #hud-desglose { left: calc(10px + 148px) !important; }
+    body.sidebar-cerrado #hud-desglose { left: 10px !important; }
 
     #hud-desglose-toggle { font-size: 0.52rem !important; padding: 6px 10px !important; }
-    #hud-desglose-arrow  { font-size: 0.58rem !important; }
+    #hud-desglose-arrow  { font-size: 0.58rem !important; transform: rotate(180deg) !important; }
+    #hud-desglose[data-open="true"] #hud-desglose-arrow { transform: rotate(0deg) !important; }
     .desglose-seccion-titulo { font-size: 0.46rem !important; }
     .desglose-label          { font-size: 0.42rem !important; }
     .desglose-valor          { font-size: 0.44rem !important; }
@@ -238,32 +239,36 @@
     .desglose-total-label    { font-size: 0.44rem !important; }
     .desglose-total-valor    { font-size: 0.60rem !important; }
 
-    /* ── BOTÓN RUTA: encima del turno, directamente arriba ── */
+    /* ── BOTÓN RUTA: encima del botón clima (stack derecho) ── */
     #btn-calcular-ruta {
         position: fixed !important;
-        bottom: calc(76px + 56px) !important; /* izquierda + turno */
-        left: calc(var(--sb-width) + 10px) !important;
-        right: auto !important;
+        bottom: calc(16px + 48px + 6px + 48px + 6px) !important;
+        right: 8px !important;
+        left: auto !important;
         top: auto !important;
         width: 48px !important;
         height: 48px !important;
         font-size: 0.46rem !important;
-        transition: bottom 0.14s steps(4), left 0.14s steps(4), background 0.14s steps(4), border-color 0.14s steps(4) !important;
+        transition: none !important;
     }
 
     body.sidebar-cerrado #btn-calcular-ruta {
-        left: 10px !important;
+        right: 8px !important;
     }
 
     body.sidebar-construccion-abierto #btn-calcular-ruta {
-        bottom: calc(76px + 56px + 8px) !important;
+        bottom: calc(16px + 48px + 6px + 48px + 6px) !important;
     }
 
-    /* ── RECURSOS: centrados en la parte superior ── */
+    body.panel-noticias-abierto #btn-calcular-ruta {
+        right: calc(var(--sb-width) + 16px) !important;
+    }
+
+    /* ── RECURSOS: aún más hacia la derecha ── */
     #hud-recursos {
         position: fixed !important;
         top: 8px !important;
-        left: 50% !important;
+        left: calc(50% + 58px) !important;
         transform: translateX(-50%) !important;
         display: flex;
         flex-direction: row;
@@ -274,7 +279,7 @@
         border: none;
         padding: 0;
         max-width: calc(100vw - 340px);
-        overflow: hidden;
+        overflow: visible !important;
         /* Sin transition para que NO se muevan al abrir desglose */
         transition: none !important;
     }
@@ -285,17 +290,33 @@
     body.hud-desglose-open #hud-recursos,
     body.panel-noticias-abierto #hud-recursos,
     body.panel-ranking-abierto #hud-recursos {
-        left: 50% !important;
+        left: calc(50% + 58px) !important;
         transform: translateX(-50%) !important;
         top: 8px !important;
         transition: none !important;
     }
 
-    .hud-recurso       { padding: 4px 8px; min-width: 0; }
+    .hud-recurso       { padding: 4px 8px; min-width: 0; position: relative; overflow: visible; touch-action: manipulation; }
     .hud-recurso-icono { font-size: 1rem; }
     /* Ocultar label (DINERO / ELECTRICIDAD / AGUA) en tablet — solo icono + valor */
     .hud-recurso-label { display: none !important; }
     .hud-recurso-valor { font-size: 0.65rem; min-width: 0; }
+
+    /* ── TOOLTIPS RECURSOS EN TABLET: prioridad legibilidad ── */
+    .hud-recurso-tooltip {
+        font-size: 0.52rem !important;
+        line-height: 1.9 !important;
+        min-width: 250px !important;
+        padding: 14px 18px !important;
+    }
+
+    .hud-recurso-tooltip .tooltip-item,
+    .hud-recurso-tooltip .tooltip-balance,
+    .hud-recurso-tooltip .tooltip-prod,
+    .hud-recurso-tooltip .tooltip-cons,
+    .hud-recurso-tooltip .tooltip-balance-val {
+        font-size: 0.52rem !important;
+    }
 
     /* ── CONTROLES: esquina superior derecha ── */
     #hud-controles {
@@ -409,4 +430,10 @@
 /* ── Portrait tablet: sidebar un poco más angosto ── */
 @media (min-width: 768px) and (max-width: 1024px) and (orientation: portrait) {
     :root { --sb-width: 220px; }
+}
+
+@media (max-width: 1024px) {
+    #hud-recursos { overflow: visible !important; }
+    .hud-recurso { position: relative !important; overflow: visible !important; }
+    .hud-recurso-tooltip { z-index: 1200 !important; }
 }

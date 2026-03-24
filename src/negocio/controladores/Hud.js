@@ -153,7 +153,70 @@ function initHUD() {
     ---------------------------------------------------------- */
     configurarTooltipsRecursos();
 
+    habilitarTooltipsRecursosTouch();
+
     console.info('[HUD] Inicializado. Duración turno:', timerEstado.duracionTurno + 's');
+}
+
+function habilitarTooltipsRecursosTouch() {
+  if (window.__hudTooltipsTouchBound) return;
+  window.__hudTooltipsTouchBound = true;
+
+  const enVistaMovilTablet = () =>
+    window.matchMedia('(max-width: 1024px)').matches;
+
+  const obtenerRecursos = () =>
+    Array.from(document.querySelectorAll('#hud-recursos .hud-recurso'));
+
+  const cerrarTodos = () => {
+    obtenerRecursos().forEach((r) => {
+      r.classList.remove('is-open');
+      r.setAttribute('aria-expanded', 'false');
+      const tt = r.querySelector('.hud-recurso-tooltip');
+      if (tt) tt.classList.remove('visible');
+    });
+
+    const activo = document.activeElement;
+    if (activo && activo.classList && activo.classList.contains('hud-recurso')) {
+      activo.blur();
+    }
+  };
+
+  document.addEventListener('click', (e) => {
+    const recurso = e.target.closest('#hud-recursos .hud-recurso');
+
+    // Click/tap fuera de un recurso
+    if (!recurso) {
+      if (enVistaMovilTablet()) cerrarTodos();
+      return;
+    }
+
+    // En desktop se mantiene solo hover/focus
+    if (!enVistaMovilTablet()) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    const tooltip = recurso.querySelector('.hud-recurso-tooltip');
+    if (!tooltip) return;
+
+    const abrir = !recurso.classList.contains('is-open');
+    cerrarTodos();
+
+    if (abrir) {
+      recurso.classList.add('is-open');
+      recurso.setAttribute('aria-expanded', 'true');
+      tooltip.classList.add('visible');
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') cerrarTodos();
+  });
+
+  window.addEventListener('resize', () => {
+    if (!enVistaMovilTablet()) cerrarTodos();
+  });
 }
 
 /* ================================================================

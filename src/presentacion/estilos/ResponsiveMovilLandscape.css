@@ -247,8 +247,16 @@
 
     #hud-desglose-toggle { font-size: 0.31rem !important; padding: 4px 6px !important; }
     #hud-desglose-arrow  { font-size: 0.41rem !important; }
-    #hud-desglose-cuerpo { max-height: 0; overflow: hidden; }
-    #hud-desglose[data-open="true"] #hud-desglose-cuerpo { max-height: 260px !important; overflow-y: auto !important; }
+    #hud-desglose[data-open="false"] #hud-desglose-cuerpo {
+        display: none !important;
+        max-height: 0 !important;
+        overflow: hidden !important;
+    }
+    #hud-desglose[data-open="true"] #hud-desglose-cuerpo {
+        display: block !important;
+        max-height: 260px !important;
+        overflow-y: auto !important;
+    }
     .desglose-seccion    { padding: 4px 6px 2px !important; }
     .desglose-seccion-titulo { font-size: 0.28rem !important; }
     .desglose-label      { font-size: 0.26rem !important; }
@@ -260,11 +268,11 @@
     .desglose-total-valor { font-size: 0.38rem !important; }
     .desglose-total-wrap  { padding: 5px 6px !important; }
 
-    /* ── BOTÓN RUTA: encima del botón clima (esquina inferior derecha) ── */
+    /* ── BOTÓN RUTA: encima del botón clima (stack derecho) ── */
     #btn-calcular-ruta {
         position: fixed !important;
-        /* widgets: bottom=8px, btn-noticias=36px, gap=4px, btn-clima=36px, gap=4px → encima de clima */
-        bottom: calc(8px + 36px + 4px + 36px + 4px + 4px) !important;
+        /* widgets: bottom=8px, noticias=36px, gap=4px, clima=36px, gap=4px, ruta=36px */
+        bottom: calc(8px + 36px + 4px + 36px + 4px) !important;
         right: 6px !important;
         left: auto !important;
         top: auto !important;
@@ -272,14 +280,16 @@
         height: 36px !important;
         font-size: 0.36rem !important;
         padding: 0 !important;
-        transition: right 0.25s ease, bottom var(--transition, 0.14s steps(4)),
+        transition: right 0.25s ease,
                     background var(--transition, 0.14s steps(4)),
                     border-color var(--transition, 0.14s steps(4)) !important;
     }
 
     /* Cuando sidebar de construcción está abierto NO mover el RUTA (ya no está a la izquierda) */
     body.sidebar-construccion-abierto #btn-calcular-ruta {
-        bottom: calc(8px + 36px + 4px + 36px + 4px + 4px) !important;
+        bottom: calc(8px + 36px + 4px + 36px + 4px) !important;
+        right: 6px !important;
+        left: auto !important;
     }
 
     /* Cuando noticias está abierto, mover igual que los widgets */
@@ -287,11 +297,11 @@
         right: calc(220px + 8px) !important;
     }
 
-    /* ── RECURSOS: centrados arriba ── */
+    /* ── RECURSOS: aún más hacia la derecha ── */
     #hud-recursos {
         position: fixed !important;
         top: 6px !important;
-        left: 50% !important;
+        left: calc(50% + 52px) !important;
         transform: translateX(-50%) !important;
         display: flex; flex-direction: row;
         gap: 4px; align-items: center;
@@ -299,20 +309,29 @@
         background: transparent; border: none; padding: 0;
         transition: left 0.14s steps(4) !important;
         max-width: calc(100vw - 380px);
-        overflow: hidden;
+        overflow: visible !important; /* antes hidden */
     }
 
     body.sidebar-cerrado #hud-recursos {
-        left: 50% !important;
+        left: calc(50% + 52px) !important;
         transform: translateX(-50%) !important;
         max-width: calc(100vw - 380px) !important;
     }
 
-    .hud-recurso       { padding: 3px 6px; min-width: 0; }
+    .hud-recurso       { padding: 3px 6px; min-width: 0; touch-action: manipulation; }
     .hud-recurso-icono { font-size: 1rem; }
     /* Ocultar label en landscape móvil — solo icono + valor */
     .hud-recurso-label { display: none !important; }
     .hud-recurso-valor { font-size: 0.55rem; min-width: 0; }
+
+    .hud-recurso {
+        position: relative !important;
+        overflow: visible !important;
+    }
+
+    .hud-recurso-tooltip {
+        z-index: 1200 !important;
+    }
 
     /* ── CONTROLES: esquina superior derecha ── */
     #hud-controles {

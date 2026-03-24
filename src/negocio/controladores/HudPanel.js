@@ -327,7 +327,17 @@ export function onNuevoTurno() {
  * El posicionamiento es automático con position: absolute + bottom: 100%
  */
 export function configurarTooltipsRecursos() {
+    const puedeHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
     const recursos = document.querySelectorAll('.hud-recurso');
+
+    // En touch no usamos mouseenter/mouseleave; el toggle lo maneja Hud.js con click.
+    if (!puedeHover) {
+        recursos.forEach(recurso => {
+            const tooltip = recurso.querySelector('.hud-recurso-tooltip');
+            if (tooltip) tooltip.classList.remove('visible');
+        });
+        return;
+    }
     
     recursos.forEach(recurso => {
         const tooltip = recurso.querySelector('.hud-recurso-tooltip');
@@ -369,6 +379,11 @@ export function observarSidebar() {
     const btnDesglose = document.getElementById('hud-desglose-toggle');
     const panelDesglose = document.getElementById('hud-desglose');
     const perfil = document.getElementById('hud-perfil');
+
+    if (panelDesglose) {
+        panelDesglose.dataset.open = 'false';
+        document.body.classList.remove('hud-desglose-open');
+    }
 
     function actualizarPosicionDesglose() {
         if (!panelDesglose || !perfil) return;

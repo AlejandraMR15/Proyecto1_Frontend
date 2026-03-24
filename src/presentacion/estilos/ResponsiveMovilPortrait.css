@@ -36,7 +36,7 @@
         border: none;
         padding: 0;
         max-width: calc(100vw - 170px);
-        overflow: hidden;
+        overflow: visible !important;
         transition: none !important;
     }
 
@@ -57,6 +57,17 @@
         background: rgba(26, 40, 56, 0.92);
         border: 1px solid #3d6b8a;
         min-width: 0;
+        position: relative;
+        overflow: visible;
+        touch-action: manipulation;
+    }
+
+    .hud-recurso.is-open {
+        z-index: 1201;
+    }
+
+    .hud-recurso-tooltip {
+        z-index: 1200 !important;
     }
 
     .hud-recurso-icono { font-size: 0.85rem; }

@@ -24,39 +24,41 @@
 
     <!-- ===== RECURSOS FLOTANTES (arriba centro) ===== -->
     <div id="hud-recursos">
-        <div class="hud-recurso" id="hud-dinero">
+        <div class="hud-recurso" id="hud-dinero" data-resource role="button" tabindex="0" aria-expanded="false">
             <span class="hud-recurso-icono">💰</span>
             <div class="hud-recurso-datos">
                 <span class="hud-recurso-label">DINERO</span>
                 <span class="hud-recurso-valor" id="val-dinero">$50.000</span>
             </div>
-            <div class="hud-recurso-tooltip" id="tooltip-dinero">
+            <div class="hud-recurso-tooltip" id="tooltip-dinero" data-resource-panel>
                 <div class="tooltip-item">Producción: <span class="tooltip-prod">+0</span></div>
                 <div class="tooltip-item">Consumo: <span class="tooltip-cons">-0</span></div>
                 <div class="tooltip-separator"></div>
                 <div class="tooltip-item tooltip-balance">Balance: <span class="tooltip-balance-val">+0</span></div>
             </div>
         </div>
-        <div class="hud-recurso" id="hud-electricidad">
+
+        <div class="hud-recurso" id="hud-electricidad" data-resource role="button" tabindex="0" aria-expanded="false">
             <span class="hud-recurso-icono">⚡</span>
             <div class="hud-recurso-datos">
                 <span class="hud-recurso-label">ELECTRICIDAD</span>
                 <span class="hud-recurso-valor" id="val-electricidad">0</span>
             </div>
-            <div class="hud-recurso-tooltip" id="tooltip-electricidad">
+            <div class="hud-recurso-tooltip" id="tooltip-electricidad" data-resource-panel>
                 <div class="tooltip-item">Producción: <span class="tooltip-prod">+0</span></div>
                 <div class="tooltip-item">Consumo: <span class="tooltip-cons">-0</span></div>
                 <div class="tooltip-separator"></div>
                 <div class="tooltip-item tooltip-balance">Balance: <span class="tooltip-balance-val">+0</span></div>
             </div>
         </div>
-        <div class="hud-recurso" id="hud-agua">
+
+        <div class="hud-recurso" id="hud-agua" data-resource role="button" tabindex="0" aria-expanded="false">
             <span class="hud-recurso-icono">💧</span>
             <div class="hud-recurso-datos">
                 <span class="hud-recurso-label">AGUA</span>
                 <span class="hud-recurso-valor" id="val-agua">0</span>
             </div>
-            <div class="hud-recurso-tooltip" id="tooltip-agua">
+            <div class="hud-recurso-tooltip" id="tooltip-agua" data-resource-panel>
                 <div class="tooltip-item">Producción: <span class="tooltip-prod">+0</span></div>
                 <div class="tooltip-item">Consumo: <span class="tooltip-cons">-0</span></div>
                 <div class="tooltip-separator"></div>

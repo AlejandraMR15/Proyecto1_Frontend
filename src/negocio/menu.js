@@ -112,6 +112,18 @@ function inicializarMenuPrincipal() {
 function mostrarPantalla(pantalla) {
     document.querySelectorAll('.pantalla').forEach(p => p.classList.remove('activa'));
     pantalla.classList.add('activa');
+
+    // Evita quedar "a mitad" al cambiar entre menú y formulario en móvil.
+    requestAnimationFrame(() => {
+        window.scrollTo(0, 0);
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+
+        // En landscape móvil el scroll vive dentro del contenedor del formulario.
+        if (pantalla && typeof pantalla.scrollTo === 'function') {
+            pantalla.scrollTo(0, 0);
+        }
+    });
 }
 
 btnNueva.addEventListener('click', () => {
@@ -501,17 +513,17 @@ function limpiarFormulario() {
     labelMapa.textContent = `${MAPA_MIN} × ${MAPA_MIN}`;
     inputTurno.value    = TURNO_MIN_SEG;
     ciudadSeleccionada  = null;
-    mapaJsonCargado     = null;
-    inputTxt.value     = '';
+    mapaTextoCargado    = null;
+    inputTxt.value      = '';
     ocultarSugerencias();
     ocultarErrorForm();
     regionError.classList.add('oculto');
-    jsonError.classList.add('oculto');
-    jsonInfo.classList.add('oculto');
+    txtError.classList.add('oculto');
+    txtInfo.classList.add('oculto');
     // Resetear opción de mapa a manual
     document.querySelector('input[name="mapa-tipo"][value="manual"]').checked = true;
     seccionManual.classList.remove('oculto');
-    seccionJson.classList.add('oculto');
+    seccionTxt.classList.add('oculto');
 }
 
 /* ================================================================

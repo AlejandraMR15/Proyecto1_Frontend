@@ -18,14 +18,34 @@
 /* ---- Pantallas (una visible a la vez) ---- */
 .pantalla {
     display: none;
+    position: relative;
     width: 100%;
     min-height: 100vh;
     align-items: center;
     justify-content: center;
+    /* Overlay y fondo en una sola capa para evitar parpadeos al scrollear */
+    background-color: #111b24;
+    background-image:
+        linear-gradient(rgba(17, 27, 36, 0.85), rgba(17, 27, 36, 0.85)),
+        url('../../assets/images/menu-background.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
+.pantalla::before {
+    content: none;
 }
 
 .pantalla.activa {
     display: flex;
+}
+
+/* Asegurar que el contenido esté por encima del overlay */
+.pantalla > * {
+    position: relative;
+    z-index: 2;
 }
 
 /* ---- MENÚ PRINCIPAL ---- */
@@ -396,6 +416,61 @@ input[type="range"]::-moz-range-thumb {
 
 .txt-info p:last-child {
     margin-bottom: 0;
+}
+
+/* ---- Corrección de scroll para menú en landscape/tablet ---- */
+body.menu-body {
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+@media (orientation: landscape) and (max-height: 700px) and (max-width: 1024px) {
+    html {
+        height: 100dvh;
+        overflow: hidden !important;
+    }
+
+    body.menu-body {
+        display: block;
+        min-height: 100dvh;
+        height: 100dvh;
+        overflow: hidden !important;
+    }
+
+    .pantalla {
+        min-height: 100dvh;
+        height: 100dvh;
+        padding: 12px;
+        background-attachment: scroll;
+    }
+
+    #pantalla-menu {
+        align-items: center;
+        overflow: hidden;
+    }
+
+    #pantalla-formulario {
+        align-items: flex-start;
+        overflow-y: auto;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .menu-contenedor,
+    .form-contenedor {
+        margin: 0 auto;
+    }
+
+    .menu-contenedor {
+        padding: 20px 16px;
+    }
+
+    .form-contenedor {
+        width: min(100%, 640px);
+        max-width: 640px;
+        margin: 0 auto 12px;
+        padding: 20px 16px 28px;
+    }
 }
 
 /* ---- Clase general para ocultar elementos ---- */

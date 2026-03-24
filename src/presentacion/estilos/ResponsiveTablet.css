@@ -325,9 +325,42 @@
     .widget-btn        { width: 48px; height: 48px; }
     .widget-clima-temp { font-size: 0.49rem; }
 
+    /* ── CLIMA INFOBOX: a la izquierda de los botones, flecha apunta a la derecha ── */
     .clima-infobox {
-        bottom: 70px; right: 8px !important;
-        left: auto; width: 200px; top: auto;
+        /* A la izquierda del widget-container: 8px margen + 48px botón + 10px gap */
+        right: calc(8px + 48px + 10px) !important;
+        left: auto !important;
+        top: auto !important;
+        /* Centrado verticalmente con el botón clima.
+           btn-noticias: bottom=16px h=48px → btn-clima: bottom=70px h=48px → centro=94px
+           infobox ~160px alto → bottom = 94 - 80 = 14px */
+        bottom: 14px !important;
+        width: 200px !important;
+    }
+
+    /* Cuando noticias está abierto, también mover el infobox */
+    .clima-infobox.panel-noticias-abierto {
+        right: calc(var(--sb-width) + 16px + 48px + 10px) !important;
+    }
+
+    /* Flecha apunta hacia la derecha (hacia el botón clima) */
+    .clima-infobox::after {
+        bottom: auto !important;
+        top: 50% !important;
+        right: -10px !important;
+        left: auto !important;
+        transform: translateY(-50%) !important;
+        border-top: 8px solid transparent !important;
+        border-bottom: 8px solid transparent !important;
+        border-left: 8px solid var(--border) !important;
+        border-right: none !important;
+        width: 0 !important;
+        height: 0 !important;
+    }
+
+    /* ── Mover widgets al abrir panel de noticias ── */
+    #widgets-container.panel-noticias-abierto {
+        right: calc(var(--sb-width) + 16px) !important;
     }
 
     /* ── MODALES ── */

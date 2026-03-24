@@ -348,11 +348,36 @@
     .widget-clima-temp { font-size: 0.41rem; }
 
     .clima-infobox {
-        bottom: 50px; right: 6px !important;
-        left: auto; width: 160px; top: auto;
+        /* A la izquierda de los botones, flecha apunta a la derecha hacia el botón clima.
+           Botones en right=6px, col, gap=4px, 36px cada uno.
+           btn-noticias: bottom=8px; btn-clima: bottom=8+36+4=48px, centro=66px
+           Infobox: borde-der a right=50px (6+36+8), ancho=160px */
+        right: calc(6px + 36px + 8px) !important;
+        left: auto !important;
+        /* Centrar verticalmente con btn clima: centro en bottom=66px, infobox ~150px alto → bottom = 66-75 → mínimo 8px */
+        bottom: 8px !important;
+        top: auto !important;
+        width: 160px !important;
     }
 
-    .clima-infobox.panel-noticias-abierto { right: calc(220px + 8px) !important; }
+    /* Flecha del clima en landscape: apunta hacia la derecha (hacia el botón) */
+    .clima-infobox::after {
+        bottom: auto !important;
+        /* btn-clima centro: bottom=66px, infobox bottom=8px → desde fondo infobox = 58px
+           infobox ~160px alto → desde top = 160-58 = 102px ≈ 64% del alto */
+        top: 64% !important;
+        right: -10px !important;
+        left: auto !important;
+        transform: translateY(-50%) !important;
+        border-top: 8px solid transparent !important;
+        border-bottom: 8px solid transparent !important;
+        border-left: 8px solid var(--border) !important;
+        border-right: none !important;
+        width: 0 !important;
+        height: 0 !important;
+    }
+
+    .clima-infobox.panel-noticias-abierto { right: calc(220px + 8px + 36px + 8px) !important; }
 
     /* ── PANEL NOTICIAS: header visible, entra desde la derecha ── */
     .noticias-panel .sidebar-header {

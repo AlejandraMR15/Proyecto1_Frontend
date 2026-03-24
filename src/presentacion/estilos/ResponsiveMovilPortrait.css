@@ -132,12 +132,18 @@
         flex-direction: column;
         gap: 6px;
         z-index: 500;
+        transition: top 0.25s ease;
     }
 
     #hud-controles button {
         width: 42px; height: 42px;
         min-width: 42px; min-height: 42px;
         font-size: 0.85rem;
+    }
+
+    /* Cuando noticias está abierto, bajar controles para no quedar solapados */
+    body.panel-noticias-abierto #hud-controles {
+        top: calc(70vh + 10px);
     }
 
     /* ── BOTÓN RUTA: debajo del perfil ── */
@@ -149,10 +155,16 @@
         font-size: 0.52rem;
         padding: 0;
         transition: background var(--transition, 0.14s steps(4)),
-                    border-color var(--transition, 0.14s steps(4));
+                    border-color var(--transition, 0.14s steps(4)),
+                    top 0.25s ease;
     }
 
     body.sidebar-cerrado #btn-calcular-ruta { left: 8px; }
+
+    /* Bajar el botón ruta cuando noticias está abierto */
+    body.panel-noticias-abierto #btn-calcular-ruta {
+        top: calc(70vh + 10px + 42px + 6px);
+    }
 
     /* ── TIMER: sobre la barra inferior ── */
     #hud-turno {
@@ -292,13 +304,45 @@
     .widget-btn        { width: 42px; height: 42px; }
     .widget-clima-temp { font-size: 0.56rem; }
 
+    /* ── CLIMA INFOBOX en portrait:
+       Queda a la DERECHA del timer y a la IZQUIERDA de los botones de widgets.
+       Timer: left=8px, min-width=130px → termina en ~150px.
+       Widgets: right=8px, 42px ancho → borde izq en right=58px (8+42+8).
+       El infobox ocupa el espacio entre ambos, flecha apunta a la derecha. */
     .clima-infobox {
-        left: 8px; right: 8px !important;
-        bottom: calc(var(--mobile-bottombar) + 56px);
-        top: auto; width: auto;
+        left: 150px !important;
+        right: calc(8px + 42px + 8px) !important;
+        bottom: calc(var(--mobile-bottombar) + 6px) !important;
+        top: auto !important;
+        width: auto !important;
+        z-index: 399 !important;
+        transition: bottom 0.3s ease, opacity 0.12s steps(3), transform 0.12s steps(3);
     }
 
-    .clima-infobox.panel-noticias-abierto { right: 8px !important; }
+    /* Flecha apunta hacia la derecha (hacia el botón clima).
+       btn-clima centro: bottom = mobile-bottombar + 73px.
+       Fondo infobox: bottom = mobile-bottombar + 6px.
+       Diferencia = 67px → flecha a bottom: 67px desde el fondo del infobox. */
+    .clima-infobox::after {
+        bottom: 62px !important;
+        top: auto !important;
+        right: -10px !important;
+        left: auto !important;
+        transform: none !important;
+        border-top: 8px solid transparent !important;
+        border-bottom: 8px solid transparent !important;
+        border-left: 8px solid var(--border) !important;
+        border-right: none !important;
+        width: 0 !important;
+        height: 0 !important;
+    }
+
+    .clima-infobox.panel-noticias-abierto { right: calc(8px + 42px + 8px) !important; }
+
+    /* Cuando el menú de construcción está abierto, el info-box del clima sube igual que el botón */
+    body.sidebar-construccion-abierto .clima-infobox {
+        bottom: calc(25vh + 4px) !important;
+    }
 
     /* ── PANEL NOTICIAS: entra desde arriba ── */
     .noticias-panel {

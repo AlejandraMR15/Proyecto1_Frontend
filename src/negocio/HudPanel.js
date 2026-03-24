@@ -261,13 +261,40 @@ export function observarSidebar() {
     const obs = new MutationObserver(sincronizar);
     obs.observe(sidebar, { attributes: true, attributeFilter: ['data-open'] });
 
-    // Toggle del panel de desglose de puntuación
+    // Ajusta el despliegue de desglose para landscape según el ancho real del perfil
     const btnDesglose = document.getElementById('hud-desglose-toggle');
     const panelDesglose = document.getElementById('hud-desglose');
+    const perfil = document.getElementById('hud-perfil');
+
+    function actualizarPosicionDesglose() {
+        if (!panelDesglose || !perfil) return;
+
+        const esLandscape = window.matchMedia('(orientation: landscape) and (max-height: 500px)').matches;
+        
+        if (!esLandscape) {
+            panelDesglose.style.left = '';
+            return;
+        }
+
+        const rectPerfil = perfil.getBoundingClientRect();
+        const destinoIzq = Math.round(rectPerfil.right + 8); // 8px gap fijo para landscape
+        panelDesglose.style.left = `${destinoIzq}px`;
+    }
+
     if (btnDesglose && panelDesglose) {
         btnDesglose.addEventListener('click', function () {
             const abierto = panelDesglose.dataset.open === 'true';
-            panelDesglose.dataset.open = abierto ? 'false' : 'true';
+            const nuevoEstado = !abierto;
+            panelDesglose.dataset.open = nuevoEstado ? 'true' : 'false';
+            document.body.classList.toggle('hud-desglose-open', nuevoEstado);
         });
+    }
+
+    window.addEventListener('resize', actualizarPosicionDesglose);
+    actualizarPosicionDesglose();
+
+    if (perfil) {
+        const observerPerfil = new MutationObserver(actualizarPosicionDesglose);
+        observerPerfil.observe(perfil, { childList: true, subtree: true, characterData: true });
     }
 }

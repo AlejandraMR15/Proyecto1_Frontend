@@ -90,6 +90,7 @@ function _onEscape(e) {
     // Panel ranking lateral activo → cerrar
     if (panelRanking?.dataset.open === 'true') {
         panelRanking.dataset.open = 'false';
+        document.body.classList.remove('panel-ranking-abierto');
     }
 }
 

@@ -371,6 +371,7 @@ const noticias = (function () {
   function abrir() {
     abierto = true;
     panelEl.dataset.open = 'true';
+    document.body.classList.add('panel-noticias-abierto');
     const container = document.getElementById('widgets-container');
     const climaInfobox = document.getElementById('clima-infobox');
     if (container) container.classList.add('panel-noticias-abierto');
@@ -382,6 +383,7 @@ const noticias = (function () {
   function cerrar() {
     abierto = false;
     panelEl.dataset.open = 'false';
+    document.body.classList.remove('panel-noticias-abierto');
     const container = document.getElementById('widgets-container');
     const climaInfobox = document.getElementById('clima-infobox');
     if (container) container.classList.remove('panel-noticias-abierto');

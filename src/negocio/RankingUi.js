@@ -171,12 +171,15 @@ export function renderizarRanking() {
 export function abrirRanking() {
     const panel = document.getElementById('panel-ranking');
     if (!panel) return;
-    if (panel.dataset.open === 'true') {
+    const abierto = panel.dataset.open === 'true';
+    if (abierto) {
         panel.dataset.open = 'false';
+        document.body.classList.remove('panel-ranking-abierto');
     } else {
         actualizarOAgregarEnRanking();
         renderizarRanking();
         panel.dataset.open = 'true';
+        document.body.classList.add('panel-ranking-abierto');
     }
 }
 
@@ -227,6 +230,7 @@ export function registrarEventosRanking(irAlMenu) {
     document.getElementById('btn-ranking-cerrar')
         ?.addEventListener('click', () => {
             document.getElementById('panel-ranking').dataset.open = 'false';
+            document.body.classList.remove('panel-ranking-abierto');
         });
 
     document.getElementById('btn-ranking-exportar')

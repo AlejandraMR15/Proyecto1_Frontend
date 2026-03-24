@@ -8,13 +8,25 @@
 #hud-recursos {
     position: fixed;
     top: 12px;
-    left: 50%;
+    left: calc(50% + 40px);
     transform: translateX(-50%);
     display: flex;
     gap: 6px;
     align-items: center;
     z-index: 210;
 }
+
+/* Mostrar recursos un poco desplazados a la derecha para desktop */
+body.sidebar-cerrado #hud-recursos {
+    left: calc(50% + 40px);
+}
+
+/* Ocultar controles cuando ranking o noticias estén abiertos (mobile/tablet/desktops) */
+body.panel-ranking-abierto #hud-controles,
+body.panel-noticias-abierto #hud-controles {
+    display: none !important;
+}
+
 
 .hud-recurso {
     display: flex;
@@ -81,6 +93,19 @@
     flex-direction: column;
     gap: 12px;
     z-index: 210;
+}
+
+/* Ocultar controles cuando ranking o noticias estén abiertos */
+body.panel-ranking-abierto #hud-controles,
+body.panel-noticias-abierto #hud-controles {
+    display: none !important;
+}
+
+@media (min-width: 1025px) {
+    /* Escritorio: recursos un poco más a la derecha */
+    #hud-recursos {
+        left: calc(50% + 40px) !important;
+    }
 }
 
 #hud-controles button {

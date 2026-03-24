@@ -612,13 +612,15 @@ body.sidebar-cerrado #hud-turno {
 
 /* ============================================================
    PANEL DESGLOSE DE PUNTUACIÓN
-   Desktop: debajo del bienestar, izquierda.
-   Mismo ancho y estilo que #hud-perfil.
+   Desktop: a la derecha del panel bienestar.
+   Se alinea en top con el bienestar (top: 130px).
    ============================================================ */
 #hud-desglose {
     position: fixed;
-    top: 224px;   /* aprox. debajo de bienestar (130px) + altura bienestar (~78px) + 16px gap */
-    left: 280px;
+    /* Mismo top que #hud-bienestar */
+    top: 130px;
+    /* Bienestar: left=280px + min-width=190px + 8px gap = 478px */
+    left: 478px;
     width: 210px;
     background: #1c2b3a;
     border: 2px solid #3d6b8a;
@@ -631,7 +633,8 @@ body.sidebar-cerrado #hud-turno {
 }
 
 body.sidebar-cerrado #hud-desglose {
-    left: 12px;
+    /* Bienestar cerrado: left=12px + 190px + 8px = 210px */
+    left: 210px;
 }
 
 /* ---- Botón de cabecera / toggle ---- */

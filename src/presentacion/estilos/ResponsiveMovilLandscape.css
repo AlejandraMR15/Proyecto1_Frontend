@@ -260,22 +260,31 @@
     .desglose-total-valor { font-size: 0.38rem !important; }
     .desglose-total-wrap  { padding: 5px 6px !important; }
 
-    /* ── BOTÓN RUTA: encima del turno (misma lógica que tablet) ── */
+    /* ── BOTÓN RUTA: encima del botón clima (esquina inferior derecha) ── */
     #btn-calcular-ruta {
         position: fixed !important;
-        bottom: calc(56px + 48px + 8px) !important;
-        left: calc(var(--sb-width) + 10px) !important;
-        right: auto !important;
+        /* widgets: bottom=8px, btn-noticias=36px, gap=4px, btn-clima=36px, gap=4px → encima de clima */
+        bottom: calc(8px + 36px + 4px + 36px + 4px + 4px) !important;
+        right: 6px !important;
+        left: auto !important;
         top: auto !important;
-        width: 38px; height: 38px;
-        font-size: 0.36rem; padding: 0;
-        transition: bottom 0.14s steps(4), left 0.14s steps(4), background var(--transition, 0.14s steps(4)), border-color var(--transition, 0.14s steps(4));
+        width: 36px !important;
+        height: 36px !important;
+        font-size: 0.36rem !important;
+        padding: 0 !important;
+        transition: right 0.25s ease, bottom var(--transition, 0.14s steps(4)),
+                    background var(--transition, 0.14s steps(4)),
+                    border-color var(--transition, 0.14s steps(4)) !important;
     }
 
-    body.sidebar-cerrado #btn-calcular-ruta { left: 10px !important; }
-
+    /* Cuando sidebar de construcción está abierto NO mover el RUTA (ya no está a la izquierda) */
     body.sidebar-construccion-abierto #btn-calcular-ruta {
-        bottom: calc(56px + 48px + 16px) !important;
+        bottom: calc(8px + 36px + 4px + 36px + 4px + 4px) !important;
+    }
+
+    /* Cuando noticias está abierto, mover igual que los widgets */
+    body.panel-noticias-abierto #btn-calcular-ruta {
+        right: calc(220px + 8px) !important;
     }
 
     /* ── RECURSOS: centrados arriba ── */
@@ -300,9 +309,10 @@
     }
 
     .hud-recurso       { padding: 3px 6px; min-width: 0; }
-    .hud-recurso-icono { font-size: 0.83rem; }
-    .hud-recurso-label { font-size: 0.33rem; }
-    .hud-recurso-valor { font-size: 0.49rem; }
+    .hud-recurso-icono { font-size: 1rem; }
+    /* Ocultar label en landscape móvil — solo icono + valor */
+    .hud-recurso-label { display: none !important; }
+    .hud-recurso-valor { font-size: 0.55rem; min-width: 0; }
 
     /* ── CONTROLES: esquina superior derecha ── */
     #hud-controles {
@@ -348,33 +358,35 @@
         position: fixed;
         bottom: 8px; right: 6px !important;
         left: auto; top: auto;
-        flex-direction: column; gap: 4px; z-index: 400;
-        transition: none;
+        flex-direction: column; gap: 4px; z-index: 410;
+        transition: right 0.25s ease;
+        pointer-events: auto !important;
     }
 
-    #widgets-container.panel-noticias-abierto { right: calc(220px + 8px) !important; }
-
-    .widget-btn        { width: 36px; height: 36px; }
+    .widget-btn { width: 36px; height: 36px; pointer-events: auto !important; }
     .widget-clima-temp { font-size: 0.41rem; }
 
+    /* Al abrir noticias, los widgets se mueven a la izquierda del panel */
+    #widgets-container.panel-noticias-abierto { right: calc(220px + 8px) !important; }
+
+    /* ── CLIMA INFOBOX ── */
+    /* Con el btn-ruta encima, los botones quedan (de abajo a arriba):
+       btn-noticias: bottom=8, h=36 → top=44
+       btn-clima:    bottom=48, h=36 → top=84, centro=66px
+       btn-ruta:     bottom=92, h=36
+       Infobox: right = 6+36+8=50px, ancho=160px, bottom=8px */
     .clima-infobox {
-        /* A la izquierda de los botones, flecha apunta a la derecha hacia el botón clima.
-           Botones en right=6px, col, gap=4px, 36px cada uno.
-           btn-noticias: bottom=8px; btn-clima: bottom=8+36+4=48px, centro=66px
-           Infobox: borde-der a right=50px (6+36+8), ancho=160px */
         right: calc(6px + 36px + 8px) !important;
         left: auto !important;
-        /* Centrar verticalmente con btn clima: centro en bottom=66px, infobox ~150px alto → bottom = 66-75 → mínimo 8px */
         bottom: 8px !important;
         top: auto !important;
         width: 160px !important;
+        z-index: 420 !important;
     }
 
-    /* Flecha del clima en landscape: apunta hacia la derecha (hacia el botón) */
+    /* Flecha del clima en landscape: apunta hacia la derecha */
     .clima-infobox::after {
         bottom: auto !important;
-        /* btn-clima centro: bottom=66px, infobox bottom=8px → desde fondo infobox = 58px
-           infobox ~160px alto → desde top = 160-58 = 102px ≈ 64% del alto */
         top: 64% !important;
         right: -10px !important;
         left: auto !important;

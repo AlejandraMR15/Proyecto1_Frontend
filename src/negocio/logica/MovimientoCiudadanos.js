@@ -38,23 +38,21 @@ export default class MovimientoCiudadanos {
         this.renderer         = renderer;
         this.gestorCiudadanos = gestorCiudadanos;
 
-        const {
-            contenedorId = 'iso-grid',
-            intervaloMs  = 2500,
-        } = opciones;
+    const {
+        contenedorId = 'iso-grid',
+        intervaloMs  = 2500,
+        // Fracción de TD para apoyar el sprite sobre la vía sin que "se hunda"
+        roadYOffsetFactor = 0.40,
+    } = opciones;
 
-        this.contenedorId = contenedorId;
-        this.intervaloMs  = intervaloMs;
+    this.contenedorId = contenedorId;
+    this.intervaloMs  = intervaloMs;
+    this.roadYOffsetFactor = roadYOffsetFactor;
 
-        // Elemento DOM contenedor (se resuelve en iniciar())
-        this._gridEl = null;
-
-        // Mapa interno: ciudadanoId → { sprite: HTMLElement, col: number, row: number }
-        this._sprites = new Map();
-
-        // id del setInterval activo (null = detenido)
-        this._intervaloId = null;
-    }
+    this._gridEl = null;
+    this._sprites = new Map();
+    this._intervaloId = null;
+}
 
     /* ------------------------------------------------------------------ */
     /*  Ciclo de vida                                                        */
@@ -72,12 +70,12 @@ export default class MovimientoCiudadanos {
             return;
         }
 
-        // Sincronización inicial de sprites con ciudadanos existentes
-        this._sincronizarSprites();
+    // Evita intervalos duplicados (saltos bruscos)
+        if (this._intervaloId !== null) return;
 
-        // Iniciar el loop de movimiento
+        this._sincronizarSprites();
         this._intervaloId = setInterval(() => this._tick(), this.intervaloMs);
-    }
+        }
 
     /**
      * Detiene el loop de movimiento y elimina todos los sprites del DOM.
@@ -218,33 +216,31 @@ export default class MovimientoCiudadanos {
      * @param {number}      row
      */
     _posicionarSprite(sprite, col, row) {
-        const TW     = this.renderer.TW;      // ancho del tile (64 px por defecto)
-        const TH     = this.renderer.TH;      // altura cara superior = TW/2
-        const STEP_X = this.renderer.STEP_X;  // TW/2
-        const STEP_Y = this.renderer.STEP_Y;  // TW/4
+        const TW     = this.renderer.TW;
+        const TH     = this.renderer.TH;
+        const STEP_X = this.renderer.STEP_X;
+        const STEP_Y = this.renderer.STEP_Y;
 
-        // Mismo cálculo que GridRenderer._gridToScreen
         const screenX = (col - row) * STEP_X;
         const screenY = (col + row) * STEP_Y;
 
-        // Offset horizontal para que x nunca sea negativo (igual que en _construirGrid)
-        const cols   = this.mapa.ancho;
-        const rows   = this.mapa.alto;
-        const minX   = (0 - (rows - 1)) * STEP_X;
+        const rows    = this.mapa.alto;
+        const minX    = (0 - (rows - 1)) * STEP_X;
         const offsetX = -minX;
 
-        // Centrar el sprite sobre poly-bottom de la vía.
-        // poly-bottom está TD píxeles más abajo que la cara superior del cubo.
-        const TD = this.renderer.TD;
+        const TD = this.renderer.TD ?? 0;
         const spriteSize = 10;
+
+        // Antes se usaba TD completo; eso puede dar efecto de hundimiento.
+        const roadYOffset = TD * this.roadYOffsetFactor;
+
         const left = screenX + offsetX + (TW / 2) - (spriteSize / 2);
-        const top  = screenY + TD      + (TH / 2) - (spriteSize / 2);
+        const top  = screenY + roadYOffset + (TH / 2) - (spriteSize / 2);
 
-        sprite.style.left = left + 'px';
-        sprite.style.top  = top  + 'px';
+        sprite.style.left = `${left}px`;
+        sprite.style.top  = `${top}px`;
 
-        // Mismo z-index que el cubo de esa celda para respetar el Painter's Algorithm
-        // Los edificios con mayor col+row quedarán encima de los ciudadanos
+        // Mantiene prioridad visual por profundidad (col + row)
         sprite.style.zIndex = (col + row).toString();
     }
 

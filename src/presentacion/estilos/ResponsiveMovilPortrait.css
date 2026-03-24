@@ -59,9 +59,10 @@
         min-width: 0;
     }
 
-    .hud-recurso-icono { font-size: 0.75rem; }
-    .hud-recurso-label { font-size: 0.36rem; }
-    .hud-recurso-valor { font-size: 0.54rem; }
+    .hud-recurso-icono { font-size: 0.85rem; }
+    /* Ocultar label (DINERO / ELECTRICIDAD / AGUA) en móvil portrait — solo icono + valor */
+    .hud-recurso-label { display: none !important; }
+    .hud-recurso-valor { font-size: 0.58rem; min-width: 0; }
 
     /* ── PERFIL: esquina superior izquierda ── */
     #hud-perfil {

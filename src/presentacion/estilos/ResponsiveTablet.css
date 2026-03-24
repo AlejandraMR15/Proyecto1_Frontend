@@ -39,7 +39,7 @@
         flex-direction: column !important;
         transform: translateX(0) !important;
         pointer-events: auto !important;
-        border-right: 3px solid #3a3a9a !important;
+        border-right: 3px solid #3d6b8a !important;
         border-top: none !important;
         z-index: 200 !important;
         transition: transform 0.14s steps(4) !important;
@@ -68,7 +68,7 @@
     }
 
     .sidebar > .sidebar-header .sidebar-title {
-        font-size: 7px !important;
+        font-size: 13px !important;
         letter-spacing: 0.02em !important;
     }
 
@@ -89,7 +89,7 @@
         height: 32px !important;
         min-width: 32px !important;
         padding: 4px !important;
-        font-size: 14px !important;
+        font-size: 16px !important;
         flex-shrink: 0 !important;
     }
 
@@ -137,8 +137,8 @@
     }
 
     .sidebar .build-icon { font-size: 1.1rem !important; }
-    .sidebar .build-name { font-size: 0.38rem !important; white-space: nowrap !important; }
-    .sidebar .build-cost { font-size: 0.32rem !important; }
+    .sidebar .build-name { font-size: 0.49rem !important; white-space: nowrap !important; }
+    .sidebar .build-cost { font-size: 0.41rem !important; }
 
     /* ── BOTÓN CONSTRUIR: abajo izquierda, se mueve con el sidebar ── */
     #sidebarTab {
@@ -148,7 +148,7 @@
         left: calc(var(--sb-width) + 10px) !important;
         width: 160px !important;
         height: 52px !important;
-        font-size: 0.45rem !important;
+        font-size: 0.58rem !important;
         transition: left 0.14s steps(4), opacity 0.15s ease !important;
         z-index: 210 !important;
     }
@@ -167,13 +167,13 @@
         top: 8px;
         left: calc(var(--sb-width) + 10px);
         padding: 5px 10px;
-        font-size: 0.38rem;
+        font-size: 0.49rem;
         z-index: 400;
         min-width: 0 !important;
         max-width: 140px;
         transition: left 0.14s steps(4);
-        background: #0f0f2a;
-        border: 2px solid #3a3a9a;
+        background: #1c2b3a;
+        border: 2px solid #3d6b8a;
         border-radius: 4px;
     }
 
@@ -182,7 +182,7 @@
     #perfil-nombre-ciudad,
     #perfil-alcalde,
     #perfil-puntuacion {
-        font-size: 0.34rem;
+        font-size: 0.44rem;
         margin-bottom: 2px;
         white-space: nowrap;
         overflow: hidden;
@@ -197,8 +197,8 @@
         position: fixed;
         top: 96px;
         left: calc(var(--sb-width) + 10px) !important;
-        background: rgba(15, 15, 42, 0.88);
-        border: 1px solid #3a3a9a;
+        background: rgba(28, 43, 58, 0.88);
+        border: 1px solid #3d6b8a;
         border-radius: 4px;
         padding: 4px 8px;
         z-index: 399;
@@ -211,21 +211,51 @@
 
     .bienestar-fila  { gap: 5px; }
     .bienestar-icono { font-size: 0.8rem; }
-    .bienestar-label { font-size: 0.28rem; }
-    .bienestar-valor { font-size: 0.38rem; }
+    .bienestar-label { font-size: 0.36rem; }
+    .bienestar-valor { font-size: 0.49rem; }
 
-    /* ── BOTÓN RUTA: esquina superior derecha junto a controles ── */
+    /* ── DESGLOSE: debajo del bienestar ── */
+    #hud-desglose {
+        position: fixed;
+        top: 168px;
+        left: calc(var(--sb-width) + 10px) !important;
+        width: 150px !important;
+        z-index: 399;
+        transition: left 0.14s steps(4);
+    }
+
+    body.sidebar-cerrado #hud-desglose { left: 10px !important; }
+
+    #hud-desglose-toggle { font-size: 0.52rem !important; padding: 6px 10px !important; }
+    #hud-desglose-arrow  { font-size: 0.58rem !important; }
+    .desglose-seccion-titulo { font-size: 0.46rem !important; }
+    .desglose-label          { font-size: 0.42rem !important; }
+    .desglose-valor          { font-size: 0.44rem !important; }
+    .desglose-item-bonif,
+    .desglose-item-penal,
+    .desglose-sin-items      { font-size: 0.40rem !important; }
+    .desglose-total-label    { font-size: 0.44rem !important; }
+    .desglose-total-valor    { font-size: 0.60rem !important; }
+
+    /* ── BOTÓN RUTA: encima del turno, directamente arriba ── */
     #btn-calcular-ruta {
         position: fixed !important;
-        top: 8px !important;
-        right: 112px !important;
-        left: auto !important;
-        bottom: auto !important;
+        bottom: calc(76px + 56px) !important; /* izquierda + turno */
+        left: calc(var(--sb-width) + 10px) !important;
+        right: auto !important;
+        top: auto !important;
         width: 48px !important;
         height: 48px !important;
-        font-size: 0.36rem !important;
-        transition: background 0.14s steps(4),
-                    border-color 0.14s steps(4) !important;
+        font-size: 0.46rem !important;
+        transition: bottom 0.14s steps(4), left 0.14s steps(4), background 0.14s steps(4), border-color 0.14s steps(4) !important;
+    }
+
+    body.sidebar-cerrado #btn-calcular-ruta {
+        left: 10px !important;
+    }
+
+    body.sidebar-construccion-abierto #btn-calcular-ruta {
+        bottom: calc(76px + 56px + 8px) !important;
     }
 
     /* ── RECURSOS: centrados en la parte superior ── */
@@ -244,7 +274,7 @@
         padding: 0;
         max-width: calc(100vw - 500px);
         overflow: hidden;
-        transition: none !important;
+        transition: left 0.14s steps(4) !important;
     }
 
     body.sidebar-cerrado #hud-recursos {
@@ -252,10 +282,20 @@
         transform: translateX(-50%) !important;
     }
 
+    body.sidebar-construccion-abierto #hud-recursos {
+        left: calc(50% + 40px) !important;
+        transform: translateX(-50%) !important;
+    }
+
+    body.hud-desglose-open #hud-recursos {
+        left: calc(50% + 40px) !important;
+        transform: translateX(-50%) !important;
+    }
+
     .hud-recurso       { padding: 4px 8px; min-width: 0; }
     .hud-recurso-icono { font-size: 0.8rem; }
-    .hud-recurso-label { font-size: 0.32rem; }
-    .hud-recurso-valor { font-size: 0.48rem; }
+    .hud-recurso-label { font-size: 0.41rem; }
+    .hud-recurso-valor { font-size: 0.61rem; }
 
     /* ── CONTROLES: esquina superior derecha ── */
     #hud-controles {
@@ -279,7 +319,7 @@
         bottom: 76px;
         left: calc(var(--sb-width) + 10px);
         top: auto; transform: none;
-        font-size: 0.38rem;
+        font-size: 0.49rem;
         padding: 6px 10px;
         min-width: 180px;
         z-index: 400;
@@ -300,11 +340,44 @@
     }
 
     .widget-btn        { width: 48px; height: 48px; }
-    .widget-clima-temp { font-size: 0.38rem; }
+    .widget-clima-temp { font-size: 0.49rem; }
 
+    /* ── CLIMA INFOBOX: a la izquierda de los botones, flecha apunta a la derecha ── */
     .clima-infobox {
-        bottom: 70px; right: 8px !important;
-        left: auto; width: 200px; top: auto;
+        /* A la izquierda del widget-container: 8px margen + 48px botón + 10px gap */
+        right: calc(8px + 48px + 10px) !important;
+        left: auto !important;
+        top: auto !important;
+        /* Centrado verticalmente con el botón clima.
+           btn-noticias: bottom=16px h=48px → btn-clima: bottom=70px h=48px → centro=94px
+           infobox ~160px alto → bottom = 94 - 80 = 14px */
+        bottom: 14px !important;
+        width: 200px !important;
+    }
+
+    /* Cuando noticias está abierto, también mover el infobox */
+    .clima-infobox.panel-noticias-abierto {
+        right: calc(var(--sb-width) + 16px + 48px + 10px) !important;
+    }
+
+    /* Flecha apunta hacia la derecha (hacia el botón clima) */
+    .clima-infobox::after {
+        bottom: auto !important;
+        top: 50% !important;
+        right: -10px !important;
+        left: auto !important;
+        transform: translateY(-50%) !important;
+        border-top: 8px solid transparent !important;
+        border-bottom: 8px solid transparent !important;
+        border-left: 8px solid var(--border) !important;
+        border-right: none !important;
+        width: 0 !important;
+        height: 0 !important;
+    }
+
+    /* ── Mover widgets al abrir panel de noticias ── */
+    #widgets-container.panel-noticias-abierto {
+        right: calc(var(--sb-width) + 16px) !important;
     }
 
     /* ── MODALES ── */

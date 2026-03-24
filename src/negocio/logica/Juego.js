@@ -29,6 +29,7 @@ export default class Juego {
         this.gestorCiudadanos = new GestorCiudadano();
         this.recolectorBurbujas = new RecoleccionBurbujas(this);
         this.numeroTurno = 0;
+        this.desglosePuntaje = null;
     }
 
     /**
@@ -84,7 +85,7 @@ export default class Juego {
             const poblacion = this.gestorCiudadanos.calcularTotalCiudadanos();
             const felicidad = this.gestorCiudadanos.calcularFelicidadPromedio();
             
-            puntaje = this.administrarPuntaje.calcular({
+            const datosPuntaje = {
                 poblacion,
                 felicidad,
                 dinero:       recursos.dinero,
@@ -92,7 +93,9 @@ export default class Juego {
                 electricidad: recursos.electricidad,
                 agua:         recursos.agua,
                 desempleados
-            });
+            };
+            puntaje = this.administrarPuntaje.calcular(datosPuntaje);
+            this.desglosePuntaje = this.administrarPuntaje.obtenerDesglose(datosPuntaje);
         }
         this.puntaje = puntaje;
         return puntaje;

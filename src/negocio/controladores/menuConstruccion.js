@@ -196,12 +196,16 @@ function mostrarInfoEdificio(construccion, col, row) {
 ================================================================ */
 
 /**
- * Cambia el cursor del viewport y de todos los cubos del grid.
+ * Cambia el cursor del viewport, del iso-grid y de todos los cubos del grid.
+ * iso-grid es el elemento que recibe los eventos reales (pointer-events: all),
+ * por eso es el que hay que actualizar para que el cursor sea visible.
  * @param {'crosshair'|'not-allowed'|''} cursor
  */
 function aplicarCursorModo(cursor) {
     const vp = document.getElementById('viewport');
     if (vp) vp.style.cursor = cursor;
+    const grid = document.getElementById('iso-grid');
+    if (grid) grid.style.cursor = cursor;
     document.querySelectorAll('.iso-cube').forEach(el => el.style.cursor = cursor);
 }
 

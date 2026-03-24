@@ -5,31 +5,30 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  image-rendering: pixelated;
 }
 
 :root {
-  /* Paleta pixel art oscura */
-  --bg-page:        #080818;
-  --bg-sidebar:     #0f0f2a;
-  --bg-header:      #08081c;
-  --bg-cat:         #14144a;
-  --bg-cat-hover:   #1e1e6a;
-  --bg-item:        #0c0c24;
-  --bg-item-hover:  #181848;
-  --bg-item-active: #20208a;
+  /* Paleta azul-gris claro */
+  --bg-page:        #111b24;
+  --bg-sidebar:     #1c2b3a;
+  --bg-header:      #152030;
+  --bg-cat:         #223344;
+  --bg-cat-hover:   #2e4460;
+  --bg-item:        #1a2838;
+  --bg-item-hover:  #243850;
+  --bg-item-active: #2a4a70;
 
-  /* Bordes pixel */
-  --border:         #3a3a9a;
-  --border-hi:      #6868cc;
-  --border-dk:      #06061a;
+  /* Bordes azul claro */
+  --border:         #3d6b8a;
+  --border-hi:      #5a9abf;
+  --border-dk:      #0a1520;
 
   /* Textos */
-  --text-primary:   #c8d8ff;
-  --text-secondary: #6878a8;
-  --text-dim:       #383868;
+  --text-primary:   #e8f0f7;
+  --text-secondary: #7aaabf;
+  --text-dim:       #3a5a70;
 
-  /* Acento dorado retro */
+  /* Acento dorado */
   --accent:         #ffd700;
   --accent-dim:     #aa8800;
   --accent-bg:      rgba(255, 215, 0, 0.10);
@@ -38,13 +37,13 @@
   /* Sidebar */
   --sb-width:       272px;
   --header-h:       50px;
-  --transition:     0.14s steps(4);
+  --transition:     0.14s ease;
 }
 
 body {
   background-color: var(--bg-page);
   color: var(--text-primary);
-  font-family: 'Press Start 2P', 'Courier New', monospace;
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
   min-height: 100vh;
   overflow-x: hidden;
   cursor: default;
@@ -125,7 +124,7 @@ body {
 }
 
 .sidebar-title {
-  font-size: 9px;
+  font-size: 12px;
   font-weight: 400;
   letter-spacing: 0.09em;
   color: var(--accent);
@@ -139,8 +138,8 @@ body {
   background: var(--bg-item);
   border: 2px solid var(--border);
   color: var(--text-secondary);
-  font-family: 'Press Start 2P', monospace;
-  font-size: 9px;
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  font-size: 12px;
   cursor: pointer;
   padding: 5px 7px;
   line-height: 1;
@@ -176,7 +175,7 @@ body {
   background: var(--bg-item);
   border: 2px solid var(--border);
   color: var(--text-secondary);
-  font-family: 'Press Start 2P', monospace;
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
   font-size: 10px;
   cursor: pointer;
   padding: 5px 7px;
@@ -256,8 +255,8 @@ body {
   border-bottom: 1px solid var(--border-dk);
   cursor: pointer;
   color: var(--text-primary);
-  font-family: 'Press Start 2P', monospace;
-  font-size: 7px;
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  font-size: 10px;
   letter-spacing: 0.05em;
   text-align: left;
   transition: background var(--transition);
@@ -296,7 +295,7 @@ body {
 }
 
 .cat-arrow {
-  font-size: 7px;
+  font-size: 10px;
   color: var(--border-hi);
   transition: transform 0.12s steps(3);
   line-height: 1;
@@ -380,7 +379,7 @@ body {
 }
 
 .build-name {
-  font-size: 6.5px;
+  font-size: 10px;
   color: var(--text-primary);
   line-height: 1.4;
   transition: color var(--transition);
@@ -392,7 +391,7 @@ body {
 .build-item:hover .build-name { color: #ffffff; }
 
 .build-cost {
-  font-size: 6px;
+  font-size: 9px;
   color: var(--accent);
   white-space: nowrap;
   background: var(--accent-bg);
@@ -432,8 +431,8 @@ body {
   border: 3px solid var(--border);
   border-left: none;
   color: var(--text-primary);
-  font-family: 'Press Start 2P', monospace;
-  font-size: 6px;
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  font-size: 9px;
   letter-spacing: 0.05em;
   padding: 14px 8px;
   cursor: pointer;
@@ -500,7 +499,7 @@ body {
 
     /* Reducir título para que quepan los botones en 160px */
     #sidebar .sidebar-title {
-        font-size: 6px !important;
+        font-size: 9px !important;
         letter-spacing: 0 !important;
     }
 

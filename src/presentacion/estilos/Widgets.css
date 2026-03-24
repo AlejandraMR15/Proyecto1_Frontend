@@ -27,7 +27,7 @@
   background: var(--bg-cat);
   border: 3px solid var(--border);
   color: var(--text-primary);
-  font-family: 'Press Start 2P', monospace;
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
   cursor: pointer;
   display: flex;
   flex-direction: column;
@@ -119,17 +119,25 @@
   transform: translateY(0);
 }
 
-/* Flecha indicadora hacia abajo */
+/* Flecha indicadora hacia abajo — apunta al botón clima.
+   widgets-container: right=88px, gap=8px, btn-noticias=64px, btn-clima=64px.
+   Centro btn clima desde derecha pantalla = 88 + 8 + 64 + 32 = 192px.
+   infobox right=88px → desde borde derecho infobox = 192-88=104px.
+   Flecha centrada (16px ancho) → right: 96px */
 .clima-infobox::after {
   content: '';
   position: absolute;
   bottom: -10px;
-  left: 24px;
+  right: 96px;
+  left: auto;
+  top: auto;
+  transform: none;
   width: 0;
   height: 0;
   border-left: 8px solid transparent;
   border-right: 8px solid transparent;
   border-top: 8px solid var(--border);
+  border-bottom: none;
 }
 
 /* Cabecera del info-box */
@@ -166,7 +174,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid rgba(58, 58, 154, 0.35);
+  border-bottom: 1px solid rgba(61, 107, 138, 0.35);
   padding-bottom: 5px;
 }
 

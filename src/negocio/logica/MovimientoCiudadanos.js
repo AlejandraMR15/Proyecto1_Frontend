@@ -233,16 +233,19 @@ export default class MovimientoCiudadanos {
         const minX   = (0 - (rows - 1)) * STEP_X;
         const offsetX = -minX;
 
-        // Centrar el sprite sobre la cara superior del cubo
-        const spriteSize = 10; // coincide con el tamaño definido en CSS
-        const left = screenX + offsetX + (TW  / 2) - (spriteSize / 2);
-        const top  = screenY           + (TH  / 2) - (spriteSize / 2);
+        // Centrar el sprite sobre poly-bottom de la vía.
+        // poly-bottom está TD píxeles más abajo que la cara superior del cubo.
+        const TD = this.renderer.TD;
+        const spriteSize = 10;
+        const left = screenX + offsetX + (TW / 2) - (spriteSize / 2);
+        const top  = screenY + TD      + (TH / 2) - (spriteSize / 2);
 
         sprite.style.left = left + 'px';
         sprite.style.top  = top  + 'px';
 
-        // z-index superior al del cubo para que se vea encima
-        sprite.style.zIndex = (col + row + 1000).toString();
+        // Mismo z-index que el cubo de esa celda para respetar el Painter's Algorithm
+        // Los edificios con mayor col+row quedarán encima de los ciudadanos
+        sprite.style.zIndex = (col + row).toString();
     }
 
     /* ------------------------------------------------------------------ */

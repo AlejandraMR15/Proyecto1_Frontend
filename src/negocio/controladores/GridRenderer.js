@@ -110,6 +110,8 @@ export default class GridRenderer {
         }
 
         this._construirGrid();
+        this._construirBloqueVolumen();
+        this._registrarEventosGrid();
     }
 
     /**
@@ -216,6 +218,95 @@ export default class GridRenderer {
             this._gridEl.appendChild(cubo);
             this._cubos.set(`${col},${row}`, cubo);
         });
+
+        // Tiempo en que termina de cargarse el último cubo (mismo cálculo que en _crearCubo)
+        this._tiempoUltimoCubo = (celdas.length - 1) * 3 + 50;
+    }
+
+    /**
+     * Crea un SVG decorativo detrás del grid que da la ilusión de un bloque
+     * con volumen (cara izquierda, cara derecha y cara frontal en marrón tierra).
+     * No afecta eventos ni lógica — puramente visual.
+     * @private
+     */
+    _construirBloqueVolumen() {
+        const cols  = this.mapa.ancho;
+        const rows  = this.mapa.alto;
+        const TD    = this.TD;
+        const TW    = this.TW;
+        const TH    = this.TH;
+        const depth = 110;
+
+        // El div de cada celda se posiciona en:
+        //   left = (col-row)*STEP_X + _offsetX
+        //   top  = (col+row)*STEP_Y + TD   (TD porque el div está desplazado)
+        // Los vértices del diamante dentro del div son:
+        //   Tope     = [TW/2, 0]
+        //   Derecha  = [TW,   TH/2]
+        //   Fondo    = [TW/2, TH]
+        //   Izquierda= [0,    TH/2]
+        // En coordenadas absolutas del #iso-grid:
+
+        const dX = (col, row) => (col - row) * this.STEP_X + this._offsetX;
+        const dY = (col, row) => (col + row) * this.STEP_Y + TD;
+
+        // Pico DERECHO: vértice derecho del diamante de la celda (cols-1, 0)
+        const rc = { x: dX(cols-1, 0) + TW,      y: dY(cols-1, 0) + TH / 2 };
+        // Pico INFERIOR: vértice fondo del diamante de la celda (cols-1, rows-1)
+        const bc = { x: dX(cols-1, rows-1) + TW/2, y: dY(cols-1, rows-1) + TH };
+        // Pico IZQUIERDO: vértice izquierdo del diamante de la celda (0, rows-1)
+        const lc = { x: dX(0, rows-1) + 0,         y: dY(0, rows-1) + TH / 2 };
+
+        const faceLeft = [
+            `${lc.x},${lc.y}`,
+            `${bc.x},${bc.y}`,
+            `${bc.x},${bc.y + depth}`,
+            `${lc.x},${lc.y + depth}`
+        ].join(' ');
+
+        const faceRight = [
+            `${bc.x},${bc.y}`,
+            `${rc.x},${rc.y}`,
+            `${rc.x},${rc.y + depth}`,
+            `${bc.x},${bc.y + depth}`
+        ].join(' ');
+
+        const svgW = parseInt(this._gridEl.style.width)  || 2000;
+        const svgH = parseInt(this._gridEl.style.height) + depth + 20;
+
+        const ns  = 'http://www.w3.org/2000/svg';
+        const svg = document.createElementNS(ns, 'svg');
+        svg.id = 'iso-volume';
+        svg.setAttribute('width',   svgW);
+        svg.setAttribute('height',  svgH);
+        svg.setAttribute('viewBox', `0 0 ${svgW} ${svgH}`);
+        svg.style.cssText = `
+            position:absolute; top:0; left:0;
+            pointer-events:none; overflow:visible; z-index:0;
+            opacity:0; transition: opacity 0.4s ease;
+        `;
+
+        const mkPoly = (points, fill, stroke) => {
+            const p = document.createElementNS(ns, 'polygon');
+            p.setAttribute('points',          points);
+            p.setAttribute('fill',            fill);
+            p.setAttribute('stroke',          stroke);
+            p.setAttribute('stroke-width',    '1.5');
+            p.setAttribute('stroke-linejoin', 'round');
+            return p;
+        };
+
+        svg.appendChild(mkPoly(faceLeft,  '#7a3b1e', '#3d1a08'));
+        svg.appendChild(mkPoly(faceRight, '#9b4f28', '#3d1a08'));
+
+        if (this._gridEl.firstChild) {
+            this._gridEl.insertBefore(svg, this._gridEl.firstChild);
+        } else {
+            this._gridEl.appendChild(svg);
+        }
+
+        const delay = (this._tiempoUltimoCubo ?? 50) + 80;
+        setTimeout(() => { svg.style.opacity = '1'; }, delay);
     }
 
     /**
@@ -227,42 +318,39 @@ export default class GridRenderer {
         const { x, y } = this._gridToScreen(col, row);
         const etiqueta = this.mapa.matriz[row][col] ?? 'g';
 
+        // Wrapper: posicionado en la cara INFERIOR (poly-bottom)
+        // poly-bottom empieza en y + TD dentro del SVG, y tiene alto TH
+        // Al mover el div TD píxeles hacia abajo y reducir su alto a TH,
+        // el bounding box coincide exactamente con el diamante visible.
         const cubo = document.createElement('div');
         cubo.className = 'iso-cube';
         cubo.dataset.col = col;
         cubo.dataset.row = row;
         cubo.dataset.etiqueta = etiqueta;
         cubo.style.left   = (x + offsetX) + 'px';
-        cubo.style.top    = y + 'px';
+        cubo.style.top    = (y + this.TD) + 'px';          // ← bajar TD para coincidir con poly-bottom
         cubo.style.width  = this.TW + 'px';
-        cubo.style.height = (this.TH + this.TD) + 'px';
+        cubo.style.height = this.TH + 'px';                // ← solo la altura del diamante inferior
         cubo.style.zIndex = row + col;
+        cubo.style.overflow = 'visible';
 
         // Animación de entrada escalonada
         cubo.style.opacity    = '0';
         cubo.style.transition = 'opacity 0.25s ease';
 
         const colores = this._coloresPorEtiqueta(etiqueta);
-        const imagen = this._obtenerImagenPorEtiqueta(etiqueta);
-        
-        
-        if (imagen) {
-            // Mostrar imagen como fondo del cubo
-            const imgEl = document.createElement('img');
-            imgEl.src = imagen;
-            imgEl.style.width = '100%';
-            imgEl.style.height = '100%';
-            imgEl.style.objectFit = 'cover';
-            imgEl.style.objectPosition = 'center';
-            imgEl.style.borderRadius = '4px';
-            cubo.appendChild(imgEl);
-        } else {
-            // Mostrar SVG coloreado
-            const svg = this._crearSVGCubo(colores.top, colores.left, colores.right);
-            cubo.appendChild(svg);
-        }
+        const svg = this._crearSVGCubo(colores.top, colores.left, colores.right, etiqueta);
+        svg.style.position      = 'absolute';
+        svg.style.left          = '0';
+        svg.style.pointerEvents = 'none';
+        // Edificios suben TH px sobre el suelo; planos solo TD
+        svg.style.top = this._esEdificio(etiqueta)
+            ? (-this.TH / 2) + 'px'
+            : (-this.TD) + 'px';
+        cubo.appendChild(svg);
 
-        // Eventos
+        // Eventos directamente en el cubo — el bounding box ya coincide con poly-bottom
+        cubo.style.pointerEvents = 'all';
         cubo.addEventListener('mouseenter', (e) => this._onEnter(e));
         cubo.addEventListener('mouseleave', ()  => this._onLeave());
         cubo.addEventListener('click',      (e) => this._onClick(e));
@@ -291,26 +379,18 @@ export default class GridRenderer {
         cubo.dataset.etiqueta = etiqueta;
 
         const colores = this._coloresPorEtiqueta(etiqueta);
-        const imagen = this._obtenerImagenPorEtiqueta(etiqueta);
 
-        // Limpiar contenido anterior
+        // Limpiar contenido anterior (ya no usamos imágenes)
         cubo.innerHTML = '';
 
-        if (imagen) {
-            // Mostrar imagen como fondo del cubo
-            const imgEl = document.createElement('img');
-            imgEl.src = imagen;
-            imgEl.style.width = '100%';
-            imgEl.style.height = '100%';
-            imgEl.style.objectFit = 'cover';
-            imgEl.style.objectPosition = 'center';
-            imgEl.style.borderRadius = '4px';
-            cubo.appendChild(imgEl);
-        } else {
-            // Mostrar SVG coloreado
-            const svg = this._crearSVGCubo(colores.top, colores.left, colores.right);
-            cubo.appendChild(svg);
-        }
+        const svg = this._crearSVGCubo(colores.top, colores.left, colores.right, etiqueta);
+        svg.style.position      = 'absolute';
+        svg.style.left          = '0';
+        svg.style.pointerEvents = 'none';
+        svg.style.top = this._esEdificio(etiqueta)
+            ? (-this.TH / 2) + 'px'
+            : (-this.TD) + 'px';
+        cubo.appendChild(svg);
 
         // Efecto visual breve para indicar el cambio
         this._animarCambio(cubo);
@@ -330,18 +410,15 @@ export default class GridRenderer {
     /* ------------------------------------------------------------------ */
 
     /**
-     * Devuelve las tres caras de color (top, left, right) para una etiqueta dada.
-     * Centraliza aquí toda la lógica visual de tipos de celda.
+     * Devuelve los colores de cara para una etiqueta dada.
+     * Con el nuevo sistema visual:
+     *  - 'top'   → color de la cara inferior visible (poly-bottom) y referencia para detectar terreno
+     *  - 'left'  → color de cara lateral izquierda (solo borde, fill transparente)
+     *  - 'right' → color de cara lateral derecha   (solo borde, fill transparente)
      *
-     * Grupos de colores:
-     *  'g'        → terreno (azul claro — color base de la demo)
-     *  'r'        → vía (gris oscuro)
-     *  'P1'       → parque (verde)
-     *  'R1','R2'  → residencial (naranja cálido)
-     *  'C1','C2'  → comercial (amarillo dorado)
-     *  'I1','I2'  → industrial (marrón / óxido)
-     *  'S1'–'S3'  → servicio (púrpura)
-     *  'U1','U2'  → planta de utilidad (rojo)
+     * Para terreno 'g': top debe ser '#7ecfe6' para que _crearSVGCubo
+     * lo detecte y use verde pasto (#6bbf3e) como color de la cara inferior.
+     * Para el resto: top es el color de la cara inferior del edificio/vía.
      *
      * @private
      * @param {string} etiqueta
@@ -349,74 +426,50 @@ export default class GridRenderer {
      */
     _coloresPorEtiqueta(etiqueta) {
         const paletas = {
-            // Terreno vacío (azul-celeste, igual que la demo original)
+            // Terreno vacío — marcador especial para usar verde pasto
             'g':  { top: '#7ecfe6', left: '#4baec8', right: '#2d8aaa' },
 
-            // Vías (gris carbón)
-            'r':  { top: '#8a9099', left: '#5c6169', right: '#3d4147' },
+            // Vías — gris
+            'r':  { top: '#909090', left: '#686868', right: '#484848' },
 
-            // Parque (verde)
-            'P1': { top: '#6ecf5a', left: '#46a834', right: '#2d7a20' },
+            // Parque — verde oscuro
+            'P1': { top: '#2e8b2e', left: '#1e6b1e', right: '#104e10' },
 
-            // Residencial (naranja cálido)
-            'R1': { top: '#f0a040', left: '#c07820', right: '#8a5010' },
-            'R2': { top: '#f5b860', left: '#d09030', right: '#9a6818' },
+            // Casas — beige
+            'R1': { top: '#f5e6c8', left: '#d4be98', right: '#b09870' },
 
-            // Comercial (amarillo dorado)
-            'C1': { top: '#f0d040', left: '#c4a820', right: '#9a8010' },
-            'C2': { top: '#f5e060', left: '#d4b830', right: '#a89018' },
+            // Apartamentos — marrón claro
+            'R2': { top: '#c8956a', left: '#a87040', right: '#845020' },
 
-            // Industrial (marrón / óxido)
-            'I1': { top: '#b06030', left: '#804018', right: '#582808' },
-            'I2': { top: '#c07840', left: '#905028', right: '#683010' },
+            // Tienda — rosado
+            'C1': { top: '#f4a0b8', left: '#d87090', right: '#b84870' },
 
-            // Servicios (púrpura)
-            'S1': { top: '#a060d0', left: '#7038a8', right: '#4a1880' },
-            'S2': { top: '#b070e0', left: '#8048b8', right: '#5828a0' },
-            'S3': { top: '#c080f0', left: '#9058c8', right: '#6838b0' },
+            // Centro comercial — naranja
+            'C2': { top: '#ff8c00', left: '#cc6a00', right: '#994800' },
 
-            // Plantas de utilidad (rojo)
-            'U1': { top: '#e04040', left: '#b01818', right: '#800808' },
-            'U2': { top: '#f05050', left: '#c02828', right: '#981010' },
+            // Fábrica — negro claro (gris oscuro)
+            'I1': { top: '#505050', left: '#383838', right: '#202020' },
+
+            // Granja — café tierra
+            'I2': { top: '#8b5e3c', left: '#6b4020', right: '#4a2808' },
+
+            // Estación de policía — azul oscuro
+            'S1': { top: '#1a3a7a', left: '#102860', right: '#081840' },
+
+            // Estación de bomberos — roja
+            'S2': { top: '#e02020', left: '#b00808', right: '#800000' },
+
+            // Hospital — blanco
+            'S3': { top: '#f0f0f0', left: '#d0d0d0', right: '#b0b0b0' },
+
+            // Planta eléctrica — amarillo
+            'U1': { top: '#f5e020', left: '#c8b000', right: '#9a8000' },
+
+            // Planta de agua — azul claro
+            'U2': { top: '#40a8e0', left: '#2080c0', right: '#0858a0' },
         };
 
-        // Fallback: terreno vacío para etiquetas desconocidas
         return paletas[etiqueta] ?? paletas['g'];
-    }
-
-    /**
-     * Mapeo de etiquetas a imágenes                                        
-     * Devuelve la ruta de imagen para una etiqueta dada.
-     * @private
-     * @param {string} etiqueta
-     * @returns {string|null} Ruta de la imagen o null si no existe
-     */
-    _obtenerImagenPorEtiqueta(etiqueta) {
-        const imagenes = {
-            // Terreno vacío
-            'g':  null,
-            // Vías
-            'r':  null,
-            // Parques
-            'P1': '/src/acceso_datos/imagen/parque.avif',
-            // Residencial
-            'R1': '/src/acceso_datos/imagen/casa%20residencial.avif',
-            'R2': '/src/acceso_datos/imagen/edificio%20residencial.jpg',
-            // Comercial
-            'C1': '/src/acceso_datos/imagen/tienda.avif',
-            'C2': '/src/acceso_datos/imagen/centro%20comercial.avif',
-            // Industrial
-            'I1': '/src/acceso_datos/imagen/fabrica.avif',
-            'I2': '/src/acceso_datos/imagen/granja.jpg',
-            // Servicios
-            'S1': '/src/acceso_datos/imagen/policia.png',
-            'S2': '/src/acceso_datos/imagen/bomberos.jpg',
-            'S3': '/src/acceso_datos/imagen/hospital.png',
-            // Plantas de utilidad
-            'U1': '/src/acceso_datos/imagen/planta%20energia.avif',
-            'U2': '/src/acceso_datos/imagen/agua.jpg',
-        };
-        return imagenes[etiqueta] || null;
     }
 
     /* ------------------------------------------------------------------ */
@@ -424,20 +477,36 @@ export default class GridRenderer {
     /* ------------------------------------------------------------------ */
 
     /**
-     * Construye el SVG con las tres caras del cubo isométrico.
-     * Geometría exacta sin huecos (mismos vértices compartidos).
+     * Indica si una etiqueta es un edificio con volumen (no terreno, vía ni parque).
      * @private
      */
-    _crearSVGCubo(colorTop, colorLeft, colorRight) {
-        const W = this.TW;
-        const H = this.TH;
-        const D = this.TD;
+    _esEdificio(etiqueta) {
+        return !['g', 'r', 'P1'].includes(etiqueta);
+    }
 
-        // Vértices
-        const A  = [W / 2, 0          ];
-        const B  = [W,     H / 2      ];
-        const C  = [W / 2, H          ];
-        const D2 = [0,     H / 2      ];
+    /**
+     * Construye el SVG con las tres caras del cubo isométrico.
+     * - Para terreno/vía/parque: solo cara inferior visible (plana).
+     * - Para edificios: cubo completo con volumen (top + laterales + bottom).
+     * @private
+     */
+    _crearSVGCubo(colorTop, colorLeft, colorRight, etiqueta = 'g') {
+        return this._esEdificio(etiqueta)
+            ? this._crearSVGEdificio(colorTop, colorLeft, colorRight)
+            : this._crearSVGPlano(colorTop, colorLeft, colorRight);
+    }
+
+    /**
+     * SVG plano: solo la cara inferior visible (terreno, vías, parques).
+     * @private
+     */
+    _crearSVGPlano(colorTop, colorLeft, colorRight) {
+        const W  = this.TW;
+        const H  = this.TH;
+        const D  = this.TD;
+
+        // Diamante inferior: A2, G, F, E
+        const A2 = [W / 2, D          ];
         const E  = [0,     H / 2 + D  ];
         const F  = [W / 2, H + D      ];
         const G  = [W,     H / 2 + D  ];
@@ -451,17 +520,68 @@ export default class GridRenderer {
         svg.style.overflow = 'visible';
         svg.style.display  = 'block';
 
+        const esTerreno   = (colorTop === '#7ecfe6');
+        const colorBottom = esTerreno ? '#6bbf3e' : colorTop;
+        const strokeB     = esTerreno ? '#4a8c22' : _darken(colorTop);
+
+        const p = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+        p.setAttribute('points',       pts([A2, G, F, E]));
+        p.setAttribute('fill',         colorBottom);
+        p.setAttribute('fill-opacity', '1');
+        p.setAttribute('stroke',       strokeB);
+        p.setAttribute('stroke-width', '0.6');
+        p.setAttribute('stroke-opacity', '0.5');
+        p.setAttribute('stroke-linejoin', 'round');
+        p.classList.add('poly-bottom');
+        svg.appendChild(p);
+
+        return svg;
+    }
+
+    /**
+     * SVG edificio: cubo isométrico perfecto con volumen.
+     * Solo las tres caras visibles: top, left, right.
+     * @private
+     */
+    _crearSVGEdificio(colorTop, colorLeft, colorRight) {
+        const W  = this.TW;
+        const H  = this.TH;
+        const EH = this.TH / 2;  // mitad de altura — 16px
+
+        const At = [W / 2, 0          ];
+        const Bt = [W,     H / 2      ];
+        const Ct = [W / 2, H          ];
+        const Dt = [0,     H / 2      ];
+        const Bb = [W,     H / 2 + EH ];
+        const Cb = [W / 2, H     + EH ];
+        const Db = [0,     H / 2 + EH ];
+
+        const pts = (arr) => arr.map(p => p.join(',')).join(' ');
+
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('width',   W);
+        svg.setAttribute('height',  H + EH);
+        svg.setAttribute('viewBox', `0 0 ${W} ${H + EH}`);
+        svg.style.overflow = 'visible';
+        svg.style.display  = 'block';
+
+        const stroke = _darken(colorRight);
+
         const mkPoly = (points, fill, cls) => {
             const p = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
-            p.setAttribute('points', pts(points));
-            p.setAttribute('fill', fill);
+            p.setAttribute('points',          pts(points));
+            p.setAttribute('fill',            fill);
+            p.setAttribute('stroke',          stroke);
+            p.setAttribute('stroke-width',    '1');
+            p.setAttribute('stroke-linejoin', 'round');
             p.classList.add(cls);
             return p;
         };
 
-        svg.appendChild(mkPoly([D2, C, F, E], colorLeft,  'poly-left' ));
-        svg.appendChild(mkPoly([C, B, G, F],  colorRight, 'poly-right'));
-        svg.appendChild(mkPoly([A, B, C, D2], colorTop,   'poly-top'  ));
+        // Orden Painter: laterales primero, cara superior encima
+        svg.appendChild(mkPoly([Dt, Ct, Cb, Db], colorLeft,  'poly-left' ));
+        svg.appendChild(mkPoly([Ct, Bt, Bb, Cb], colorRight, 'poly-right'));
+        svg.appendChild(mkPoly([At, Bt, Ct, Dt], colorTop,   'poly-top'  ));
 
         return svg;
     }
@@ -485,57 +605,73 @@ export default class GridRenderer {
     /*  Eventos del grid                                                     */
     /* ------------------------------------------------------------------ */
 
-    /**
-     * Referencia al cubo actualmente seleccionado.
-     * @private
-     */
-    _seleccionado = null;
+    _registrarEventosGrid() {
+        // Los eventos hover y click se manejan directamente en cada cubo
+        // via _onEnter/_onClick/_onLeave registrados en _crearCubo().
+        // Aquí solo registramos mousedown a nivel de grid para detectar drag.
+        let _mouseDownX = 0;
+        let _mouseDownY = 0;
+        this._gridEl.addEventListener('mousedown', (e) => {
+            _mouseDownX = e.clientX;
+            _mouseDownY = e.clientY;
+        });
+        this._getMouseDown = () => ({ x: _mouseDownX, y: _mouseDownY });
 
-    /**
-     * Emite evento de entrada de puntero sobre celda.
-     * @param {MouseEvent} e
-     * @private
-     */
+        this._gridEl.addEventListener('mouseleave', () => {
+            if (this._cuboHover) {
+                this._cuboHover.classList.remove('hovered');
+                this._cuboHover = null;
+            }
+            this._gridEl.dispatchEvent(new CustomEvent('celda-leave', { bubbles: true }));
+        });
+    }
+
+    _seleccionado = null;
+    _cuboHover    = null;
+
     _onEnter(e) {
-        // El tooltip es gestionado externamente (grid.js / main); aquí solo
-        // emitimos el evento con los datos de la celda para que quien quiera
-        // lo consuma.
-        const cubo = e.currentTarget;
-        const col  = parseInt(cubo.dataset.col,  10);
-        const row  = parseInt(cubo.dataset.row,  10);
+        // Ignorar eventos simulados por touch (el navegador genera mouseenter
+        // después de un tap en tablets, lo que causaría el hovered azul en lugar del selected dorado)
+        if (e.sourceCapabilities?.firesTouchEvents) return;
+
+        // No procesar si hay botón presionado (drag)
+        if (e.buttons !== 0) return;
+
+        const cubo     = e.currentTarget;
+        const col      = parseInt(cubo.dataset.col, 10);
+        const row      = parseInt(cubo.dataset.row, 10);
         const etiqueta = cubo.dataset.etiqueta ?? 'g';
 
-        // Disparar evento personalizado para que código externo (p. ej. tooltip)
-        // pueda suscribirse sin acoplar este módulo.
+        if (this._cuboHover && this._cuboHover !== cubo) {
+            this._cuboHover.classList.remove('hovered');
+        }
+        cubo.classList.add('hovered');
+        this._cuboHover = cubo;
+
         this._gridEl.dispatchEvent(new CustomEvent('celda-enter', {
             bubbles: true,
             detail: { col, row, etiqueta, originalEvent: e }
         }));
     }
 
-    /**
-     * Emite evento de salida de puntero de una celda.
-     * @private
-     */
     _onLeave() {
+        if (this._cuboHover) {
+            this._cuboHover.classList.remove('hovered');
+            this._cuboHover = null;
+        }
         this._gridEl.dispatchEvent(new CustomEvent('celda-leave', { bubbles: true }));
     }
 
-    /**
-     * Gestiona el click sobre un cubo.
-     * - Actualiza la selección visual.
-     * - Llama al callback `onCeldaClick` si fue provisto.
-     * - No escribe nada en Mapa por sí solo; eso corresponde a la capa de UI
-     *   que decide qué etiqueta colocar.
-     * @private
-     */
     _onClick(e) {
-        const cubo = e.currentTarget;
-        const col  = parseInt(cubo.dataset.col,  10);
-        const row  = parseInt(cubo.dataset.row,  10);
+        // Ignorar si fue un drag
+        const md = this._getMouseDown ? this._getMouseDown() : { x: e.clientX, y: e.clientY };
+        if (Math.abs(e.clientX - md.x) > 6 || Math.abs(e.clientY - md.y) > 6) return;
+
+        const cubo     = e.currentTarget;
+        const col      = parseInt(cubo.dataset.col, 10);
+        const row      = parseInt(cubo.dataset.row, 10);
         const etiqueta = cubo.dataset.etiqueta ?? 'g';
 
-        // Gestión de selección visual
         if (this._seleccionado && this._seleccionado !== cubo) {
             this._seleccionado.classList.remove('selected');
         }
@@ -547,12 +683,10 @@ export default class GridRenderer {
             this._seleccionado = cubo;
         }
 
-        // Notificar a la capa superior
         if (typeof this.onCeldaClick === 'function') {
             this.onCeldaClick(col, row, etiqueta);
         }
 
-        // También como evento del DOM para suscriptores desacoplados
         this._gridEl.dispatchEvent(new CustomEvent('celda-click', {
             bubbles: true,
             detail: { col, row, etiqueta }
@@ -674,4 +808,20 @@ export default class GridRenderer {
             burbuja.remove();
         }, 1800);
     }
+}
+
+/**
+ * Oscurece un color hex aproximadamente un 35% para usarlo como borde.
+ * @param {string} hex  Color en formato #rrggbb
+ * @returns {string}    Color oscurecido en formato #rrggbb
+ */
+function _darken(hex) {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    const factor = 0.55;
+    const rr = Math.round(r * factor).toString(16).padStart(2, '0');
+    const gg = Math.round(g * factor).toString(16).padStart(2, '0');
+    const bb = Math.round(b * factor).toString(16).padStart(2, '0');
+    return `#${rr}${gg}${bb}`;
 }

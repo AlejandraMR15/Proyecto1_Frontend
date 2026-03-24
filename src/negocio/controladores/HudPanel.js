@@ -45,6 +45,20 @@ const elBarraFill    = document.getElementById('turno-barra-fill');
 const elTiempoAct    = document.getElementById('val-tiempo-actual');
 const elTiempoTot    = document.getElementById('val-tiempo-total');
 
+/* ---- Referencias desglose puntuación ---- */
+const elDsgPoblacion    = document.getElementById('dsg-poblacion');
+const elDsgFelicidad    = document.getElementById('dsg-felicidad');
+const elDsgDinero       = document.getElementById('dsg-dinero');
+const elDsgEdificios    = document.getElementById('dsg-edificios');
+const elDsgElectricidad = document.getElementById('dsg-electricidad');
+const elDsgAgua         = document.getElementById('dsg-agua');
+const elDsgSubtotal     = document.getElementById('dsg-subtotal');
+const elDsgTotalBonif   = document.getElementById('dsg-total-bonif');
+const elDsgTotalPenal   = document.getElementById('dsg-total-penal');
+const elDsgBonifLista   = document.getElementById('dsg-bonif-lista');
+const elDsgPenalLista   = document.getElementById('dsg-penal-lista');
+const elDsgTotal        = document.getElementById('dsg-total');
+
 /* ================================================================
    UTILIDADES
 ================================================================ */
@@ -104,6 +118,57 @@ export function actualizarHUD() {
 
     // --- Turno ---
     if (elTurnoNum) elTurnoNum.textContent = juego.numeroTurno;
+
+    // --- Desglose de puntuación ---
+    if (juego.desglosePuntaje) actualizarDesglose(juego.desglosePuntaje);
+}
+
+/**
+ * Actualiza el panel de desglose de puntuación en el DOM.
+ * @param {object} d - Objeto retornado por Puntuacion.obtenerDesglose()
+ */
+function actualizarDesglose(d) {
+    if (!elDsgTotal) return;
+
+    const fmtPts = n => (n >= 0 ? '+' : '') + Math.round(n).toLocaleString('es-CO');
+
+    if (elDsgPoblacion)    elDsgPoblacion.textContent    = fmtPts(d.puntosPoblacion);
+    if (elDsgFelicidad)    elDsgFelicidad.textContent    = fmtPts(d.puntosFelicidad);
+    if (elDsgDinero)       elDsgDinero.textContent       = fmtPts(d.puntosDinero);
+    if (elDsgEdificios)    elDsgEdificios.textContent    = fmtPts(d.puntosEdificios);
+    if (elDsgElectricidad) elDsgElectricidad.textContent = fmtPts(d.puntosElectricidad);
+    if (elDsgAgua)         elDsgAgua.textContent         = fmtPts(d.puntosAgua);
+    if (elDsgSubtotal)     elDsgSubtotal.textContent     = fmtPts(d.subtotal);
+
+    if (elDsgTotalBonif) elDsgTotalBonif.textContent = '+' + d.totalBonificaciones.toLocaleString('es-CO');
+    if (elDsgTotalPenal) elDsgTotalPenal.textContent = '-' + d.totalPenalizaciones.toLocaleString('es-CO');
+
+    // Bonificaciones activas
+    if (elDsgBonifLista) {
+        const bonifs = [];
+        if (d.bonificaciones.empleadosTodos  > 0) bonifs.push('✓ +500 Todos empleados');
+        if (d.bonificaciones.felicidadAlta   > 0) bonifs.push('✓ +300 Felicidad > 80');
+        if (d.bonificaciones.recursosPositivos > 0) bonifs.push('✓ +200 Recursos positivos');
+        if (d.bonificaciones.poblacionGrande > 0) bonifs.push('✓ +1000 Más de 1.000 hab.');
+        elDsgBonifLista.innerHTML = bonifs.length
+            ? bonifs.map(t => `<div class="desglose-item-bonif">${t}</div>`).join('')
+            : '<div class="desglose-sin-items">Sin bonificaciones</div>';
+    }
+
+    // Penalizaciones activas
+    if (elDsgPenalLista) {
+        const penals = [];
+        if (d.penalizaciones.dineroNegativo       > 0) penals.push('✗ -500 Dinero negativo');
+        if (d.penalizaciones.electricidadNegativa > 0) penals.push('✗ -300 Sin electricidad');
+        if (d.penalizaciones.aguaNegativa         > 0) penals.push('✗ -300 Sin agua');
+        if (d.penalizaciones.felicidadBaja        > 0) penals.push('✗ -400 Felicidad < 40');
+        if (d.penalizaciones.desempleados         > 0) penals.push(`✗ -${d.penalizaciones.desempleados} Desempleados`);
+        elDsgPenalLista.innerHTML = penals.length
+            ? penals.map(t => `<div class="desglose-item-penal">${t}</div>`).join('')
+            : '<div class="desglose-sin-items">Sin penalizaciones</div>';
+    }
+
+    if (elDsgTotal) elDsgTotal.textContent = d.puntuacionFinal.toLocaleString('es-CO');
 }
 
 /**
@@ -197,10 +262,14 @@ export function actualizarTooltipsRecursos() {
 /**
  * Inicia el intervalo del timer visual (tick cada segundo).
  * Si ya hay uno corriendo, lo detiene primero.
+ * Preserva tiempoTranscurrido si ya fue restaurado desde localStorage.
  */
 export function iniciarTimerTurno() {
     detenerTimerTurno();
-    timerEstado.tiempoTranscurrido = 1;
+    // Solo resetear a 1 si no hay un valor restaurado desde localStorage
+    if (!timerEstado.tiempoTranscurrido || timerEstado.tiempoTranscurrido <= 0) {
+        timerEstado.tiempoTranscurrido = 1;
+    }
     actualizarTimerDOM();
 
     timerEstado.intervalo = setInterval(() => {
@@ -281,6 +350,7 @@ export function configurarTooltipsRecursos() {
 /**
  * Observa el atributo data-open del sidebar y sincroniza
  * la clase 'sidebar-cerrado' en el body.
+ * También registra el toggle del panel de desglose.
  */
 export function observarSidebar() {
     const sidebar = document.getElementById('sidebar');
@@ -294,4 +364,41 @@ export function observarSidebar() {
     sincronizar();
     const obs = new MutationObserver(sincronizar);
     obs.observe(sidebar, { attributes: true, attributeFilter: ['data-open'] });
+
+    // Ajusta el despliegue de desglose para landscape según el ancho real del perfil
+    const btnDesglose = document.getElementById('hud-desglose-toggle');
+    const panelDesglose = document.getElementById('hud-desglose');
+    const perfil = document.getElementById('hud-perfil');
+
+    function actualizarPosicionDesglose() {
+        if (!panelDesglose || !perfil) return;
+
+        const esLandscape = window.matchMedia('(orientation: landscape) and (max-height: 500px)').matches;
+        
+        if (!esLandscape) {
+            panelDesglose.style.left = '';
+            return;
+        }
+
+        const rectPerfil = perfil.getBoundingClientRect();
+        const destinoIzq = Math.round(rectPerfil.right + 8); // 8px gap fijo para landscape
+        panelDesglose.style.left = `${destinoIzq}px`;
+    }
+
+    if (btnDesglose && panelDesglose) {
+        btnDesglose.addEventListener('click', function () {
+            const abierto = panelDesglose.dataset.open === 'true';
+            const nuevoEstado = !abierto;
+            panelDesglose.dataset.open = nuevoEstado ? 'true' : 'false';
+            document.body.classList.toggle('hud-desglose-open', nuevoEstado);
+        });
+    }
+
+    window.addEventListener('resize', actualizarPosicionDesglose);
+    actualizarPosicionDesglose();
+
+    if (perfil) {
+        const observerPerfil = new MutationObserver(actualizarPosicionDesglose);
+        observerPerfil.observe(perfil, { childList: true, subtree: true, characterData: true });
+    }
 }

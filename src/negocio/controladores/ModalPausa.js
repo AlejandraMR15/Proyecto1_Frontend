@@ -268,13 +268,6 @@ export function registrarEventosModales() {
     document.getElementById('btn-game-over-nueva-partida')
         ?.addEventListener('click', irAlMenuDesdeGameOver);
 
-    // Cerrar modales al hacer click en el overlay (excepto modal-pausa)
-    [modalPausa, modalConfig, modalFinalizar].forEach(modal => {
-        if (!modal) return;
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal && modal !== modalPausa) {
-                setModal(modal, false);
-            }
-        });
-    });
+    // Los modales de configuración y finalizar NO se cierran al hacer click en el overlay
+    // para mantener el estado de pausa del juego
 }

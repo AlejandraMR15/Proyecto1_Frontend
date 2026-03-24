@@ -6,7 +6,7 @@
     <title>Ciudad Virtual</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../estilos/menuConstruccion.css">
     <link rel="stylesheet" href="../estilos/rutas.css">
     <link rel="stylesheet" href="../estilos/styles.css">
@@ -120,6 +120,63 @@
             <div class="bienestar-datos">
                 <span class="bienestar-label">VIVIENDAS</span>
                 <span class="bienestar-valor" id="val-residenciales">0</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== PANEL DESGLOSE DE PUNTUACIÓN ===== -->
+    <div id="hud-desglose" data-open="false">
+        <button id="hud-desglose-toggle" title="Ver desglose de puntuación">
+            <span>📊 DESGLOSE</span>
+            <span id="hud-desglose-arrow">▼</span>
+        </button>
+        <div id="hud-desglose-cuerpo">
+            <!-- Puntos base -->
+            <div class="desglose-seccion">
+                <div class="desglose-seccion-titulo">📊 PUNTOS BASE</div>
+                <div class="desglose-fila">
+                    <span class="desglose-label">Población</span>
+                    <span class="desglose-valor" id="dsg-poblacion">0</span>
+                </div>
+                <div class="desglose-fila">
+                    <span class="desglose-label">Felicidad</span>
+                    <span class="desglose-valor" id="dsg-felicidad">0</span>
+                </div>
+                <div class="desglose-fila">
+                    <span class="desglose-label">Dinero</span>
+                    <span class="desglose-valor" id="dsg-dinero">0</span>
+                </div>
+                <div class="desglose-fila">
+                    <span class="desglose-label">Edificios</span>
+                    <span class="desglose-valor" id="dsg-edificios">0</span>
+                </div>
+                <div class="desglose-fila">
+                    <span class="desglose-label">Electricidad</span>
+                    <span class="desglose-valor" id="dsg-electricidad">0</span>
+                </div>
+                <div class="desglose-fila">
+                    <span class="desglose-label">Agua</span>
+                    <span class="desglose-valor" id="dsg-agua">0</span>
+                </div>
+                <div class="desglose-fila desglose-subtotal">
+                    <span class="desglose-label">SUBTOTAL</span>
+                    <span class="desglose-valor" id="dsg-subtotal">0</span>
+                </div>
+            </div>
+            <!-- Bonificaciones -->
+            <div class="desglose-seccion">
+                <div class="desglose-seccion-titulo desglose-titulo-verde">🎁 BONIF. <span id="dsg-total-bonif">+0</span></div>
+                <div id="dsg-bonif-lista"></div>
+            </div>
+            <!-- Penalizaciones -->
+            <div class="desglose-seccion">
+                <div class="desglose-seccion-titulo desglose-titulo-rojo">⚠ PENAL. <span id="dsg-total-penal">-0</span></div>
+                <div id="dsg-penal-lista"></div>
+            </div>
+            <!-- Total -->
+            <div class="desglose-total-wrap">
+                <span class="desglose-total-label">📈 TOTAL</span>
+                <span class="desglose-total-valor" id="dsg-total">0</span>
             </div>
         </div>
     </div>
@@ -475,6 +532,7 @@
                     </li>
                 </ul>
             </div>
+
         </div>
     </aside>
 
@@ -495,7 +553,7 @@
         <div class="modal-caja">
             <div class="modal-titulo">📥 IMPORTAR CIUDAD</div>
             <p class="modal-texto">
-                ⚠️ <strong>Tu partida actual se perderá permanentemente.</strong>
+                ⚠️ <strong class="importar-advertencia">Tu partida actual se perderá permanentemente.</strong>
                 Esta acción no se puede deshacer. Si quieres conservarla,
                 cancela y usa <em>Exportar Ciudad</em> primero.
             </p>

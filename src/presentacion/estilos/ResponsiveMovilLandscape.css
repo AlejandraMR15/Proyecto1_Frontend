@@ -38,7 +38,7 @@
         flex-direction: column !important;
         transform: translateX(0) !important;
         pointer-events: auto !important;
-        border-right: 3px solid #3a3a9a !important;
+        border-right: 3px solid #3d6b8a !important;
         border-top: none !important;
         z-index: 200 !important;
         transition: transform 0.14s steps(4) !important;
@@ -156,8 +156,8 @@
     }
 
     .build-icon { font-size: 0.85rem !important; }
-    .build-name { font-size: 0.28rem !important; white-space: nowrap !important; }
-    .build-cost { font-size: 0.26rem !important; }
+    .build-name { font-size: 0.36rem !important; white-space: nowrap !important; }
+    .build-cost { font-size: 0.33rem !important; }
 
     /* ── BOTÓN CONSTRUIR ── */
     #sidebarTab {
@@ -167,7 +167,7 @@
         left: calc(var(--sb-width) + 4px) !important;
         width: 130px !important;
         height: 38px !important;
-        font-size: 0.36rem !important;
+        font-size: 0.46rem !important;
         transition: left 0.14s steps(4), opacity 0.15s ease !important;
         z-index: 210 !important;
     }
@@ -186,13 +186,13 @@
         top: 6px;
         left: calc(var(--sb-width) + 8px);
         padding: 4px 8px;
-        font-size: 0.32rem;
+        font-size: 0.41rem;
         z-index: 400;
         min-width: 0 !important;
         max-width: 110px;
         transition: left 0.14s steps(4);
-        background: #0f0f2a;
-        border: 2px solid #3a3a9a;
+        background: #1c2b3a;
+        border: 2px solid #3d6b8a;
         border-radius: 4px;
     }
 
@@ -201,7 +201,7 @@
     #perfil-nombre-ciudad,
     #perfil-alcalde,
     #perfil-puntuacion {
-        font-size: 0.28rem; margin-bottom: 2px;
+        font-size: 0.36rem; margin-bottom: 2px;
         white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
 
@@ -213,8 +213,8 @@
         position: fixed;
         top: 78px;
         left: calc(var(--sb-width) + 8px) !important;
-        background: rgba(15, 15, 42, 0.88);
-        border: 1px solid #3a3a9a;
+        background: rgba(28, 43, 58, 0.88);
+        border: 1px solid #3d6b8a;
         border-radius: 4px;
         padding: 3px 6px;
         z-index: 399;
@@ -226,21 +226,56 @@
     body.sidebar-cerrado #hud-bienestar { left: 8px !important; }
 
     .bienestar-fila  { gap: 4px; }
-    .bienestar-icono { font-size: 0.65rem; }
-    .bienestar-label { font-size: 0.24rem; }
-    .bienestar-valor { font-size: 0.34rem; }
+    .bienestar-icono { font-size: 0.83rem; }
+    .bienestar-label { font-size: 0.31rem; }
+    .bienestar-valor { font-size: 0.44rem; }
 
-    /* ── BOTÓN RUTA: junto a los controles, derecha ── */
-    #btn-calcular-ruta {
+    /* ── DESGLOSE: a la derecha del perfil, mismo nivel superior ── */
+    #hud-desglose {
+        display: block !important;
         position: fixed !important;
         top: 6px !important;
-        right: 90px !important;
-        left: auto !important;
-        bottom: auto !important;
+        left: calc(var(--sb-width) + 8px + 88px) !important;
+        width: 120px !important;
+        z-index: 399 !important;
+        transition: left 0.14s steps(4) !important;
+    }
+
+    body.sidebar-cerrado #hud-desglose {
+        left: calc(8px + 118px) !important;
+    }
+
+    #hud-desglose-toggle { font-size: 0.31rem !important; padding: 4px 6px !important; }
+    #hud-desglose-arrow  { font-size: 0.41rem !important; }
+    #hud-desglose-cuerpo { max-height: 0; overflow: hidden; }
+    #hud-desglose[data-open="true"] #hud-desglose-cuerpo { max-height: 260px !important; overflow-y: auto !important; }
+    .desglose-seccion    { padding: 4px 6px 2px !important; }
+    .desglose-seccion-titulo { font-size: 0.28rem !important; }
+    .desglose-label      { font-size: 0.26rem !important; }
+    .desglose-valor      { font-size: 0.28rem !important; }
+    .desglose-item-bonif,
+    .desglose-item-penal,
+    .desglose-sin-items  { font-size: 0.23rem !important; }
+    .desglose-total-label { font-size: 0.28rem !important; }
+    .desglose-total-valor { font-size: 0.38rem !important; }
+    .desglose-total-wrap  { padding: 5px 6px !important; }
+
+    /* ── BOTÓN RUTA: encima del turno (misma lógica que tablet) ── */
+    #btn-calcular-ruta {
+        position: fixed !important;
+        bottom: calc(56px + 48px + 8px) !important;
+        left: calc(var(--sb-width) + 10px) !important;
+        right: auto !important;
+        top: auto !important;
         width: 38px; height: 38px;
-        font-size: 0.28rem; padding: 0;
-        transition: background var(--transition, 0.14s steps(4)),
-                    border-color var(--transition, 0.14s steps(4));
+        font-size: 0.36rem; padding: 0;
+        transition: bottom 0.14s steps(4), left 0.14s steps(4), background var(--transition, 0.14s steps(4)), border-color var(--transition, 0.14s steps(4));
+    }
+
+    body.sidebar-cerrado #btn-calcular-ruta { left: 10px !important; }
+
+    body.sidebar-construccion-abierto #btn-calcular-ruta {
+        bottom: calc(56px + 48px + 16px) !important;
     }
 
     /* ── RECURSOS: centrados arriba ── */
@@ -253,7 +288,7 @@
         gap: 4px; align-items: center;
         z-index: 400;
         background: transparent; border: none; padding: 0;
-        transition: none !important;
+        transition: left 0.14s steps(4) !important;
         max-width: calc(100vw - 380px);
         overflow: hidden;
     }
@@ -265,9 +300,9 @@
     }
 
     .hud-recurso       { padding: 3px 6px; min-width: 0; }
-    .hud-recurso-icono { font-size: 0.65rem; }
-    .hud-recurso-label { font-size: 0.26rem; }
-    .hud-recurso-valor { font-size: 0.38rem; }
+    .hud-recurso-icono { font-size: 0.83rem; }
+    .hud-recurso-label { font-size: 0.33rem; }
+    .hud-recurso-valor { font-size: 0.49rem; }
 
     /* ── CONTROLES: esquina superior derecha ── */
     #hud-controles {
@@ -276,10 +311,15 @@
         flex-direction: column; gap: 4px; z-index: 500;
     }
 
+    body.panel-ranking-abierto #hud-controles,
+    body.panel-noticias-abierto #hud-controles {
+        display: none !important;
+    }
+
     #hud-controles button {
         width: 36px; height: 36px;
         min-width: 36px; min-height: 36px;
-        font-size: 0.70rem;
+        font-size: 0.9rem;
     }
 
     /* ── TIMER: encima del botón CONSTRUIR ── */
@@ -289,7 +329,7 @@
         bottom: 56px;
         left: calc(var(--sb-width) + 8px);
         top: auto; transform: none;
-        font-size: 0.28rem; padding: 4px 8px;
+        font-size: 0.36rem; padding: 4px 8px;
         min-width: 0 !important;
         width: 160px !important;
         max-width: 160px !important;
@@ -297,8 +337,8 @@
         transition: left 0.14s steps(4);
     }
 
-    #turno-numero    { font-size: 0.26rem !important; }
-    #turno-tiempo    { font-size: 0.22rem !important; }
+    #turno-numero    { font-size: 0.33rem !important; }
+    #turno-tiempo    { font-size: 0.28rem !important; }
     #turno-barra-wrap { height: 5px !important; }
 
     body.sidebar-cerrado #hud-turno { left: 8px; }
@@ -315,14 +355,39 @@
     #widgets-container.panel-noticias-abierto { right: calc(220px + 8px) !important; }
 
     .widget-btn        { width: 36px; height: 36px; }
-    .widget-clima-temp { font-size: 0.32rem; }
+    .widget-clima-temp { font-size: 0.41rem; }
 
     .clima-infobox {
-        bottom: 50px; right: 6px !important;
-        left: auto; width: 160px; top: auto;
+        /* A la izquierda de los botones, flecha apunta a la derecha hacia el botón clima.
+           Botones en right=6px, col, gap=4px, 36px cada uno.
+           btn-noticias: bottom=8px; btn-clima: bottom=8+36+4=48px, centro=66px
+           Infobox: borde-der a right=50px (6+36+8), ancho=160px */
+        right: calc(6px + 36px + 8px) !important;
+        left: auto !important;
+        /* Centrar verticalmente con btn clima: centro en bottom=66px, infobox ~150px alto → bottom = 66-75 → mínimo 8px */
+        bottom: 8px !important;
+        top: auto !important;
+        width: 160px !important;
     }
 
-    .clima-infobox.panel-noticias-abierto { right: calc(220px + 8px) !important; }
+    /* Flecha del clima en landscape: apunta hacia la derecha (hacia el botón) */
+    .clima-infobox::after {
+        bottom: auto !important;
+        /* btn-clima centro: bottom=66px, infobox bottom=8px → desde fondo infobox = 58px
+           infobox ~160px alto → desde top = 160-58 = 102px ≈ 64% del alto */
+        top: 64% !important;
+        right: -10px !important;
+        left: auto !important;
+        transform: translateY(-50%) !important;
+        border-top: 8px solid transparent !important;
+        border-bottom: 8px solid transparent !important;
+        border-left: 8px solid var(--border) !important;
+        border-right: none !important;
+        width: 0 !important;
+        height: 0 !important;
+    }
+
+    .clima-infobox.panel-noticias-abierto { right: calc(220px + 8px + 36px + 8px) !important; }
 
     /* ── PANEL NOTICIAS: header visible, entra desde la derecha ── */
     .noticias-panel .sidebar-header {
@@ -353,7 +418,7 @@
         top: 0; right: 0;
         width: 220px !important; height: 100vh !important;
         max-height: none !important;
-        border-left: 3px solid #3a3a9a; border-bottom: none;
+        border-left: 3px solid #3d6b8a; border-bottom: none;
         z-index: 600;
         overflow-y: auto;
         transform: translateX(100%) !important;
@@ -377,7 +442,7 @@
         bottom: auto; left: auto;
         transform: translateX(calc(100% + 8px));
         border: none;
-        border-left: 3px solid #3a3a9a;
+        border-left: 3px solid #3d6b8a;
         border-radius: 0;
         transition: transform 0.2s ease;
         pointer-events: none;

@@ -171,8 +171,7 @@ export function exportarCiudad() {
         }, 100);
     }
 
-    // Cerrar modal de pausa
-    setModal(document.getElementById('modal-pausa'), false);
+    // NO cerrar modal de pausa al exportar
 }
 
 /* ================================================================
@@ -183,8 +182,7 @@ export function exportarCiudad() {
  * Abre el modal de confirmación de importar ciudad.
  */
 export function abrirModalImportar() {
-    const aviso = document.getElementById('importar-aviso-error');
-    if (aviso) aviso.dataset.visible = 'false';
+    // El mensaje de error permanece oculto hasta que ocurra un error real
     setModal(document.getElementById('modal-pausa'), false);
     setModal(document.getElementById('modal-importar'), true);
 }

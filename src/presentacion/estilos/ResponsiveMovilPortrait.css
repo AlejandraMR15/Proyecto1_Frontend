@@ -21,12 +21,12 @@
         touch-action: none;
     }
 
-    /* ── RECURSOS: centrados arriba ── */
+    /* ── RECURSOS: centrados arriba, NUNCA se mueven ── */
     #hud-recursos {
-        position: fixed;
-        top: 8px;
-        left: 50%;
-        transform: translateX(-50%);
+        position: fixed !important;
+        top: 8px !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
         display: flex;
         flex-direction: row;
         gap: 3px;
@@ -37,19 +37,31 @@
         padding: 0;
         max-width: calc(100vw - 170px);
         overflow: hidden;
+        transition: none !important;
+    }
+
+    /* Sobrescribir CUALQUIER estado que intente mover los recursos */
+    body.sidebar-construccion-abierto #hud-recursos,
+    body.sidebar-cerrado #hud-recursos,
+    body.hud-desglose-open #hud-recursos,
+    body.panel-noticias-abierto #hud-recursos,
+    body.panel-ranking-abierto #hud-recursos {
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        top: 8px !important;
     }
 
     .hud-recurso {
         flex-shrink: 0;
         padding: 3px 5px;
-        background: rgba(13, 30, 53, 0.92);
-        border: 1px solid #2e7a94;
+        background: rgba(26, 40, 56, 0.92);
+        border: 1px solid #3d6b8a;
         min-width: 0;
     }
 
     .hud-recurso-icono { font-size: 0.75rem; }
-    .hud-recurso-label { font-size: 0.28rem; }
-    .hud-recurso-valor { font-size: 0.42rem; }
+    .hud-recurso-label { font-size: 0.36rem; }
+    .hud-recurso-valor { font-size: 0.54rem; }
 
     /* ── PERFIL: esquina superior izquierda ── */
     #hud-perfil {
@@ -57,7 +69,7 @@
         position: fixed;
         top: 8px; left: 8px;
         padding: 3px 6px;
-        font-size: 0.30rem;
+        font-size: 0.38rem;
         z-index: 400;
         min-width: 0 !important;
         max-width: 90px;
@@ -67,14 +79,14 @@
     body.sidebar-cerrado #hud-perfil { left: 8px; }
 
     #perfil-nombre-ciudad {
-        font-size: 0.30rem; margin-bottom: 2px;
+        font-size: 0.38rem; margin-bottom: 2px;
         white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
     #perfil-alcalde {
-        font-size: 0.27rem; margin-bottom: 2px;
+        font-size: 0.35rem; margin-bottom: 2px;
         white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
-    #perfil-puntuacion { font-size: 0.27rem; }
+    #perfil-puntuacion { font-size: 0.35rem; }
 
     /* ── BIENESTAR: esquina superior derecha, bajo los controles ── */
     #hud-bienestar {
@@ -85,8 +97,8 @@
         top: 106px;
         right: 8px;
         left: auto !important;
-        background: rgba(15, 15, 42, 0.92);
-        border: 1px solid #3a3a9a;
+        background: rgba(28, 43, 58, 0.92);
+        border: 1px solid #3d6b8a;
         border-radius: 4px;
         padding: 4px 6px;
         z-index: 399;
@@ -96,9 +108,43 @@
 
     .bienestar-fila  { gap: 4px; }
     .bienestar-icono { font-size: 0.75rem; }
-    .bienestar-label { font-size: 0.26rem; }
-    .bienestar-valor { font-size: 0.38rem; }
+    .bienestar-label { font-size: 0.33rem; }
+    .bienestar-valor { font-size: 0.49rem; }
 
+    /* ── DESGLOSE: debajo del botón ruta, NUNCA se mueve ── */
+    #hud-desglose {
+        position: fixed !important;
+        top: 145px !important;
+        left: 8px !important;
+        width: 140px !important;
+        z-index: 399;
+        transition: none !important;
+    }
+
+    /* Sobrescribir CUALQUIER estado que intente mover el desglose */
+    body.sidebar-construccion-abierto #hud-desglose,
+    body.sidebar-cerrado #hud-desglose,
+    body.hud-desglose-open #hud-desglose,
+    body.panel-noticias-abierto #hud-desglose,
+    body.panel-ranking-abierto #hud-desglose {
+        top: 145px !important;
+        left: 8px !important;
+        position: fixed !important;
+        transition: none !important;
+    }
+
+    #hud-desglose-toggle { font-size: 0.48rem !important; padding: 6px 8px !important; }
+    #hud-desglose-arrow  { font-size: 0.46rem !important; }
+    .desglose-seccion-titulo { font-size: 0.44rem !important; }
+    .desglose-label          { font-size: 0.40rem !important; }
+    .desglose-valor          { font-size: 0.42rem !important; }
+    .desglose-item-bonif,
+    .desglose-item-penal,
+    .desglose-sin-items      { font-size: 0.38rem !important; }
+    .desglose-total-label    { font-size: 0.42rem !important; }
+    .desglose-total-valor    { font-size: 0.56rem !important; }
+
+    /* Sube el desglose cuando el sidebar está abierto */
     /* ── CONTROLES: esquina superior derecha ── */
     #hud-controles {
         position: fixed;
@@ -106,6 +152,7 @@
         flex-direction: column;
         gap: 6px;
         z-index: 500;
+        transition: top 0.25s ease;
     }
 
     #hud-controles button {
@@ -114,19 +161,36 @@
         font-size: 0.85rem;
     }
 
+    /* Cuando noticias está abierto, bajar controles para no quedar solapados */
+    body.panel-noticias-abierto #hud-controles {
+        top: calc(70vh + 10px);
+    }
+
+    /* Ocultar botones de pausa/ranking al abrir ranking o noticias */
+    body.panel-ranking-abierto #hud-controles,
+    body.panel-noticias-abierto #hud-controles {
+        display: none !important;
+    }
+
     /* ── BOTÓN RUTA: debajo del perfil ── */
     #btn-calcular-ruta {
         position: fixed;
         top: 86px; left: 8px;
         bottom: auto !important;
         width: 50px; height: 50px;
-        font-size: 0.34rem;
+        font-size: 0.52rem;
         padding: 0;
         transition: background var(--transition, 0.14s steps(4)),
-                    border-color var(--transition, 0.14s steps(4));
+                    border-color var(--transition, 0.14s steps(4)),
+                    top 0.25s ease;
     }
 
     body.sidebar-cerrado #btn-calcular-ruta { left: 8px; }
+
+    /* Bajar el botón ruta cuando noticias está abierto */
+    body.panel-noticias-abierto #btn-calcular-ruta {
+        top: 86px !important;
+    }
 
     /* ── TIMER: sobre la barra inferior ── */
     #hud-turno {
@@ -134,7 +198,7 @@
         bottom: calc(var(--mobile-bottombar) + 6px);
         left: 8px;
         top: auto; transform: none;
-        font-size: 0.36rem;
+        font-size: 0.46rem;
         padding: 4px 7px;
         min-width: 130px;
         z-index: 400;
@@ -143,7 +207,7 @@
 
     /* Timer sube cuando el sidebar se abre */
     body.sidebar-construccion-abierto #hud-turno {
-        bottom: calc(60vh + 4px);
+        bottom: calc(25vh + 4px);
     }
 
     /* ── SIDEBAR: barra inferior deslizable ── */
@@ -156,7 +220,7 @@
         overflow: hidden;
         transform: none !important;
         border-right: none !important;
-        border-top: 3px solid #3a3a9a !important;
+        border-top: 3px solid #3d6b8a !important;
         box-shadow: none !important;
         z-index: 390;
         transition: max-height 0.3s ease !important;
@@ -170,12 +234,12 @@
         flex-shrink: 0;
         padding: 0 12px;
         cursor: pointer;
-        border-bottom: 2px solid #1e1e6a;
+        border-bottom: 2px solid #2e4460;
         border-top: none;
     }
 
     .sidebar[data-open="true"] {
-        max-height: 60vh;
+        max-height: 25vh;
         overflow: hidden;
         pointer-events: auto;
     }
@@ -189,14 +253,14 @@
         -webkit-overflow-scrolling: touch;
         padding: 6px 4px;
         gap: 0;
-        height: calc(60vh - var(--mobile-bottombar));
+        height: calc(25vh - var(--mobile-bottombar));
         align-items: flex-start;
     }
 
     .category {
         flex-shrink: 0;
         border-bottom: none;
-        border-right: 2px solid #1e1e6a;
+        border-right: 2px solid #2e4460;
         display: flex;
         flex-direction: column;
         height: 100%;
@@ -207,9 +271,9 @@
         flex-direction: column;
         gap: 2px;
         border: none;
-        border-bottom: 2px solid #1e1e6a;
+        border-bottom: 2px solid #2e4460;
         min-width: 70px;
-        font-size: 0.40rem;
+        font-size: 0.51rem;
         flex-shrink: 0;
     }
 
@@ -240,8 +304,8 @@
     }
 
     .build-icon { font-size: 1.2rem; margin: 0; }
-    .build-name { font-size: 0.36rem; white-space: nowrap; }
-    .build-cost { font-size: 0.33rem; }
+    .build-name { font-size: 0.46rem; white-space: nowrap; }
+    .build-cost { font-size: 0.42rem; }
 
     #sidebarTab { display: none; }
 
@@ -258,21 +322,53 @@
     }
 
     body.sidebar-construccion-abierto #widgets-container {
-        bottom: calc(60vh + 4px);
+        bottom: calc(25vh + 4px);
     }
 
     #widgets-container.panel-noticias-abierto { right: 8px !important; }
 
     .widget-btn        { width: 42px; height: 42px; }
-    .widget-clima-temp { font-size: 0.44rem; }
+    .widget-clima-temp { font-size: 0.56rem; }
 
+    /* ── CLIMA INFOBOX en portrait:
+       Queda a la DERECHA del timer y a la IZQUIERDA de los botones de widgets.
+       Timer: left=8px, min-width=130px → termina en ~150px.
+       Widgets: right=8px, 42px ancho → borde izq en right=58px (8+42+8).
+       El infobox ocupa el espacio entre ambos, flecha apunta a la derecha. */
     .clima-infobox {
-        left: 8px; right: 8px !important;
-        bottom: calc(var(--mobile-bottombar) + 56px);
-        top: auto; width: auto;
+        left: 150px !important;
+        right: calc(8px + 42px + 8px) !important;
+        bottom: calc(var(--mobile-bottombar) + 6px) !important;
+        top: auto !important;
+        width: auto !important;
+        z-index: 399 !important;
+        transition: bottom 0.3s ease, opacity 0.12s steps(3), transform 0.12s steps(3);
     }
 
-    .clima-infobox.panel-noticias-abierto { right: 8px !important; }
+    /* Flecha apunta hacia la derecha (hacia el botón clima).
+       btn-clima centro: bottom = mobile-bottombar + 73px.
+       Fondo infobox: bottom = mobile-bottombar + 6px.
+       Diferencia = 67px → flecha a bottom: 67px desde el fondo del infobox. */
+    .clima-infobox::after {
+        bottom: 62px !important;
+        top: auto !important;
+        right: -10px !important;
+        left: auto !important;
+        transform: none !important;
+        border-top: 8px solid transparent !important;
+        border-bottom: 8px solid transparent !important;
+        border-left: 8px solid var(--border) !important;
+        border-right: none !important;
+        width: 0 !important;
+        height: 0 !important;
+    }
+
+    .clima-infobox.panel-noticias-abierto { right: calc(8px + 42px + 8px) !important; }
+
+    /* Cuando el menú de construcción está abierto, el info-box del clima sube igual que el botón */
+    body.sidebar-construccion-abierto .clima-infobox {
+        bottom: calc(25vh + 4px) !important;
+    }
 
     /* ── PANEL NOTICIAS: entra desde arriba ── */
     .noticias-panel {
@@ -282,7 +378,7 @@
         height: auto !important;
         max-height: 70vh;
         border-left: none;
-        border-bottom: 3px solid #3a3a9a;
+        border-bottom: 3px solid #3d6b8a;
         z-index: 450;
         overflow-y: auto; overflow-x: hidden;
         transform: translateY(-110%);
@@ -303,7 +399,7 @@
         width: 95%; height: 80vh;
         top: 50%; right: auto; left: 50%;
         transform: translate(200vw, -50%);
-        border: 3px solid #3a3a9a; border-radius: 8px;
+        border: 3px solid #3d6b8a; border-radius: 8px;
         transition: transform 0.25s ease; bottom: auto;
     }
 

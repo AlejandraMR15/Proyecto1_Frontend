@@ -159,8 +159,15 @@ export function actualizarTooltipsRecursos() {
             return;
         }
 
-        const produccion = stats.produccion[tipo] || 0;
-        const consumo = stats.consumo[tipo] || 0;
+        let produccion = stats.produccion[tipo] || 0;
+        let consumo = stats.consumo[tipo] || 0;
+        
+        // Limitar agua a 2 decimales
+        if (tipo === 'agua') {
+            produccion = Math.round(produccion * 100) / 100;
+            consumo = Math.round(consumo * 100) / 100;
+        }
+        
         const balance = produccion - consumo;
 
         // Formatear valores

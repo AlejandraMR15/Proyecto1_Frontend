@@ -506,7 +506,7 @@ body.sidebar-cerrado #hud-bienestar {
     text-overflow: ellipsis;
 }
 
-/* Anchos fijos por columna: #, Ciudad, Alcalde, Score, Pobla., Felicidad, Turnos */
+/* Anchos fijos por columna: #, Ciudad, Alcalde, Puntuación, Pobla., Felicidad, Turnos, Fecha */
 #ranking-tabla th:nth-child(1),
 #ranking-tabla td:nth-child(1) { width: 36px;  text-align: center; }
 #ranking-tabla th:nth-child(2),
@@ -521,6 +521,8 @@ body.sidebar-cerrado #hud-bienestar {
 #ranking-tabla td:nth-child(6) { width: 68px;  text-align: right; }
 #ranking-tabla th:nth-child(7),
 #ranking-tabla td:nth-child(7) { width: 54px;  text-align: right; }
+#ranking-tabla th:nth-child(8),
+#ranking-tabla td:nth-child(8) { width: 90px; text-align: center; }
 
 #ranking-tabla td {
     padding: 6px 4px;

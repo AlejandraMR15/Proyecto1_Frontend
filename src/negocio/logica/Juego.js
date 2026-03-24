@@ -2,13 +2,14 @@ import SistemaTurnos from "./SistemaTurnos.js";
 import { EstadoDeJuego } from "./EstadoDeJuego.js";
 import { ESTADOS } from "./estados.js";
 import GestorCiudadano from "./GestorCiudadanos.js";
-import Ciudad from "../modelos/ciudad.js";
+import Ciudad from "../../modelos/ciudad.js";
 import Puntuacion from "./Puntuacion.js";
-import StorageManager from "../acceso_datos/StorageManager.js";
-import Ciudadano from "../modelos/Ciudadano.js";
+import StorageManager from "../../acceso_datos/StorageManager.js";
+import Ciudadano from "../../modelos/Ciudadano.js";
 import RecoleccionBurbujas from "./RecoleccionBurbujas.js";
-import Mapa from "../modelos/Mapa.js";
-import MapImporter from "../acceso_datos/MapImporter.js";
+import Mapa from "../../modelos/Mapa.js";
+import MapImporter from "../../acceso_datos/MapImporter.js";
+import { actualizarOAgregarEnRanking } from "../controladores/RankingUi.js";
 
 /**
  * Clase principal que gestiona la lógica del juego.
@@ -69,6 +70,32 @@ export default class Juego {
             this.SistemaDeTurnos.iniciar(() => this.ejecutarTurno());
             console.log("Juego reanudado");
         }
+    }
+
+    /**
+     * Recalcula la puntuación basada en el estado actual de la ciudad.
+     * Se usa tanto en ejecutarTurno como al cargar/crear ciudades.
+     */
+    recalcularPuntaje() {
+        let puntaje = 0;
+        if (this.administrarPuntaje && this.ciudad) {
+            const recursos = this.ciudad.recursos;
+            const desempleados = this.gestorCiudadanos.ciudadanos.filter(c => !c.empleo).length;
+            const poblacion = this.gestorCiudadanos.calcularTotalCiudadanos();
+            const felicidad = this.gestorCiudadanos.calcularFelicidadPromedio();
+            
+            puntaje = this.administrarPuntaje.calcular({
+                poblacion,
+                felicidad,
+                dinero:       recursos.dinero,
+                numEdificios: this.ciudad.construcciones.length,
+                electricidad: recursos.electricidad,
+                agua:         recursos.agua,
+                desempleados
+            });
+        }
+        this.puntaje = puntaje;
+        return puntaje;
     }
 
     /**
@@ -143,28 +170,13 @@ export default class Juego {
             // Reasignar ciudadanos que perdieron vivienda o empleo
             this.gestorCiudadanos.reasignarCiudadanosSinRecursos(edificiosResidenciales, edificiosLaborales);
             // Recalcular felicidad de toda la población con el estado actual de la ciudad
-            this.gestorCiudadanos.recalcularFelicidadCiudadanos(valorServicios);
+            this.gestorCiudadanos.recalcularFelicidadCiudadanos(valorServicios, this.ciudad.recursos.comida);
             // Procesar crecimiento poblacional
             this.gestorCiudadanos.procesarCrecimientoPoblacional(edificiosResidenciales, edificiosLaborales, valorServicios);
         }
 
-        let puntaje = 0;
-        if (this.administrarPuntaje && this.ciudad) {
-            const recursos = this.ciudad.recursos;
-            // Contar ciudadanos sin empleo
-            const desempleados = this.gestorCiudadanos.ciudadanos.filter(c => !c.empleo).length;
-            puntaje = this.administrarPuntaje.calcular({
-                poblacion:    this.gestorCiudadanos.calcularTotalCiudadanos(),
-                felicidad:    this.gestorCiudadanos.calcularFelicidadPromedio(),
-                dinero:       recursos.dinero,
-                numEdificios: this.ciudad.construcciones.length,
-                electricidad: recursos.electricidad,
-                agua:         recursos.agua,
-                desempleados
-            });
-        }
-        this.puntaje = puntaje;
-        console.log("Puntaje:", puntaje);
+        this.recalcularPuntaje();
+        console.log("Puntaje:", this.puntaje);
     }
 
     /**
@@ -248,12 +260,14 @@ export default class Juego {
                                  dineroInicial, electricidadInicial, aguaInicial, comidaInicial);
         this.gestorCiudadanos.ciudad = this.ciudad;
         this.SistemaDeTurnos.cambiarDuracion(duracionTurno);
+        actualizarOAgregarEnRanking();
         return this.ciudad;
     }
 
     /** Carga una Ciudad serializada y la asigna. */
     cargarCiudad(json) {
         this.ciudad = Ciudad.fromJSON(json);
+        actualizarOAgregarEnRanking();
         return this.ciudad;
     }
 
@@ -291,24 +305,26 @@ export default class Juego {
         this.gestorCiudadanos.ciudadanos = (data.ciudadanos || []).map(c => Ciudadano.fromJSON(c, edificiosPorId));
         this.ciudad.sincronizarOcupacionDesdeCiudadanos(this.gestorCiudadanos.ciudadanos);
         this.recolectorBurbujas.cargarDesdeJSON(data.recoleccion);
+        // Calcular la puntuación con todos los datos cargados
+        this.recalcularPuntaje();
         console.log("Partida cargada");
     }
     /**
-     * Crea un mapa desde un archivo JSON seleccionado.
+     * Crea un mapa desde un archivo TXT seleccionado.
      *
      * Valida:
-     * - Estructura del JSON (debe tener `map` y `gridSize` o `grid`, `width`, `height`)
+     * - Estructura del TXT (primera línea: "ANCHO ALTO", siguientes líneas: matriz)
      * - Dimensiones del mapa (15x15 mínimo, 30x30 máximo)
      * - Etiquetas válidas de terreno y construcciones
      *
-     * @param {File} archivo Archivo JSON con datos del mapa.
+     * @param {File} archivo Archivo TXT con datos del mapa.
      * @returns {Promise<Mapa>} Promesa que resuelve una instancia de Mapa validada.
      * @throws {Error} Si el archivo no es válido o no cumple validaciones.
      */
-    async crearMapaDesdeJSON(archivo) {
+    async crearMapaDesdeTXT(archivo) {
         try {
-            // Validar y extraer datos del JSON
-            const datosValidados = await MapImporter.procesarArchivoJSON(archivo);
+            // Validar y extraer datos del TXT
+            const datosValidados = await MapImporter.procesarArchivoTXT(archivo);
 
             const { ancho, alto, matriz, metadatos } = datosValidados;
 
@@ -328,7 +344,7 @@ export default class Juego {
             return nuevoMapa;
 
         } catch (error) {
-            console.error('[Juego] Error al cargar mapa desde JSON:', error.message);
+            console.error('[Juego] Error al cargar mapa desde TXT:', error.message);
             throw error;
         }
     }

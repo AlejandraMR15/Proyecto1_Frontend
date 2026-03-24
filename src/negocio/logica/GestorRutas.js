@@ -16,7 +16,7 @@
  * exclusivamente a ApiDijkstra.js.
  */
 
-import ApiDijkstra from '../acceso_datos/API/ApiDijkstra.js';
+import ApiDijkstra from '../../acceso_datos/API/ApiDijkstra.js';
 
 /* ================================================================
    ESTADO INTERNO DEL GESTOR
@@ -180,7 +180,8 @@ async function _calcularYAnimarRuta(origen, destino) {
         }
 
         _animarRuta(ruta);
-        _mostrarNotificacionRuta(`✔ Ruta encontrada: ${ruta.length} celdas`);
+        const celdasIntermedia = Math.max(0, ruta.length - 2);
+        _mostrarNotificacionRuta(`✔ Ruta encontrada: ${celdasIntermedia} celdas entre los edificios`);
 
     } catch (err) {
         console.error('[GestorRutas] Error al calcular ruta:', err);

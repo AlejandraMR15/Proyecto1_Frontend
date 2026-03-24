@@ -200,7 +200,7 @@ export function actualizarTooltipsRecursos() {
  */
 export function iniciarTimerTurno() {
     detenerTimerTurno();
-    timerEstado.tiempoTranscurrido = 0;
+    timerEstado.tiempoTranscurrido = 1;
     actualizarTimerDOM();
 
     timerEstado.intervalo = setInterval(() => {
@@ -208,8 +208,8 @@ export function iniciarTimerTurno() {
         if (!window.juego.EstadoDeJuego.estaJugando()) return;
 
         timerEstado.tiempoTranscurrido++;
-        if (timerEstado.tiempoTranscurrido >= timerEstado.duracionTurno) {
-            timerEstado.tiempoTranscurrido = 0;
+        if (timerEstado.tiempoTranscurrido > timerEstado.duracionTurno) {
+            timerEstado.tiempoTranscurrido = 1;
         }
         actualizarTimerDOM();
     }, 1000);
@@ -243,7 +243,7 @@ export function actualizarTimerDOM() {
  * Reinicia el contador visual y refresca el HUD.
  */
 export function onNuevoTurno() {
-    timerEstado.tiempoTranscurrido = 0;
+    timerEstado.tiempoTranscurrido = 1;
     actualizarTimerDOM();
     actualizarHUD();
     actualizarTooltipsRecursos();

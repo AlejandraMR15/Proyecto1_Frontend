@@ -1,8 +1,8 @@
 /**
  * CIUDAD VIRTUAL — MapImporter.js
  *
- * Responsabilidad única: importación y validación de mapas desde JSON.
- *  - Leer archivo JSON del mapa
+ * Responsabilidad única: importación y validación de mapas desde TXT.
+ *  - Leer archivo TXT del mapa
  *  - Validar dimensiones (15x15 mínimo, 30x30 máximo)
  *  - Validar etiquetas de terreno y construcciones
  *  - Retornar matriz lista para crear instancia de Mapa
@@ -34,9 +34,21 @@ export default class MapImporter {
     };
 
     /**
-     * Procesa un archivo JSON y retorna un objeto con la matriz y metadatos validados.
+     * Procesa un archivo TXT y retorna un objeto con la matriz y metadatos validados.
      *
-     * @param {File} archivo Archivo JSON seleccionado.
+     * Formato esperado del TXT:
+     * - Primera línea: "ANCHO ALTO" (ej: "15 15")
+     * - Siguientes líneas: filas del mapa con etiquetas separadas por espacios
+     *
+     * Ejemplo:
+     * ```
+     * 15 15
+     * g r R1 C1 I1 S1 U1 P1 g g g g g g g
+     * r R1 R1 R1 C1 C1 I1 I1 S1 S1 U1 P1 g g g
+     * ...
+     * ```
+     *
+     * @param {File} archivo Archivo TXT seleccionado.
      * @returns {Promise<{
      *     ancho: number,
      *     alto: number,
@@ -45,7 +57,7 @@ export default class MapImporter {
      * }>} Promesa con los datos del mapa validados.
      * @throws {Error} Si el archivo es inválido o no cumple validaciones.
      */
-    static procesarArchivoJSON(archivo) {
+    static procesarArchivoTXT(archivo) {
         return new Promise((resolve, reject) => {
             if (!archivo) {
                 reject(new Error('No se seleccionó un archivo.'));
@@ -56,19 +68,12 @@ export default class MapImporter {
 
             reader.onload = (evento) => {
                 try {
-                    const contenidoJSON = evento.target.result;
-                    const datos = JSON.parse(contenidoJSON);
-
-                    // Extraer datos del JSON
-                    const resultado = this._extraerYValidarDatos(datos);
+                    const contenidoTXT = evento.target.result;
+                    const resultado = this._parsearYValidarTXT(contenidoTXT);
                     resolve(resultado);
 
                 } catch (error) {
-                    if (error instanceof SyntaxError) {
-                        reject(new Error('El archivo no es un JSON válido.'));
-                    } else {
-                        reject(error);
-                    }
+                    reject(error);
                 }
             };
 
@@ -81,56 +86,51 @@ export default class MapImporter {
     }
 
     /**
-     * Extrae y valida los datos del JSON parseado.
-     *
-     * Soporta dos formatos:
-     * 1. Formato de partida completa: `{ map: {...}, cityName: "...", mayor: "...", gridSize: {...} }`
-     * 2. Formato de mapa simple: `{ grid: [...], width: number, height: number }`
+     * Parsea y valida el contenido del archivo TXT.
      *
      * @private
-     * @param {Object} datos Objeto JSON parseado.
+     * @param {string} contenidoTXT Contenido del archivo TXT.
      * @returns {Object} Datos validados con matriz, ancho, alto y metadatos.
-     * @throws {Error} Si faltan datos requeridos o no son válidos.
+     * @throws {Error} Si el formato no es válido o no cumple las reglas de validación.
      */
-    static _extraerYValidarDatos(datos) {
-        let ancho, alto, matriz, metadatos = {};
+    static _parsearYValidarTXT(contenidoTXT) {
+        // Eliminar espacios en blanco al inicio y final, dividir por líneas
+        const lineas = contenidoTXT.trim().split('\n').map(linea => linea.trim());
 
-        // Detectar formato: partida completa vs mapa simple
-        if (datos.map && datos.gridSize) {
-            // Formato de partida completa (exportada por PartidaManager)
-            const mapData = datos.map;
-            ancho = datos.gridSize.width;
-            alto = datos.gridSize.height;
-            matriz = mapData.matriz || mapData.data || [];
-            metadatos = {
-                nombre: datos.cityName,
-                alcalde: datos.mayor
-            };
-        } else if (datos.grid && typeof datos.width === 'number' && typeof datos.height === 'number') {
-            // Formato de mapa simple
-            ancho = datos.width;
-            alto = datos.height;
-            matriz = datos.grid;
-        } else {
-            throw new Error('El JSON no contiene estructura de mapa válida.');
+        if (lineas.length === 0) {
+            throw new Error('El archivo TXT está vacío.');
         }
 
-        // Validar que existan dimensiones
-        if (!Number.isInteger(ancho) || !Number.isInteger(alto)) {
-            throw new Error('Las dimensiones del mapa deben ser números enteros.');
-        }
+        // Extraer dimensiones de la primera línea
+        const primeraLinea = lineas[0];
+        const dimensiones = this._parsearDimensiones(primeraLinea);
+        const { ancho, alto } = dimensiones;
 
         // Validar rango de dimensiones
         this._validarDimensiones(ancho, alto);
 
-        // Validar que la matriz sea un array
-        if (!Array.isArray(matriz)) {
-            throw new Error('La matriz del mapa debe ser un array.');
+        // Validar que sea cuadrado (n x n)
+        this._validarQueSeaCuadrado(ancho, alto);
+
+        // Extraer matriz de las siguientes líneas
+        const lineasMatriz = lineas.slice(1);
+
+        if (lineasMatriz.length === 0) {
+            throw new Error(`Se esperaban ${alto} filas de mapa pero el archivo está vacío después de las dimensiones.`);
         }
 
-        // Validar dimensiones de la matriz coincidan
-        this._validarConsistenciaMatriz(matriz, ancho, alto);
+        if (lineasMatriz.length !== alto) {
+            throw new Error(
+                `El archivo tiene ${lineasMatriz.length} filas pero las dimensiones especifican ${alto} filas.`
+            );
+        }
 
+        // Parsear la matriz
+        const matriz = lineasMatriz.map((linea, numeroFila) => {
+            return this._parsearFila(linea, numeroFila, ancho);
+        });
+
+        // Validar consistencia de la matriz (ya se valida en _parsearFila)
         // Validar etiquetas
         this._validarEtiquetas(matriz);
 
@@ -138,8 +138,90 @@ export default class MapImporter {
             ancho,
             alto,
             matriz,
-            metadatos
+            metadatos: {} // No hay metadatos en archivos TXT
         };
+    }
+
+    /**
+     * Parsea la primera línea para extraer dimensiones.
+     * Acepta formatos: "15 15" o "15x15"
+     *
+     * @private
+     * @param {string} primeraLinea Primera línea del archivo.
+     * @returns {{ancho: number, alto: number}} Las dimensiones del mapa.
+     * @throws {Error} Si el formato de dimensiones es inválido.
+     */
+    static _parsearDimensiones(primeraLinea) {
+        // Intentar parsear con espacio: "15 15"
+        let partes = primeraLinea.split(' ').filter(p => p.length > 0);
+
+        if (partes.length !== 2) {
+            // Intentar parsear con 'x': "15x15"
+            partes = primeraLinea.split('x').filter(p => p.length > 0);
+        }
+
+        if (partes.length !== 2) {
+            throw new Error(
+                `Formato de dimensiones inválido. Primera línea debe ser "ANCHO ALTO" (ej: "15 15") o "ANCHOxALTO" (ej: "15x15"). ` +
+                `Se recibió: "${primeraLinea}"`
+            );
+        }
+
+        const ancho = parseInt(partes[0], 10);
+        const alto = parseInt(partes[1], 10);
+
+        if (isNaN(ancho) || isNaN(alto)) {
+            throw new Error(
+                `Las dimensiones deben ser números enteros. Se recibió: ancho="${partes[0]}", alto="${partes[1]}"`
+            );
+        }
+
+        if (ancho <= 0 || alto <= 0) {
+            throw new Error(
+                `Las dimensiones deben ser positivas. Se recibió: ancho=${ancho}, alto=${alto}`
+            );
+        }
+
+        return { ancho, alto };
+    }
+
+    /**
+     * Parsea una fila del mapa.
+     *
+     * @private
+     * @param {string} linea Línea del archivo a parsear.
+     * @param {number} numeroFila Número de la fila (para reportes de error).
+     * @param {number} anchoEsperado Ancho esperado de la fila.
+     * @returns {Array<string>} Array con las etiquetas de la fila.
+     * @throws {Error} Si la fila tiene formato inválido o número incorrecto de columnas.
+     */
+    static _parsearFila(linea, numeroFila, anchoEsperado) {
+        if (!linea || linea.length === 0) {
+            throw new Error(
+                `Fila ${numeroFila + 1} está vacía. Se esperaban ${anchoEsperado} etiquetas separadas por espacios.`
+            );
+        }
+
+        const etiquetas = linea.split(/\s+/).filter(etiqueta => etiqueta.length > 0);
+
+        if (etiquetas.length !== anchoEsperado) {
+            throw new Error(
+                `Fila ${numeroFila + 1} tiene ${etiquetas.length} elementos pero se esperaban ${anchoEsperado}. ` +
+                `Contenido: "${linea}"`
+            );
+        }
+
+        // Validar que todas las etiquetas sean strings válidos
+        for (let i = 0; i < etiquetas.length; i++) {
+            const etiqueta = etiquetas[i];
+            if (!etiqueta || typeof etiqueta !== 'string') {
+                throw new Error(
+                    `Fila ${numeroFila + 1}, columna ${i + 1}: etiqueta inválida.`
+                );
+            }
+        }
+
+        return etiquetas;
     }
 
     /**
@@ -162,6 +244,24 @@ export default class MapImporter {
         if (alto < minimo || alto > maximo) {
             throw new Error(
                 `Alto inválido: ${alto}. Debe estar entre ${minimo} y ${maximo}.`
+            );
+        }
+    }
+
+    /**
+     * Valida que el mapa sea cuadrado (ancho === alto).
+     * El mapa debe ser n x n, de lo contrario se daña la visualización del juego.
+     *
+     * @private
+     * @param {number} ancho Ancho del mapa.
+     * @param {number} alto Alto del mapa.
+     * @throws {Error} Si el mapa no es cuadrado.
+     */
+    static _validarQueSeaCuadrado(ancho, alto) {
+        if (ancho !== alto) {
+            throw new Error(
+                `El mapa debe ser cuadrado (n x n). Se recibió ${ancho} x ${alto}. ` +
+                `El ancho y alto deben ser iguales para evitar problemas de visualización.`
             );
         }
     }

@@ -371,8 +371,8 @@ input[type="range"]::-moz-range-thumb {
     border-color: #7ec8e3;
 }
 
-/* ---- Información del JSON cargado ---- */
-.json-info {
+/* ---- Información del archivo TXT cargado ---- */
+.txt-info {
     margin-top: 10px;
     padding: 10px 12px;
     background: #071018;
@@ -380,21 +380,21 @@ input[type="range"]::-moz-range-thumb {
     border-radius: 4px;
 }
 
-.json-info.oculto {
+.txt-info.oculto {
     display: none;
 }
 
-.json-info p {
+.txt-info p {
     margin: 4px 0;
     font-size: 0.85rem;
     color: #7ec8e3;
 }
 
-.json-info p:first-child {
+.txt-info p:first-child {
     margin-top: 0;
 }
 
-.json-info p:last-child {
+.txt-info p:last-child {
     margin-bottom: 0;
 }
 

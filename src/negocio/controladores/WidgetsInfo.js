@@ -13,8 +13,8 @@
  *  - DOM insertado en index.html (widgets-container, clima-infobox, noticias-panel)
  */
  
-import ApiClima    from '../acceso_datos/API/ApiClima.js';
-import ApiNoticias from '../acceso_datos/API/ApiNoticias.js';
+import ApiClima from '../../acceso_datos/API/ApiClima.js';
+import ApiNoticias from '../../acceso_datos/API/ApiNoticias.js';
  
 /* ================================================================
    CONSTANTES
@@ -436,7 +436,7 @@ const noticias = (function () {
   function renderizarError() {
     if (bodyEl) {
       bodyEl.innerHTML =
-        '<div class="noticias-error">⚠ No se pudieron cargar<br>las noticias.<br><br>Verifica la clave API.</div>';
+        '<div class="noticias-error">⚠ No se pudieron cargar<br>las noticias.<br><br>Intenta más tarde o verifica<br>tu conexión a internet.</div>';
     }
   }
  

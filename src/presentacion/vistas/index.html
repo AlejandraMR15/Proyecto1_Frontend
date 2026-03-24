@@ -251,10 +251,11 @@
                             <th>#</th>
                             <th>Ciudad</th>
                             <th>Alcalde</th>
-                            <th>Score</th>
+                            <th>Puntuación</th>
                             <th>Población</th>
                             <th>Felicidad</th>
                             <th>Turnos</th>
+                            <th>Fecha</th>
                         </tr>
                     </thead>
                     <tbody id="ranking-tbody-go"></tbody>
@@ -281,10 +282,11 @@
                         <th>#</th>
                         <th>Ciudad</th>
                         <th>Alcalde</th>
-                        <th>Score</th>
+                        <th>Puntuación</th>
                         <th>Población</th>
                         <th>Felicidad</th>
                         <th>Turnos</th>
+                        <th>Fecha</th>
                     </tr>
                 </thead>
                 <tbody id="ranking-tbody"></tbody>
@@ -297,8 +299,8 @@
         </div>
     </aside>
 
-    <script type="module" src="../../negocio/Hud.js"></script>
-    <script type="module" src="../../negocio/grid.js"></script>
+    <script type="module" src="../../negocio/controladores/Hud.js"></script>
+    <script type="module" src="../../negocio/controladores/grid.js"></script>
 
     <!-- ===== PANEL LATERAL DE CONSTRUCCIÓN ===== -->
     <aside class="sidebar" id="sidebar" data-open="false">
@@ -510,7 +512,7 @@
     <!-- Input de archivo oculto para importar ciudad JSON -->
     <input type="file" id="input-importar-ciudad" accept=".json" style="display:none">
 
-    <script type="module" src="../../negocio/menuConstruccion.js"></script>
+    <script type="module" src="../../negocio/controladores/menuConstruccion.js"></script>
 
     <!-- ===== BOTÓN CALCULAR RUTA ===== -->
     <button id="btn-calcular-ruta" data-activo="false" title="Calcular ruta entre dos edificios">
@@ -518,7 +520,7 @@
         <span>RUTA</span>
     </button>
 
-    <script type="module" src="../../negocio/GestorRutas.js"></script>
+    <script type="module" src="../../negocio/logica/GestorRutas.js"></script>
 
     <!-- ===== WIDGETS CLIMA Y NOTICIAS ===== -->
     <div id="widgets-container">
@@ -595,6 +597,6 @@
         </div>
     </div>
 
-    <script type="module" src="../../negocio/WidgetsInfo.js"></script>
+    <script type="module" src="../../negocio/controladores/WidgetsInfo.js"></script>
 </body>
 </html>

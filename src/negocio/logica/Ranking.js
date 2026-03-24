@@ -1,4 +1,4 @@
-import RankingEntry from "../modelos/RankingEntry.js";
+import RankingEntry from '../../modelos/RankingEntry.js';
 
 /**
  * Clase que gestiona el ranking de ciudades basado en puntuaciones.
@@ -21,6 +21,7 @@ export default class Ranking {
      * @param {number} datosCiudad.poblacion - Población de la ciudad.
      * @param {number} datosCiudad.felicidad - Felicidad promedio.
      * @param {number} datosCiudad.turno - Número de turno alcanzado.
+     * @param {string} [datosCiudad.ciudadId] - ID único de la ciudad.
      */
     agregarEntrada(datosCiudad) {
         const nuevaEntrada = new RankingEntry(
@@ -29,7 +30,9 @@ export default class Ranking {
             datosCiudad.puntuacion,
             datosCiudad.poblacion,
             datosCiudad.felicidad,
-            datosCiudad.turno
+            datosCiudad.turno,
+            datosCiudad.fecha ? new Date(datosCiudad.fecha) : new Date(),
+            datosCiudad.ciudadId
         );
 
         this.entradas.push(nuevaEntrada);

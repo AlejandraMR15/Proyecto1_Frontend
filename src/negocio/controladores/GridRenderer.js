@@ -22,7 +22,7 @@
  *  renderer.inicializar();
  */
 
-import Mapa from '../modelos/Mapa.js';
+import Mapa from '../../modelos/Mapa.js';
 
 export default class GridRenderer {
 

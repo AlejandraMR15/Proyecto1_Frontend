@@ -8,13 +8,13 @@
  *  - Modal de información al hacer click en celda ocupada.
  */
  
-import Residencial       from '../modelos/construccion/tiposEdificios/residencial.js';
-import Comercial         from '../modelos/construccion/tiposEdificios/comercial.js';
-import Industrial        from '../modelos/construccion/tiposEdificios/industrial.js';
-import Servicio          from '../modelos/construccion/tiposEdificios/servicio.js';
-import PlantasDeUtilidad from '../modelos/construccion/tiposEdificios/plantasUtilidad.js';
-import Parques           from '../modelos/construccion/parques.js';
-import Vias              from '../modelos/construccion/vias.js';
+import Residencial       from '../../modelos/construccion/tiposEdificios/residencial.js';
+import Comercial         from '../../modelos/construccion/tiposEdificios/comercial.js';
+import Industrial        from '../../modelos/construccion/tiposEdificios/industrial.js';
+import Servicio          from '../../modelos/construccion/tiposEdificios/servicio.js';
+import PlantasDeUtilidad from '../../modelos/construccion/tiposEdificios/plantasUtilidad.js';
+import Parques           from '../../modelos/construccion/parques.js';
+import Vias              from '../../modelos/construccion/vias.js';
  
 /* ================================================================
    CONFIGURACIONES POR DEFECTO DE CADA EDIFICIO
@@ -630,7 +630,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (window.juego && window.juego.ciudad) {
             reconstruirMapaDesdePartida(window.juego.ciudad);
         }
-    }, 200);
+    }, 500);
  
 });
  

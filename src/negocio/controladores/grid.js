@@ -10,10 +10,10 @@
  *  4. Conectar el tooltip con los eventos de GridRenderer.
  */
 
-import Mapa         from '../modelos/Mapa.js';
+import Mapa         from '../../modelos/Mapa.js';
 import GridRenderer  from './GridRenderer.js';
-import Juego         from './Juego.js';
-import MovimientoCiudadanos from './MovimientoCiudadanos.js';
+import Juego         from '../logica/Juego.js';
+import MovimientoCiudadanos from '../logica/MovimientoCiudadanos.js';
 
 (function () {
     "use strict";
@@ -280,7 +280,7 @@ import MovimientoCiudadanos from './MovimientoCiudadanos.js';
                 ancho:         tamano,
                 alto:          tamano,
                 duracionTurno: config.duracionTurno || 10000,
-                dineroInicial: config.dineroInicial || 50000,
+                dineroInicial: (config.matrizJSON ? 0 : (config.dineroInicial || 50000)),
                 coordenadas:   config.regionNombre
                                    ? { nombre: config.regionNombre, id: config.regionId }
                                    : null,
@@ -289,12 +289,14 @@ import MovimientoCiudadanos from './MovimientoCiudadanos.js';
             // Tomar el Mapa que Ciudad ya creó internamente
             mapa = juego.ciudad.mapa;
             
-            // Si se cargó un mapa personalizado desde JSON
+            // Si se cargó un mapa personalizado desde TXT
             if (config.matrizJSON) {
-                // Reemplazar la matriz generada con la del JSON
+                // Reemplazar la matriz generada con la del TXT
                 mapa.matriz = config.matrizJSON;
                 // Poblar las construcciones a partir de la matriz
                 juego.ciudad.poblarConstruccionesDesdeMatriz(config.matrizJSON);
+                // Calcular recursos iniciales basándose en los edificios cargados
+                juego.ciudad.calcularRecursosIniciales();
             } else {
                 // Modo normal: generar matriz vacía
                 mapa.generarMatriz();

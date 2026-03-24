@@ -49,6 +49,7 @@ function _onEscape(e) {
     const modalPausa       = document.getElementById('modal-pausa');
     const modalImportar    = document.getElementById('modal-importar');
     const panelRanking     = document.getElementById('panel-ranking');
+    const climaInfobox     = document.getElementById('clima-infobox');
 
     // Game over activo → no hacer nada
     if (modalGameOver?.dataset.visible === 'true') return;
@@ -57,6 +58,12 @@ function _onEscape(e) {
     if (modalRankingGO?.dataset.visible === 'true') {
         modalRankingGO.dataset.visible = 'false';
         if (modalGameOver) modalGameOver.dataset.visible = 'true';
+        return;
+    }
+
+    // Clima abierto → cerrar usando el botón
+    if (climaInfobox?.dataset.visible === 'true') {
+        document.getElementById('widget-clima-btn')?.click();
         return;
     }
 
@@ -130,19 +137,30 @@ function _onAtajos(e) {
             const sidebar = document.getElementById('sidebar');
             if (sidebar) {
                 const abierto = sidebar.dataset.open === 'true';
-                sidebar.dataset.open = abierto ? 'false' : 'true';
+                if (abierto) {
+                    document.getElementById('sidebarClose')?.click();
+                } else {
+                    document.getElementById('sidebarTab')?.click();
+                }
             }
             break;
         }
 
-        // R → Modo construcción de vías
+        // R → Toggle modo construcción de vías
         case 'KeyR': {
             e.preventDefault();
             const sidebar = document.getElementById('sidebar');
-            if (sidebar && sidebar.dataset.open !== 'true') {
+            
+            if (sidebar.dataset.open === 'true') {
+                // Sidebar abierto → cerrar
+                document.getElementById('sidebarClose')?.click();
+            } else {
+                // Sidebar cerrado → abrir y seleccionar vía
                 document.getElementById('sidebarTab')?.click();
+                setTimeout(() => {
+                    document.querySelector('.build-item[data-id="via-001"]')?.click();
+                }, 50);
             }
-            document.querySelector('.build-item[data-id="via-001"]')?.click();
             break;
         }
 

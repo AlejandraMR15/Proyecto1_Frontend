@@ -15,7 +15,7 @@
  *  - fmt (HudPanel.js) — para formatear números
  */
 
-import Ranking from './Ranking.js';
+import Ranking from '../logica/Ranking.js';
 import { storage } from './PartidaManager.js';
 import { fmt } from './HudPanel.js';
 
@@ -53,20 +53,46 @@ export function guardarRanking() {
 }
 
 /**
- * Registra la ciudad actual en el ranking y lo persiste.
+ * Actualiza la entrada existente de la ciudad actual o la crea si no existe.
+ * Busca por nombre + alcalde (combinación única que funcionaba bien).
+ * Preserva el ciudadId para identificar la partida actual.
  */
-export function registrarEnRanking() {
+export function actualizarOAgregarEnRanking() {
     const juego = window.juego;
     if (!juego || !juego.ciudad) return;
 
-    rankingManager.agregarEntrada({
-        nombreCiudad: juego.ciudad.nombre,
-        alcalde:      juego.ciudad.alcalde,
-        puntuacion:   juego.puntaje || 0,
-        poblacion:    juego.gestorCiudadanos.calcularTotalCiudadanos(),
-        felicidad:    Math.round(juego.gestorCiudadanos.calcularFelicidadPromedio()),
-        turno:        juego.numeroTurno,
-    });
+    const ciudadId = juego.ciudad.ciudadId;
+    const nombreCiudad = juego.ciudad.nombre;
+    const alcaldeActual = juego.ciudad.alcalde;
+    const datosActualizados = {
+        nombreCiudad,
+        alcalde: alcaldeActual,
+        puntuacion: juego.puntaje || 0,
+        poblacion: juego.gestorCiudadanos.calcularTotalCiudadanos(),
+        felicidad: Math.round(juego.gestorCiudadanos.calcularFelicidadPromedio()),
+        turno: juego.numeroTurno,
+        fecha: new Date().toISOString(),
+        ciudadId: ciudadId
+    };
+
+    // Buscar entrada por nombre + alcalde (combinación única)
+    // Esto evita duplicados cuando se actualiza durante la partida activa
+    const indexExistente = rankingManager.entradas.findIndex(
+        e => e.nombreCiudad === nombreCiudad && e.alcalde === alcaldeActual
+    );
+
+    if (indexExistente !== -1) {
+        // Actualizar entrada existente, preservando fecha original (fecha de inicio de esta partida)
+        const entrada = rankingManager.entradas[indexExistente];
+        const fechaOriginal = entrada.fecha;
+        Object.assign(entrada, datosActualizados);
+        entrada.fecha = fechaOriginal;
+    } else {
+        // Crear nueva entrada si no existe
+        rankingManager.agregarEntrada(datosActualizados);
+    }
+
+    rankingManager.ordenarPorPuntaje();
     guardarRanking();
 }
 
@@ -85,6 +111,7 @@ function _renderizarFilas(entradas, ciudadActual, tbody, prefixExtra = '#') {
     entradas.forEach((e, i) => {
         const tr = document.createElement('tr');
         if (e.nombreCiudad === ciudadActual) tr.classList.add('ranking-actual');
+        const fechaFormato = new Date(e.fecha).toLocaleDateString('es-ES', { year: 'numeric', month: '2-digit', day: '2-digit' });
         tr.innerHTML = `
             <td>${prefixExtra}${i + 1}</td>
             <td>${e.nombreCiudad}</td>
@@ -93,6 +120,7 @@ function _renderizarFilas(entradas, ciudadActual, tbody, prefixExtra = '#') {
             <td>${fmt(e.poblacion)}</td>
             <td>${e.felicidad}%</td>
             <td>${e.turno}</td>
+            <td>${fechaFormato}</td>
         `;
         tbody.appendChild(tr);
     });
@@ -130,6 +158,7 @@ export function renderizarRanking() {
             const trExtra = document.createElement('tr');
             trExtra.classList.add('ranking-actual');
             const e = todas[pos];
+            const fechaFormato = new Date(e.fecha).toLocaleDateString('es-ES', { year: 'numeric', month: '2-digit', day: '2-digit' });
             trExtra.innerHTML = `
                 <td>…#${pos + 1}</td>
                 <td>${e.nombreCiudad}</td>
@@ -138,6 +167,7 @@ export function renderizarRanking() {
                 <td>${fmt(e.poblacion)}</td>
                 <td>${e.felicidad}%</td>
                 <td>${e.turno}</td>
+                <td>${fechaFormato}</td>
             `;
             tbody.appendChild(trExtra);
         }
@@ -146,6 +176,7 @@ export function renderizarRanking() {
 
 /**
  * Abre (o cierra) el panel lateral de ranking.
+ * Al abrir, actualiza la entrada de la ciudad actual antes de renderizar.
  */
 export function abrirRanking() {
     const panel = document.getElementById('panel-ranking');
@@ -153,6 +184,7 @@ export function abrirRanking() {
     if (panel.dataset.open === 'true') {
         panel.dataset.open = 'false';
     } else {
+        actualizarOAgregarEnRanking();
         renderizarRanking();
         panel.dataset.open = 'true';
     }
@@ -170,8 +202,7 @@ export function abrirRankingGameOver() {
     const vacio = document.getElementById('ranking-vacio-go');
     const tabla = document.getElementById('ranking-tabla-go');
 
-    registrarEnRanking();
-    guardarRanking();
+    actualizarOAgregarEnRanking();
 
     const entradas = rankingManager.obtenerTop(10);
     if (!tbody) return;

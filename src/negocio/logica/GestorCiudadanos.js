@@ -1,4 +1,4 @@
-import Ciudadano from '../modelos/Ciudadano.js';
+import Ciudadano from '../../modelos/Ciudadano.js';
 
 /**
  * Gestiona la poblacion de ciudadanos.
@@ -83,12 +83,13 @@ export default class GestorCiudadano {
      * se ejecuta `calcularFelicidad()` para evitar acumulaciones por turno.
      *
      * @param {number} [valorServicios=0] Suma de felicidad aportada por servicios activos.
+     * @param {number} [comida=0] Nivel de alimentos disponibles en la ciudad.
      * @returns {void}
      */
-    recalcularFelicidadCiudadanos(valorServicios = 0) {
+    recalcularFelicidadCiudadanos(valorServicios = 0, comida = 0) {
         this.ciudadanos.forEach(ciudadano => {
             ciudadano.servicios = valorServicios;
-            ciudadano.calcularFelicidad();
+            ciudadano.calcularFelicidad(comida);
         });
     }
 
@@ -302,7 +303,7 @@ export default class GestorCiudadano {
             }
             
             // calcula felicidad inicial basada en asignaciones y servicios
-            nuevoCiudadano.calcularFelicidad();
+            nuevoCiudadano.calcularFelicidad(0);
             
             // Agrega el nuevo ciudadano al gestor
             this.agregarCiudadano(nuevoCiudadano);

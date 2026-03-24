@@ -22,15 +22,18 @@ export default class ApiDijkstra extends ApiExternos {
 
         const endpoint = this.obtenerEndpointCalculoRuta();
         const opcionesPeticion = this.crearOpcionesPost(datosMapa);
+        
+        let respuesta;
         try {
-            const respuesta = await fetch(`${this.baseUrl}${endpoint}`, opcionesPeticion);
-            const resultado = await this.procesarRespuestaJson(respuesta);
-
-            this.ruta = resultado?.route ?? [];
-            return resultado;
+            respuesta = await fetch(`${this.baseUrl}${endpoint}`, opcionesPeticion);
         } catch (error) {
-            throw new Error('No se pudo conectar al microservicio de rutas. Verifica que este ejecutandose en http://127.0.0.1:5000');
+            throw new Error('No fue posible conectar con el servidor de cálculo de rutas. Asegúrate de que el microservicio esté ejecutándose.');
         }
+
+        // Procesar respuesta del servidor (puede lanzar errores específicos del servidor)
+        const resultado = await this.procesarRespuestaJson(respuesta);
+        this.ruta = resultado?.route ?? [];
+        return resultado;
     }
 
     /**
@@ -91,8 +94,8 @@ export default class ApiDijkstra extends ApiExternos {
         const datosRespuesta = await respuesta.json();
 
         if (!respuesta.ok) {
-            const mensajeError = datosRespuesta?.error || 'Error al calcular la ruta';
-            throw new Error(mensajeError);
+            // En lugar de lanzar error, devolver ruta vacía para que GestorRutas maneje el mensaje
+            return { route: [] };
         }
 
         return datosRespuesta;

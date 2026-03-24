@@ -20,15 +20,18 @@ export default class Ciudad {
      * @param {number} [electricidadInicial=0]
      * @param {number} [aguaInicial=0]
      * @param {number} [comidaInicial=0]
+     * @param {string} [ciudadId=null] - ID único de la ciudad. Si no se proporciona, se genera uno nuevo.
      */
     constructor(nombre, alcalde, ancho = 15, alto = 15, coordenadas = null,
-                dineroInicial = 50000, electricidadInicial = 0, aguaInicial = 0, comidaInicial = 0) {
+                dineroInicial = 50000, electricidadInicial = 0, aguaInicial = 0, comidaInicial = 0, ciudadId = null) {
         this.nombre = nombre;
         this.alcalde = alcalde;
         this.recursos = new Recursos(dineroInicial, electricidadInicial, aguaInicial, comidaInicial);
         this.construcciones = [];
         this.mapa = new Mapa(ancho, alto); // Agregar mapa visual
         this.coordenadas = coordenadas;
+        // ID único para identificar esta instancia de ciudad en el ranking
+        this.ciudadId = ciudadId || Ciudad._generarCiudadId();
     }
 
     /**
@@ -136,6 +139,17 @@ export default class Ciudad {
                 return tieneFelicidad && activo;
             })
             .reduce((acumulado, construccion) => acumulado + construccion.felicidad, 0);
+    }
+
+    /**
+     * Genera un ID único para la ciudad (timestamp + random).
+     * @private
+     * @returns {string} ID único
+     */
+    static _generarCiudadId() {
+        const timestamp = Date.now().toString(36);
+        const random = Math.random().toString(36).substring(2, 10);
+        return `ciudad_${timestamp}_${random}`;
     }
 
     /**
@@ -405,7 +419,8 @@ export default class Ciudad {
             recursos: this.recursos,
             construcciones: this.construcciones.map(c => c.toJSON ? c.toJSON() : c),
             mapa: this.mapa.toJSON ? this.mapa.toJSON() : this.mapa,
-            coordenadas: this.coordenadas
+            coordenadas: this.coordenadas,
+            ciudadId: this.ciudadId
         };
     }
 
@@ -415,7 +430,12 @@ export default class Ciudad {
             json.alcalde,
             json.mapa ? json.mapa.ancho : 15,
             json.mapa ? json.mapa.alto  : 15,
-            json.coordenadas
+            json.coordenadas,
+            50000, // dineroInicial - será sobrescrito abajo
+            0, // electricidadInicial - será sobrescrito abajo
+            0, // aguaInicial - será sobrescrito abajo
+            0, // comidaInicial - será sobrescrito abajo
+            json.ciudadId // Preservar el ciudadId original al cargar
         );
 
         // Restaurar recursos con sus valores reales (no crear nuevos por defecto)
@@ -481,6 +501,72 @@ export default class Ciudad {
         }
 
         return ciudad;
+    }
+
+    /**
+     * Calcula recursos iniciales basándose en los edificios del mapa cargado.
+     * 
+     * Fases:
+     * 1. Producción de plantas de utilidad (electricidad, agua)
+     * 2. Producción de otros edificios (dinero, comida)
+     * 3. Consumos de todos los edificios
+     * 
+     * @returns {void}
+     */
+    calcularRecursosIniciales() {
+        const produccionPendiente = {
+            dinero: 0,
+            electricidad: 0,
+            agua: 0,
+            comida: 0,
+        };
+
+        // FASE 1: Producción de plantas de utilidad (electricidad, agua)
+        const plantas = this.construcciones.filter(c => c instanceof PlantasDeUtilidad);
+        for (const planta of plantas) {
+            if (typeof planta.procesarProduccion === 'function') {
+                const produccion = planta.procesarProduccion(this.recursos);
+                this._acumularProduccionPendiente(produccionPendiente, produccion);
+            }
+        }
+
+        // Aplicar producción de plantas
+        if (produccionPendiente.electricidad > 0) {
+            this.recursos.actualizarElectricidad(produccionPendiente.electricidad);
+        }
+        if (produccionPendiente.agua > 0) {
+            this.recursos.actualizarAgua(produccionPendiente.agua);
+        }
+
+        // Reset para siguiente fase
+        produccionPendiente.dinero = 0;
+        produccionPendiente.electricidad = 0;
+        produccionPendiente.agua = 0;
+        produccionPendiente.comida = 0;
+
+        // FASE 2: Producción de otros edificios (dinero, comida)
+        const otrosEdificios = this.construcciones.filter(c => !(c instanceof PlantasDeUtilidad));
+        for (const edificio of otrosEdificios) {
+            if (typeof edificio.procesarProduccion === 'function') {
+                const produccion = edificio.procesarProduccion(this.recursos);
+                this._acumularProduccionPendiente(produccionPendiente, produccion);
+            }
+        }
+
+        // Aplicar producción de otros edificios
+        if (produccionPendiente.dinero > 0) {
+            this.recursos.dinero += produccionPendiente.dinero;
+        }
+        if (produccionPendiente.comida > 0) {
+            this.recursos.actualizarComida(produccionPendiente.comida);
+        }
+
+        // FASE 3: Consumos de todos los edificios (mantenimiento, electricidad, agua, comida)
+        for (const edificio of this.construcciones) {
+            if (typeof edificio.procesarConsumo === 'function') {
+                edificio.procesarConsumo(this.recursos);
+            }
+        }
     }
 
     /**

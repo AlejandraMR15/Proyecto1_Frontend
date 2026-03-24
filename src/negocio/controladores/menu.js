@@ -7,7 +7,7 @@
  *  3. Cargar ciudades de Colombia via ApiRegion y manejar el autocompletado.
  *  4. Validar el formulario y guardar la configuración en localStorage
  *     antes de redirigir al juego (index.html).
- *  5. Permitir cargar mapas desde archivos JSON o definir tamaño manual.
+ *  5. Permitir cargar mapas desde archivos TXT o definir tamaño manual.
  *
  * Comunicación con index.html (juego):
  *  - Al crear partida nueva: guarda en localStorage la clave 'config-nueva-partida'
@@ -17,8 +17,8 @@
  *    grid.js la leerá y llamará a Juego.cargarPartida().
  */
 
-import ApiRegion from '../acceso_datos/API/ApiRegion.js';
-import MapImporter from '../acceso_datos/MapImporter.js';
+import ApiRegion from '../../acceso_datos/API/ApiRegion.js';
+import MapImporter from '../../acceso_datos/MapImporter.js';
 
 /* ================================================================
    CONSTANTES
@@ -60,12 +60,12 @@ const formError     = document.getElementById('form-error');
 // Elementos para opciones de mapa
 const radiosMapaTipo = document.querySelectorAll('input[name="mapa-tipo"]');
 const seccionManual  = document.getElementById('seccion-manual');
-const seccionJson    = document.getElementById('seccion-json');
-const inputJson      = document.getElementById('input-json');
-const jsonInfo       = document.getElementById('json-info');
-const jsonArchivo    = document.getElementById('json-archivo');
-const jsonDimensiones = document.getElementById('json-dimensiones');
-const jsonError      = document.getElementById('json-error');
+const seccionTxt     = document.getElementById('seccion-txt');
+const inputTxt       = document.getElementById('input-txt');
+const txtInfo        = document.getElementById('txt-info');
+const txtArchivo     = document.getElementById('txt-archivo');
+const txtDimensiones = document.getElementById('txt-dimensiones');
+const txtError       = document.getElementById('txt-error');
 
 /* ================================================================
    ESTADO LOCAL DEL MÓDULO
@@ -74,8 +74,8 @@ let todasLasCiudades = [];   // lista completa cargada desde la API
 let ciudadSeleccionada = null; // objeto ciudad elegido del autocomplete
 let cargandoCiudades = false;
 
-// Estado del mapajson
-let mapaJsonCargado = null;  // objeto con { ancho, alto, matriz, metadatos }
+// Estado del mapa TXT
+let mapaTextoCargado = null;  // objeto con { ancho, alto, matriz, metadatos }
 
 /* ================================================================
    1. VERIFICAR PARTIDA GUARDADA
@@ -160,7 +160,6 @@ async function cargarCiudadesAPI() {
         acSpinner.classList.add('oculto');
         inputRegion.disabled = false;
         inputRegion.placeholder = 'Escribe para buscar...';
-        inputRegion.focus();
     }
 }
 
@@ -318,7 +317,7 @@ sliderMapa.addEventListener('input', () => {
 });
 
 /**
- * Maneja el cambio entre opciones de mapa (manual vs JSON).
+ * Maneja el cambio entre opciones de mapa (manual vs TXT).
  */
 function configurarOpcionesMapaTipo() {
     radiosMapaTipo.forEach(radio => {
@@ -326,16 +325,16 @@ function configurarOpcionesMapaTipo() {
             const tipo = e.target.value;
             if (tipo === 'manual') {
                 seccionManual.classList.remove('oculto');
-                seccionJson.classList.add('oculto');
-                mapaJsonCargado = null;
-                inputJson.value = '';
-                jsonInfo.classList.add('oculto');
-                jsonError.classList.add('oculto');
+                seccionTxt.classList.add('oculto');
+                mapaTextoCargado = null;
+                inputTxt.value = '';
+                txtInfo.classList.add('oculto');
+                txtError.classList.add('oculto');
             } else if (tipo === 'json') {
                 seccionManual.classList.add('oculto');
-                seccionJson.classList.remove('oculto');
-                mapaJsonCargado = null;
-                inputJson.click(); // Abre diálogo de archivo
+                seccionTxt.classList.remove('oculto');
+                mapaTextoCargado = null;
+                inputTxt.click(); // Abre diálogo de archivo
             }
         });
     });
@@ -344,35 +343,35 @@ function configurarOpcionesMapaTipo() {
 /**
  * Procesa el archivo JSON seleccionado.
  */
-inputJson.addEventListener('change', async (e) => {
+inputTxt.addEventListener('change', async (e) => {
     const archivo = e.target.files[0];
     if (!archivo) {
-        mapaJsonCargado = null;
-        jsonInfo.classList.add('oculto');
-        jsonError.classList.add('oculto');
+        mapaTextoCargado = null;
+        txtInfo.classList.add('oculto');
+        txtError.classList.add('oculto');
         return;
     }
 
     try {
-        jsonError.classList.add('oculto');
-        jsonError.textContent = '';
+        txtError.classList.add('oculto');
+        txtError.textContent = '';
 
         // Procesar archivo con MapImporter
-        const datosValidados = await MapImporter.procesarArchivoJSON(archivo);
-        mapaJsonCargado = datosValidados;
+        const datosValidados = await MapImporter.procesarArchivoTXT(archivo);
+        mapaTextoCargado = datosValidados;
 
         // Mostrar información del mapa
-        jsonArchivo.textContent = `✓ Archivo cargado: ${archivo.name}`;
-        jsonDimensiones.textContent = `Tamaño detectado: ${datosValidados.ancho} × ${datosValidados.alto}`;
-        jsonInfo.classList.remove('oculto');
+        txtArchivo.textContent = `✓ Archivo cargado: ${archivo.name}`;
+        txtDimensiones.textContent = `Tamaño detectado: ${datosValidados.ancho} × ${datosValidados.alto}`;
+        txtInfo.classList.remove('oculto');
 
     } catch (error) {
-        // Si hay error, podemos dejar la opción JSON seleccionada pero mostrar error
-        mapaJsonCargado = null;
-        jsonInfo.classList.add('oculto');
-        jsonError.textContent = `Error al cargar archivo: ${error.message}`;
-        jsonError.classList.remove('oculto');
-        inputJson.value = '';
+        // Si hay error, podemos dejar la opción TXT seleccionada pero mostrar error
+        mapaTextoCargado = null;
+        txtInfo.classList.add('oculto');
+        txtError.textContent = `Error al cargar archivo: ${error.message}`;
+        txtError.classList.remove('oculto');
+        inputTxt.value = '';
     }
 });
 
@@ -417,9 +416,9 @@ function validarFormulario() {
         // Si es manual, ya el slider valida el tamaño (15-30)
         // No hay validación adicional necesaria
     } else if (mapaType === 'json') {
-        if (!mapaJsonCargado) {
-            mostrarErrorForm('Debes cargar un archivo JSON válido del mapa.');
-            inputJson.focus();
+        if (!mapaTextoCargado) {
+            mostrarErrorForm('Debes cargar un archivo TXT válido del mapa.');
+            inputTxt.focus();
             return false;
         }
     }
@@ -457,8 +456,8 @@ btnCrear.addEventListener('click', () => {
         ancho = parseInt(sliderMapa.value, 10);
         alto = parseInt(sliderMapa.value, 10);
     } else if (mapaType === 'json') {
-        ancho = mapaJsonCargado.ancho;
-        alto = mapaJsonCargado.alto;
+        ancho = mapaTextoCargado.ancho;
+        alto = mapaTextoCargado.alto;
     }
 
     // Configuración que leerá grid.js al iniciar el juego
@@ -473,9 +472,9 @@ btnCrear.addEventListener('click', () => {
         dineroInicial: 50000,
     };
 
-    // Si se cargó un mapa desde JSON, incluir los datos del mapa
-    if (mapaType === 'json' && mapaJsonCargado) {
-        config.matrizJSON = mapaJsonCargado.matriz;
+    // Si se cargó un mapa desde TXT, incluir los datos del mapa
+    if (mapaType === 'json' && mapaTextoCargado) {
+        config.matrizJSON = mapaTextoCargado.matriz;
     }
 
     // Limpiar posible acción anterior y guardar la nueva configuración
@@ -502,7 +501,7 @@ function limpiarFormulario() {
     inputTurno.value    = TURNO_MIN_SEG;
     ciudadSeleccionada  = null;
     mapaJsonCargado     = null;
-    inputJson.value     = '';
+    inputTxt.value     = '';
     ocultarSugerencias();
     ocultarErrorForm();
     regionError.classList.add('oculto');

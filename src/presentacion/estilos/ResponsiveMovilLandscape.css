@@ -5,7 +5,10 @@
    ============================================================ */
 @media (orientation: landscape) and (max-height: 500px) {
 
-    :root { --sb-width: 160px; }
+    :root {
+        --sb-width: 160px;
+        --noticias-shift-right: calc(220px + 8px);
+    }
 
     html, body { overflow: hidden; }
 
@@ -238,34 +241,53 @@
         left: calc(var(--sb-width) + 8px + 88px) !important;
         width: 120px !important;
         z-index: 399 !important;
-        transition: left 0.14s steps(4) !important;
+        overflow: hidden !important;
+        transition: left 0.14s steps(4), max-height 0.22s steps(8) !important;
+    }
+
+    /* Forzado: en landscape cerrado, mostrar solo el botón de desglose */
+    body:not(.hud-desglose-open) #hud-desglose {
+        max-height: 20px !important;
+        overflow: hidden !important;
+    }
+
+    body.hud-desglose-open #hud-desglose {
+        max-height: 420px !important;
     }
 
     body.sidebar-cerrado #hud-desglose {
         left: calc(8px + 118px) !important;
     }
 
-    #hud-desglose-toggle { font-size: 0.31rem !important; padding: 4px 6px !important; }
-    #hud-desglose-arrow  { font-size: 0.41rem !important; }
-    #hud-desglose[data-open="false"] #hud-desglose-cuerpo {
+    #hud-desglose-toggle { font-size: 0.38rem !important; padding: 4px 6px !important; }
+    /* Solo landscape móvil: flecha en orientación desktop (cerrado: ▼, abierto: ▲) */
+    #hud-desglose-arrow  {
+        font-size: 0.46rem !important;
+        transform: rotate(0deg) !important;
+    }
+    #hud-desglose[data-open="true"] #hud-desglose-arrow {
+        transform: rotate(180deg) !important;
+    }
+    /* Landscape móvil: cerrado/abierto controlado por clase del body */
+    body:not(.hud-desglose-open) #hud-desglose-cuerpo {
         display: none !important;
         max-height: 0 !important;
         overflow: hidden !important;
     }
-    #hud-desglose[data-open="true"] #hud-desglose-cuerpo {
+    body.hud-desglose-open #hud-desglose-cuerpo {
         display: block !important;
-        max-height: 260px !important;
+        max-height: 480px !important;
         overflow-y: auto !important;
     }
     .desglose-seccion    { padding: 4px 6px 2px !important; }
-    .desglose-seccion-titulo { font-size: 0.28rem !important; }
-    .desglose-label      { font-size: 0.26rem !important; }
-    .desglose-valor      { font-size: 0.28rem !important; }
+    .desglose-seccion-titulo { font-size: 0.36rem !important; }
+    .desglose-label      { font-size: 0.34rem !important; }
+    .desglose-valor      { font-size: 0.36rem !important; }
     .desglose-item-bonif,
     .desglose-item-penal,
-    .desglose-sin-items  { font-size: 0.23rem !important; }
-    .desglose-total-label { font-size: 0.28rem !important; }
-    .desglose-total-valor { font-size: 0.38rem !important; }
+    .desglose-sin-items  { font-size: 0.31rem !important; }
+    .desglose-total-label { font-size: 0.36rem !important; }
+    .desglose-total-valor { font-size: 0.50rem !important; }
     .desglose-total-wrap  { padding: 5px 6px !important; }
 
     /* ── BOTÓN RUTA: encima del botón clima (stack derecho) ── */
@@ -281,20 +303,27 @@
         font-size: 0.36rem !important;
         padding: 0 !important;
         transition: right 0.25s ease,
-                    background var(--transition, 0.14s steps(4)),
-                    border-color var(--transition, 0.14s steps(4)) !important;
+            background var(--transition, 0.14s steps(4)),
+            border-color var(--transition, 0.14s steps(4)) !important;
     }
 
-    /* Cuando sidebar de construcción está abierto NO mover el RUTA (ya no está a la izquierda) */
-    body.sidebar-construccion-abierto #btn-calcular-ruta {
-        bottom: calc(8px + 36px + 4px + 36px + 4px) !important;
+    /* Mantener alineación exacta con widgets también cuando el sidebar está cerrado */
+    body.sidebar-cerrado #btn-calcular-ruta {
         right: 6px !important;
         left: auto !important;
     }
 
+    /* Landscape móvil: al abrir construcción NO se mueve nada (override sobre tablet) */
+    body.sidebar-construccion-abierto:not(.panel-noticias-abierto) #btn-calcular-ruta {
+        bottom: calc(8px + 36px + 4px + 36px + 4px) !important;
+        right: 6px !important;
+        left: auto !important;
+        top: auto !important;
+    }
+
     /* Cuando noticias está abierto, mover igual que los widgets */
     body.panel-noticias-abierto #btn-calcular-ruta {
-        right: calc(220px + 8px) !important;
+        right: var(--noticias-shift-right) !important;
     }
 
     /* ── RECURSOS: aún más hacia la derecha ── */
@@ -386,7 +415,7 @@
     .widget-clima-temp { font-size: 0.41rem; }
 
     /* Al abrir noticias, los widgets se mueven a la izquierda del panel */
-    #widgets-container.panel-noticias-abierto { right: calc(220px + 8px) !important; }
+    #widgets-container.panel-noticias-abierto { right: var(--noticias-shift-right) !important; }
 
     /* ── CLIMA INFOBOX ── */
     /* Con el btn-ruta encima, los botones quedan (de abajo a arriba):

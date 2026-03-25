@@ -198,6 +198,19 @@ body.panel-noticias-abierto #hud-controles {
     #hud-recursos {
         left: calc(50% + 40px) !important;
     }
+
+    /* Escritorio: mostrar solo icono + valor en recursos */
+    .hud-recurso-label {
+        display: none !important;
+    }
+
+    /* Escritorio: tooltip de recursos más legible */
+    .hud-recurso-tooltip {
+        font-size: 0.54rem;
+        line-height: 2;
+        min-width: 250px;
+        padding: 14px 18px;
+    }
 }
 
 #hud-controles button {
@@ -627,16 +640,15 @@ body.sidebar-cerrado #hud-turno {
 }
 
 /* ============================================================
-   PANEL DESGLOSE DE PUNTUACIÓN
-   Desktop: a la derecha del panel bienestar.
-   Se alinea en top con el bienestar (top: 130px).
-   ============================================================ */
+    PANEL DESGLOSE DE PUNTUACIÓN
+    Desktop: alineado a la derecha del recurso de agua.
+    ============================================================ */
 #hud-desglose {
     position: fixed;
-    /* Mismo top que #hud-bienestar */
-    top: 130px;
-    /* Bienestar: left=280px + min-width=190px + 8px gap = 478px */
-    left: 478px;
+     /* Misma altura visual que la barra de recursos */
+     top: 12px;
+     /* #hud-recursos se centra en (50% + 40px); este offset lo coloca a la derecha de AGUA */
+     left: calc(50% + 240px);
     width: 210px;
     background: #1c2b3a;
     border: 2px solid #3d6b8a;
@@ -646,11 +658,6 @@ body.sidebar-cerrado #hud-turno {
     z-index: 200;
     transition: left 0.14s steps(4);
     overflow: hidden;
-}
-
-body.sidebar-cerrado #hud-desglose {
-    /* Bienestar cerrado: left=12px + 190px + 8px = 210px */
-    left: 210px;
 }
 
 /* ---- Botón de cabecera / toggle ---- */
@@ -665,7 +672,7 @@ body.sidebar-cerrado #hud-desglose {
     border-bottom: 2px solid #3d6b8a;
     color: #ffd700;
     font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
-    font-size: 0.49rem;
+    font-size: 0.62rem;
     letter-spacing: 0.04em;
     cursor: pointer;
     text-align: left;
@@ -712,7 +719,7 @@ body.sidebar-cerrado #hud-desglose {
 }
 
 .desglose-seccion-titulo {
-    font-size: 0.44rem;
+    font-size: 0.56rem;
     color: #c8e8f8;
     letter-spacing: 0.04em;
     margin-bottom: 5px;
@@ -733,7 +740,7 @@ body.sidebar-cerrado #hud-desglose {
 }
 
 .desglose-label {
-    font-size: 0.38rem;
+    font-size: 0.48rem;
     color: #7aaabf;
     white-space: nowrap;
     overflow: hidden;
@@ -742,7 +749,7 @@ body.sidebar-cerrado #hud-desglose {
 }
 
 .desglose-valor {
-    font-size: 0.41rem;
+    font-size: 0.56rem;
     color: #e8f0f7;
     flex-shrink: 0;
     text-align: right;
@@ -760,18 +767,18 @@ body.sidebar-cerrado #hud-desglose {
 
 .desglose-subtotal .desglose-label {
     color: #c8e8f8;
-    font-size: 0.41rem;
+    font-size: 0.54rem;
 }
 
 .desglose-subtotal .desglose-valor {
     color: #ffd700;
-    font-size: 0.44rem;
+    font-size: 0.60rem;
 }
 
 /* ---- Ítem de bonificación / penalización ---- */
 .desglose-item-bonif,
 .desglose-item-penal {
-    font-size: 0.36rem;
+    font-size: 0.49rem;
     padding: 2px 0;
     line-height: 1.5;
 }
@@ -780,7 +787,7 @@ body.sidebar-cerrado #hud-desglose {
 .desglose-item-penal { color: #e87070; }
 
 .desglose-sin-items {
-    font-size: 0.36rem;
+    font-size: 0.49rem;
     color: #4a5a7a;
     font-style: italic;
 }
@@ -796,13 +803,13 @@ body.sidebar-cerrado #hud-desglose {
 }
 
 .desglose-total-label {
-    font-size: 0.44rem;
+    font-size: 0.60rem;
     color: #c8e8f8;
     letter-spacing: 0.04em;
 }
 
 .desglose-total-valor {
-    font-size: 0.64rem;
+    font-size: 0.86rem;
     color: #ffd700;
     text-shadow: 1px 1px 0 #aa8800;
 }

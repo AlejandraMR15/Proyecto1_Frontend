@@ -330,26 +330,43 @@ export function configurarTooltipsRecursos() {
     const puedeHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
     const recursos = document.querySelectorAll('.hud-recurso');
 
+    const cerrarTodosTooltips = () => {
+        recursos.forEach(recurso => {
+            const tt = recurso.querySelector('.hud-recurso-tooltip');
+            if (tt) tt.classList.remove('visible');
+            recurso.classList.remove('is-open');
+            recurso.setAttribute('aria-expanded', 'false');
+        });
+    };
+
     // En touch no usamos mouseenter/mouseleave; el toggle lo maneja Hud.js con click.
     if (!puedeHover) {
-        recursos.forEach(recurso => {
-            const tooltip = recurso.querySelector('.hud-recurso-tooltip');
-            if (tooltip) tooltip.classList.remove('visible');
-        });
+        cerrarTodosTooltips();
         return;
     }
+
+    // Al entrar en modo desktop, empezar desde estado limpio.
+    cerrarTodosTooltips();
     
     recursos.forEach(recurso => {
         const tooltip = recurso.querySelector('.hud-recurso-tooltip');
         if (!tooltip) return;
         
         recurso.addEventListener('mouseenter', () => {
+            // Evita que un tooltip previo quede abierto si se cambia rápido de recurso.
+            cerrarTodosTooltips();
             tooltip.classList.add('visible');
         });
         
         recurso.addEventListener('mouseleave', () => {
             tooltip.classList.remove('visible');
         });
+    });
+
+    document.addEventListener('mousemove', (e) => {
+        if (!e.target.closest('.hud-recurso')) {
+            cerrarTodosTooltips();
+        }
     });
 }
 

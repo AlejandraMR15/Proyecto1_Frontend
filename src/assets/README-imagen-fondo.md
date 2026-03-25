@@ -11,7 +11,7 @@
 
 ## Alternativa: Usar gradientes CSS (sin imagen)
 
-Si prefieres no usar una imagen, puedes reemplazar el contenido de `src/presentacion/estilos/menu.css` con el archivo `src/assets/menu-gradientes.css` incluido en este directorio.
+Si prefieres no usar una imagen, puedes reemplazar el contenido de `src/presentacion/estilos/menu.css` con el archivo `src/presentacion/estilos/menu-gradientes.css`.
 
 ## Personalización
 
@@ -39,7 +39,7 @@ background: rgba(17, 27, 36, 0.85);
 ## Archivos incluidos:
 
 - **`README-imagen-fondo.md`**: Esta documentación
-- **`menu-gradientes.css`**: CSS alternativo con gradientes (opcional)
+- **`src/presentacion/estilos/menu-gradientes.css`**: CSS alternativo con gradientes (opcional)
 
 ### Overlay (superposición)
 
@@ -96,7 +96,7 @@ Si quieres cambiar la imagen de fondo:
 ## Archivos incluidos en este directorio
 
 - **`README-imagen-fondo.md`**: Esta documentación
-- **`menu-gradientes.css`**: CSS alternativo con gradientes y patrones
+- **`src/presentacion/estilos/menu-gradientes.css`**: CSS alternativo con gradientes y patrones
 - **`generador-imagen.html`**: Herramienta web para crear imágenes simples
 
 ## Próximos pasos

@@ -94,6 +94,8 @@ const EDIFICIOS_CONFIG = {
 let modoConstructivo     = false;
 let edificioSeleccionado = null;         // config del edificio elegido en el sidebar
 let itemActivoEl         = null;         // <li> resaltado en el sidebar
+let modoDemolicion       = false;         // modo demolición activado
+
  
 /* ================================================================
    UTILIDAD: id único para cada edificio construido
@@ -244,7 +246,43 @@ function deseleccionarEdificio() {
     aplicarCursorModo('');
 }
 
+/**
+ * Toggle el modo demolición.
+ * Cuando se activa: deselecciona construcción, cambia cursor a 🚫, muestra notificación.
+ * Cuando se desactiva: vuelve cursor a normal, muestra notificación.
+ */
+function toggleModoDemolicion() {
+    if (modoDemolicion) {
+        // Desactivar
+        modoDemolicion = false;
+        deseleccionarEdificio();
+        aplicarCursorModo('');
+        const btnDemolicion = document.getElementById('btnDemolicion');
+        if (btnDemolicion) btnDemolicion.classList.remove('demoler-activo');
+        mostrarNotificacion('Modo demolición desactivado');
+    } else {
+        // Activar
+        modoDemolicion = true;
+        deseleccionarEdificio(); // Desseleccionar cualquier construcción activa
+        aplicarCursorModo('not-allowed'); // Cursor 🚫 visual
+        const btnDemolicion = document.getElementById('btnDemolicion');
+        if (btnDemolicion) btnDemolicion.classList.add('demoler-activo');
+        mostrarNotificacion('Modo demolición: haz click en un edificio para demoler');
+    }
+}
 
+/**
+ * Desactiva explícitamente el modo demolición (sin toggle).
+ */
+function desactivarModoDemolicion() {
+    if (modoDemolicion) {
+        modoDemolicion = false;
+        deseleccionarEdificio();
+        aplicarCursorModo('');
+        const btnDemolicion = document.getElementById('btnDemolicion');
+        if (btnDemolicion) btnDemolicion.classList.remove('demoler-activo');
+    }
+}
 
 /**
  * Muestra modal de confirmación de demolición.
@@ -455,6 +493,21 @@ function manejarClickCelda(e) {
  
     const ciudad = juego.ciudad;
 
+    /* -- MODO DEMOLICIÓN: celda ocupada → iniciar demolición -- */
+    if (modoDemolicion) {
+        if (etiqueta !== 'g') {
+            const construccion = buscarEdificioPorCoordenada(col, row);
+            if (construccion) {
+                mostrarConfirmacionDemolicion(construccion, col, row);
+            } else {
+                mostrarNotificacion('🗑️ No se encontró el edificio', 'error');
+            }
+        } else {
+            mostrarNotificacion('⚠ Esa celda está vacía. Selecciona un edificio para demoler', 'error');
+        }
+        return; // No hacer nada más en modo demolición
+    }
+
     /* -- Celda OCUPADA → mostrar información (NO si estamos en modo ruta) -- */
     if (etiqueta !== 'g') {
         // No mostrar información si estamos seleccionando puntos de ruta
@@ -543,6 +596,7 @@ document.addEventListener('DOMContentLoaded', function () {
         modoConstructivo = false;  // Menú cerrado = no construir
         document.body.classList.remove('sidebar-construccion-abierto');
         deseleccionarEdificio();
+        desactivarModoDemolicion(); // Desactiva también el modo demolición
     }
  
     closeBtn.addEventListener('click', cerrarSidebar);
@@ -641,6 +695,15 @@ document.addEventListener('DOMContentLoaded', function () {
             modoConstructivo = true;
         });
     });
+
+    /* ---- Botón de demolición ---- */
+    const btnDemolicion = document.getElementById('btnDemolicion');
+    if (btnDemolicion) {
+        btnDemolicion.addEventListener('click', function () {
+            toggleModoDemolicion();
+        });
+    }
+
  
     /* ---- Escuchar clicks del grid desde document para no depender del orden de carga ---- */
     document.addEventListener('celda-click', manejarClickCelda);

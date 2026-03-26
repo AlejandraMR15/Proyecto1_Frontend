@@ -191,8 +191,15 @@ function habilitarTooltipsRecursosTouch() {
       return;
     }
 
-    // En desktop se mantiene solo hover/focus
-    if (!enVistaMovilTablet()) return;
+    // En desktop el click no debe dejar el tooltip abierto.
+    if (!enVistaMovilTablet()) {
+      const tooltip = recurso.querySelector('.hud-recurso-tooltip');
+      recurso.classList.remove('is-open');
+      recurso.setAttribute('aria-expanded', 'false');
+      if (tooltip) tooltip.classList.remove('visible');
+      recurso.blur();
+      return;
+    }
 
     e.preventDefault();
     e.stopPropagation();

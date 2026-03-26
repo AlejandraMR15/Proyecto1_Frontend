@@ -136,8 +136,7 @@ body.panel-noticias-abierto #hud-controles {
 
 /* Desktop hover + focus teclado */
 @media (hover: hover) and (pointer: fine) {
-    .hud-recurso:hover .hud-recurso-tooltip,
-    .hud-recurso:focus-within .hud-recurso-tooltip {
+    .hud-recurso:hover .hud-recurso-tooltip {
         visibility: visible;
         opacity: 1;
         transform: translateX(-50%) translateY(0);

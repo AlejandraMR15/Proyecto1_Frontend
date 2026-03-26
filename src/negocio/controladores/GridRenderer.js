@@ -98,10 +98,6 @@ export default class GridRenderer {
         if (existente) existente.remove();
         this._burbujesEl = document.createElement('div');
         this._burbujesEl.id = 'burbujas-recursos';
-        this._burbujesEl.style.cssText = [
-            'position:fixed', 'top:0', 'left:0', 'width:100%', 'height:100%',
-            'pointer-events:none', 'overflow:visible', 'z-index:9000'
-        ].join(';');
         document.body.appendChild(this._burbujesEl);
 
         // Aseguramos que Mapa tenga una matriz generada
@@ -280,11 +276,6 @@ export default class GridRenderer {
         svg.setAttribute('width',   svgW);
         svg.setAttribute('height',  svgH);
         svg.setAttribute('viewBox', `0 0 ${svgW} ${svgH}`);
-        svg.style.cssText = `
-            position:absolute; top:0; left:0;
-            pointer-events:none; overflow:visible; z-index:0;
-            opacity:0; transition: opacity 0.4s ease;
-        `;
 
         const mkPoly = (points, fill, stroke) => {
             const p = document.createElementNS(ns, 'polygon');
@@ -306,7 +297,7 @@ export default class GridRenderer {
         }
 
         const delay = (this._tiempoUltimoCubo ?? 50) + 80;
-        setTimeout(() => { svg.style.opacity = '1'; }, delay);
+        setTimeout(() => { svg.classList.add('visible'); }, delay);
     }
 
     /**
@@ -328,35 +319,25 @@ export default class GridRenderer {
         cubo.dataset.row = row;
         cubo.dataset.etiqueta = etiqueta;
         cubo.style.left   = (x + offsetX) + 'px';
-        cubo.style.top    = (y + this.TD) + 'px';          // ← bajar TD para coincidir con poly-bottom
+        cubo.style.top    = (y + this.TD) + 'px';
         cubo.style.width  = this.TW + 'px';
-        cubo.style.height = this.TH + 'px';                // ← solo la altura del diamante inferior
+        cubo.style.height = this.TH + 'px';
         cubo.style.zIndex = row + col;
-        cubo.style.overflow = 'visible';
-
-        // Animación de entrada escalonada
-        cubo.style.opacity    = '0';
-        cubo.style.transition = 'opacity 0.25s ease';
 
         const colores = this._coloresPorEtiqueta(etiqueta);
         const svg = this._crearSVGCubo(colores.top, colores.left, colores.right, etiqueta);
-        svg.style.position      = 'absolute';
-        svg.style.left          = '0';
-        svg.style.pointerEvents = 'none';
-        // Edificios suben TH px sobre el suelo; planos solo TD
         svg.style.top = this._esEdificio(etiqueta)
             ? (-this.TH / 2) + 'px'
             : (-this.TD) + 'px';
         cubo.appendChild(svg);
 
         // Eventos directamente en el cubo — el bounding box ya coincide con poly-bottom
-        cubo.style.pointerEvents = 'all';
         cubo.addEventListener('mouseenter', (e) => this._onEnter(e));
         cubo.addEventListener('mouseleave', ()  => this._onLeave());
         cubo.addEventListener('click',      (e) => this._onClick(e));
 
         // Fade-in escalonado
-        setTimeout(() => { cubo.style.opacity = '1'; }, idx * 3 + 50);
+        setTimeout(() => { cubo.classList.add('loaded'); }, idx * 3 + 50);
 
         return cubo;
     }
@@ -384,9 +365,6 @@ export default class GridRenderer {
         cubo.innerHTML = '';
 
         const svg = this._crearSVGCubo(colores.top, colores.left, colores.right, etiqueta);
-        svg.style.position      = 'absolute';
-        svg.style.left          = '0';
-        svg.style.pointerEvents = 'none';
         svg.style.top = this._esEdificio(etiqueta)
             ? (-this.TH / 2) + 'px'
             : (-this.TD) + 'px';
@@ -722,17 +700,7 @@ export default class GridRenderer {
             'produccion': '📦'
         };
 
-        // Mapeo de colores por tipo
-        const colores = {
-            'dinero': '#FFD700',
-            'comida': '#FF6B6B',
-            'electricidad': '#FFA500',
-            'agua': '#4ECDC4',
-            'produccion': '#95E1D3'
-        };
-
         const icono = iconos[tipo] || '📦';
-        const color = colores[tipo] || '#FFD700';
 
         // Obtener posición en pantalla usando el cubo DOM real.
         // Como el contenedor de burbujas es position:fixed en el body,
@@ -757,36 +725,20 @@ export default class GridRenderer {
         // Crear elemento de burbuja
         const burbuja = document.createElement('div');
         burbuja.className = 'burbuja-recurso';
-        burbuja.style.cssText = `
-            position: absolute;
-            left: ${posX}px;
-            top: ${posY}px;
-            transform: translate(-50%, -50%);
-            width: 48px;
-            height: 48px;
-            background: ${color};
-            border: 3px solid rgba(255,255,255,0.9);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            font-weight: bold;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.5), inset 0 2px 4px rgba(255,255,255,0.4);
-            pointer-events: none;
-            z-index: 5001;
-            opacity: 1;
-        `;
+        burbuja.dataset.tipo = tipo;
+        burbuja.style.left = posX + 'px';
+        burbuja.style.top = posY + 'px';
+        burbuja.style.transform = 'translate(-50%, -50%)';
 
         // Agregar cantidad si es > 1
         if (cantidad > 1) {
-            burbuja.innerHTML = `
-                <span style="position:absolute;font-size:12px;bottom:-6px;right:-2px;background:rgba(0,0,0,0.7);color:white;padding:2px 5px;border-radius:3px;font-weight:bold;white-space:nowrap">${cantidad}</span>
-                ${icono}
-            `;
-        } else {
-            burbuja.textContent = icono;
+            const cantidad_span = document.createElement('span');
+            cantidad_span.className = 'burbuja-cantidad';
+            cantidad_span.textContent = cantidad;
+            burbuja.appendChild(cantidad_span);
         }
+
+        burbuja.appendChild(document.createTextNode(icono));
 
         this._burbujesEl.appendChild(burbuja);
 

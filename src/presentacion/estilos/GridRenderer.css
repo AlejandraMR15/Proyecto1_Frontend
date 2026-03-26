@@ -1,0 +1,139 @@
+/* ========================================
+   GRID RENDERER — Estilos para la cuadrícula
+   isométrica y burbujas de recursos
+   ======================================== */
+
+/* ---- CONTENEDOR DE BURBUJAS DE RECURSOS ---- */
+#burbujas-recursos {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: visible;
+    z-index: 9000;
+}
+
+/* ---- BURBUJA INDIVIDUAL DE RECURSO ---- */
+.burbuja-recurso {
+    position: absolute;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: bold;
+    pointer-events: none;
+    z-index: 5001;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), inset 0 2px 4px rgba(255, 255, 255, 0.4);
+    border: 3px solid rgba(255, 255, 255, 0.9);
+    opacity: 1;
+}
+
+/* Variantes de color por tipo de recurso */
+.burbuja-recurso[data-tipo="dinero"] {
+    background: #FFD700;
+}
+
+.burbuja-recurso[data-tipo="comida"] {
+    background: #FF6B6B;
+}
+
+.burbuja-recurso[data-tipo="electricidad"] {
+    background: #FFA500;
+}
+
+.burbuja-recurso[data-tipo="agua"] {
+    background: #4ECDC4;
+}
+
+.burbuja-recurso[data-tipo="produccion"] {
+    background: #95E1D3;
+}
+
+/* ---- CANTIDAD EN LA BURBUJA ---- */
+.burbuja-cantidad {
+    position: absolute;
+    font-size: 12px;
+    bottom: -6px;
+    right: -2px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 2px 5px;
+    border-radius: 3px;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+/* ---- VOLUMEN ISO (SVG decorativo detrás del grid) ---- */
+#iso-volume {
+    position: absolute;
+    top: 0;
+    left: 0;
+    overflow: visible;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+#iso-volume.visible {
+    opacity: 1;
+}
+
+/* ---- CUBOS ISOMÉTRICOS ---- */
+.iso-cube {
+    position: absolute;
+    overflow: visible;
+    cursor: pointer;
+    pointer-events: all;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+}
+
+.iso-cube.loaded {
+    opacity: 1;
+}
+
+.iso-cube svg {
+    overflow: visible;
+    display: block;
+    pointer-events: none;
+    position: absolute;
+    left: 0;
+}
+
+/* Hover: solo poly-bottom baja a 50% opacidad */
+.iso-cube.hovered .poly-bottom {
+    fill-opacity: 0.5;
+}
+
+/* Las caras fantasma NUNCA se revelan al hacer hover */
+.iso-cube.hovered .poly-top,
+.iso-cube.hovered .poly-left,
+.iso-cube.hovered .poly-right {
+    fill-opacity: 0 !important;
+}
+
+.iso-cube.hovered {
+    z-index: 9999 !important;
+    filter: drop-shadow(0 0 5px rgba(150, 255, 100, 0.6));
+}
+
+/* ---- SELECTED: overlay CSS puro ---- */
+.iso-cube.selected::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(240, 208, 64, 0.45);
+    pointer-events: none;
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+}
+
+.iso-cube.selected {
+    filter: drop-shadow(0 0 8px rgba(240, 208, 64, 0.9));
+    z-index: 9999 !important;
+}

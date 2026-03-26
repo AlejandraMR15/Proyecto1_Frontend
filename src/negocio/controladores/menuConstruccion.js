@@ -101,6 +101,19 @@ let itemActivoEl         = null;         // <li> resaltado en el sidebar
 function generarId() {
     return 'edif-' + Date.now() + '-' + Math.floor(Math.random() * 10000);
 }
+
+/**
+ * Vincula un listener click reemplazando el anterior en el mismo elemento.
+ * Evita acumulación de handlers cuando un modal se abre varias veces.
+ */
+function setSingleClickListener(elemento, handler) {
+    if (!elemento) return;
+    if (elemento._singleClickHandler) {
+        elemento.removeEventListener('click', elemento._singleClickHandler);
+    }
+    elemento._singleClickHandler = handler;
+    elemento.addEventListener('click', handler);
+}
  
 /* ================================================================
    NOTIFICACIÓN en pantalla (sin alert)
@@ -108,9 +121,8 @@ function generarId() {
 function mostrarNotificacion(mensaje, tipo = 'info') {
     const notif = document.getElementById('notif-construccion');
     if (!notif) return; // Template debe estar en HTML
-    
-    notif.style.borderColor = tipo === 'error' ? '#e05555' : '#2e7a94';
-    notif.style.color       = tipo === 'error' ? '#f08080' : '#a8dff0';
+
+    notif.classList.toggle('notif-construccion--error', tipo === 'error');
     notif.textContent = mensaje;
     notif.style.display = 'block';
     notif.style.opacity = '1';
@@ -159,8 +171,8 @@ function mostrarInfoEdificio(construccion, col, row) {
             const label  = LABELS[clave] || clave;
             const valStr = typeof valor === 'boolean' ? (valor ? 'Sí' : 'No') : valor;
             return `<tr>
-                <td style="color:#4a9fb5;padding:5px 14px 5px 0;white-space:nowrap;font-size:0.78rem">${label}</td>
-                <td style="color:#a8dff0;padding:5px 0;font-size:0.82rem">${valStr}</td>
+                <td class="construct-modal-row-label">${label}</td>
+                <td class="construct-modal-row-value">${valStr}</td>
             </tr>`;
         }).join('');
  
@@ -173,14 +185,16 @@ function mostrarInfoEdificio(construccion, col, row) {
     
     // Cerrar al hacer click en la X
     const btnCerrar = document.getElementById('modal-cerrar');
-    btnCerrar.onclick = () => modal.style.display = 'none';
+    setSingleClickListener(btnCerrar, () => {
+        modal.style.display = 'none';
+    });
     
     // Botón de demoler
     const btnDemoler = document.getElementById('modal-info-demoler');
-    btnDemoler.onclick = () => {
+    setSingleClickListener(btnDemoler, () => {
         modal.style.display = 'none';
         mostrarConfirmacionDemolicion(construccion, col, row);
-    };
+    });
  
     // Cerrar al hacer click fuera
     const cerrarAlClickFuera = (e) => {
@@ -251,13 +265,13 @@ function mostrarConfirmacionDemolicion(construccion, col, row) {
     if (Array.isArray(construccion.residentes)) {
         const num = construccion.residentes.length;
         if (num > 0) {
-            mensajeCiudadanos += `<p style="color:#f08080;margin-top:8px">⚠️ Hay ${num} ciudadano(s) viviendo aquí. Quedarán sin hogar.</p>`;
+            mensajeCiudadanos += `<p class="construct-modal-alerta">⚠️ Hay ${num} ciudadano(s) viviendo aquí. Quedarán sin hogar.</p>`;
         }
     }
     if (Array.isArray(construccion.empleados)) {
         const num = construccion.empleados.length;
         if (num > 0) {
-            mensajeCiudadanos += `<p style="color:#f08080;margin-top:8px">⚠️ Hay ${num} ciudadano(s) empleado(s) aquí. Quedarán sin trabajo.</p>`;
+            mensajeCiudadanos += `<p class="construct-modal-alerta">⚠️ Hay ${num} ciudadano(s) empleado(s) aquí. Quedarán sin trabajo.</p>`;
         }
     }
 
@@ -278,12 +292,16 @@ function mostrarConfirmacionDemolicion(construccion, col, row) {
     const btnCancelar = document.getElementById('modal-demolicion-cancelar');
     const btnConfirmar = document.getElementById('modal-demolicion-confirmar');
 
-    btnCerrar.onclick = () => modal.style.display = 'none';
-    btnCancelar.onclick = () => modal.style.display = 'none';
-    btnConfirmar.onclick = () => {
+    setSingleClickListener(btnCerrar, () => {
+        modal.style.display = 'none';
+    });
+    setSingleClickListener(btnCancelar, () => {
+        modal.style.display = 'none';
+    });
+    setSingleClickListener(btnConfirmar, () => {
         ejecutarDemolicion(construccion, col, row);
         modal.style.display = 'none';
-    };
+    });
 
     // Cerrar al hacer click fuera
     const cerrarAlClickFuera = (e) => {

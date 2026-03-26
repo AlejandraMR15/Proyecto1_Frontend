@@ -249,8 +249,14 @@ export function actualizarTooltipsRecursos() {
         if (consSpan) consSpan.textContent = consText + sufijo;
         if (balSpan) {
             balSpan.textContent = balText + sufijo;
-            // Cambiar color del balance según si es positivo o negativo
-            balSpan.style.color = balance > 0 ? '#4ade80' : balance < 0 ? '#ff6b6b' : '#fbbf24';
+            balSpan.classList.remove('tooltip-balance-pos', 'tooltip-balance-neg', 'tooltip-balance-neu');
+            if (balance > 0) {
+                balSpan.classList.add('tooltip-balance-pos');
+            } else if (balance < 0) {
+                balSpan.classList.add('tooltip-balance-neg');
+            } else {
+                balSpan.classList.add('tooltip-balance-neu');
+            }
         }
     });
 }

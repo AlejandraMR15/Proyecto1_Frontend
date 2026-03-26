@@ -93,6 +93,44 @@
     font-family: 'Inter', 'Segoe UI', system-ui, sans-serif !important;
 }
 
+.modal-titulo-game-over {
+    color: #ff4444;
+}
+
+.game-over-razon-box {
+    background: #1a2a38;
+    padding: 16px;
+    border-radius: 6px;
+    margin: 16px 0;
+    text-align: center;
+}
+
+.game-over-razon-label {
+    font-size: 11px;
+    color: #aaa;
+    margin: 0;
+}
+
+.game-over-razon-valor {
+    font-size: 13px;
+    color: #ff8888;
+    margin: 8px 0;
+    font-weight: 700;
+}
+
+.game-over-resumen-box {
+    background: #1a2a38;
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 16px;
+}
+
+.game-over-resumen-texto {
+    font-size: 9px;
+    color: #6878a8;
+    margin: 0;
+}
+
 /* ---- BOTONES ---- */
 .modal-opciones {
     display: flex;
@@ -314,6 +352,7 @@
 }
 
 #ranking-vacio-go {
+    display: none;
     text-align: center;
     color: #95b3c8;
     font-size: 0.58rem;
@@ -340,6 +379,7 @@
 }
 
 #ranking-vacio {
+    display: none;
     text-align: center;
     color: #7aaabf;
     font-size: 0.58rem;

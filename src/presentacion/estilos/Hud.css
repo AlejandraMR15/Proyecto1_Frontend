@@ -175,6 +175,18 @@ body.panel-noticias-abierto #hud-controles {
     font-weight: bold;
 }
 
+.tooltip-balance-val.tooltip-balance-pos {
+    color: #4ade80;
+}
+
+.tooltip-balance-val.tooltip-balance-neg {
+    color: #ff6b6b;
+}
+
+.tooltip-balance-val.tooltip-balance-neu {
+    color: #fbbf24;
+}
+
 /* ---- BOTONES CONTROL (esquina superior derecha) ---- */
 #hud-controles {
     position: fixed;

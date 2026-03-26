@@ -365,40 +365,42 @@ export default class Ciudad {
                     construccion = new Vias(100);
 
                 } else if (etiqueta === 'R1') {
-                    construccion = new Residencial(1000, ultimoId, 'Casa', 50, 5, 3, true, 4, []);
+                    construccion = new Residencial(1000, ultimoId, 'Casa', 1, 5, 3, true, 4, []);
 
                 } else if (etiqueta === 'R2') {
-                    construccion = new Residencial(3000, ultimoId, 'Apartamento', 100, 15, 10, true, 12, []);
+                    construccion = new Residencial(3000, ultimoId, 'Apartamento', 3, 15, 10, true, 12, []);
 
                 } else if (etiqueta === 'C1') {
-                    construccion = new Comercial(2000, ultimoId, 'Tienda', 80, 8, 0, true, 6, [], 500);
+                    construccion = new Comercial(2000, ultimoId, 'Tienda', 2, 8, 0, true, 6, [], 500);
 
                 } else if (etiqueta === 'C2') {
-                    construccion = new Comercial(8000, ultimoId, 'Centro Comercial', 200, 25, 0, true, 20, [], 2000);
+                    construccion = new Comercial(8000, ultimoId, 'Centro Comercial', 8, 25, 0, true, 20, [], 2000);
 
                 } else if (etiqueta === 'I1') {
-                    construccion = new Industrial(5000, ultimoId, 'Fábrica', 150, 20, 15, true, 15, [], 'fabrica', 800);
+                    construccion = new Industrial(5000, ultimoId, 'Fábrica', 5, 20, 15, true, 15, [], 'fabrica', 800);
 
                 } else if (etiqueta === 'I2') {
-                    construccion = new Industrial(3000, ultimoId, 'Granja', 100, 0, 10, true, 8, [], 'granja', 50);
+                    construccion = new Industrial(3000, ultimoId, 'Granja', 3, 0, 10, true, 8, [], 'granja', 50);
 
                 } else if (etiqueta === 'S1') {
-                    construccion = new Servicio(4000, ultimoId, 'Estación de Policía', 120, 15, 0, true, 'policia', 10, 5);
+                    construccion = new Servicio(4000, ultimoId, 'Estación de Policía', 4, 15, 0, true, 'policia', 10, 5);
 
                 } else if (etiqueta === 'S2') {
-                    construccion = new Servicio(4000, ultimoId, 'Estación de Bomberos', 120, 15, 0, true, 'bomberos', 10, 5);
+                    construccion = new Servicio(4000, ultimoId, 'Estación de Bomberos', 4, 15, 0, true, 'bomberos', 10, 5);
 
                 } else if (etiqueta === 'S3') {
-                    construccion = new Servicio(6000, ultimoId, 'Hospital', 200, 20, 10, true, 'hospital', 10, 7);
+                    construccion = new Servicio(6000, ultimoId, 'Hospital', 6, 20, 10, true, 'hospital', 10, 7);
 
                 } else if (etiqueta === 'U1') {
-                    construccion = new PlantasDeUtilidad(10000, ultimoId, 'Planta Eléctrica', 300, 0, 0, true, 'electrica', 200);
+                    construccion = new PlantasDeUtilidad(10000, ultimoId, 'Planta Eléctrica', 10, 0, 0, true, 'electrica', 200);
 
                 } else if (etiqueta === 'U2') {
-                    construccion = new PlantasDeUtilidad(8000, ultimoId, 'Planta de Agua', 250, 20, 0, true, 'agua', 150);
+                    construccion = new PlantasDeUtilidad(8000, ultimoId, 'Planta de Agua', 8, 20, 0, true, 'agua', 150);
 
                 } else if (etiqueta === 'P1') {
-                    construccion = new Parques(1500, 5);
+                    construccion = new Parques(1500, 5, 1);
+                } else if (etiqueta === 'r') {
+                    construccion = new Vias(100, 0);
                 }
 
                 // Agregar construcción a la lista y al mapa si fue creada
@@ -613,9 +615,9 @@ export default class Ciudad {
                     c.tipoDeServicio, c.felicidad, c.radio
                 );
             case 'Parques':
-                return new Parques(c.costo, c.felicidad);
+                return new Parques(c.costo, c.felicidad, c.costoMantenimiento ?? 0);
             case 'Vias':
-                return new Vias(c.costo);
+                return new Vias(c.costo, c.costoMantenimiento ?? 0);
             default:
                 console.warn(`Ciudad.fromJSON: tipo de construcción desconocido "${c.tipo}", se omite.`);
                 return null;

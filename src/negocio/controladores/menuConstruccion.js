@@ -24,67 +24,67 @@ const EDIFICIOS_CONFIG = {
     'res-001': {
         etiqueta: 'R1',
         label:    'Casa',
-        fabrica:  (id) => new Residencial(1000, id, 'Casa', 50, 5, 3, true, 4, [])
+        fabrica:  (id) => new Residencial(1000, id, 'Casa', 1, 5, 3, true, 4, [])
     },
     'res-002': {
         etiqueta: 'R2',
         label:    'Apartamento',
-        fabrica:  (id) => new Residencial(3000, id, 'Apartamento', 100, 15, 10, true, 12, [])
+        fabrica:  (id) => new Residencial(3000, id, 'Apartamento', 3, 15, 10, true, 12, [])
     },
     'com-001': {
         etiqueta: 'C1',
         label:    'Tienda',
-        fabrica:  (id) => new Comercial(2000, id, 'Tienda', 80, 8, 0, true, 6, [], 500)
+        fabrica:  (id) => new Comercial(2000, id, 'Tienda', 2, 8, 0, true, 6, [], 500)
     },
     'com-002': {
         etiqueta: 'C2',
         label:    'Centro Comercial',
-        fabrica:  (id) => new Comercial(8000, id, 'Centro Comercial', 200, 25, 0, true, 20, [], 2000)
+        fabrica:  (id) => new Comercial(8000, id, 'Centro Comercial', 8, 25, 0, true, 20, [], 2000)
     },
     'ind-001': {
         etiqueta: 'I1',
         label:    'Fábrica',
-        fabrica:  (id) => new Industrial(5000, id, 'Fábrica', 150, 20, 15, true, 15, [], 'fabrica', 800)
+        fabrica:  (id) => new Industrial(5000, id, 'Fábrica', 5, 20, 15, true, 15, [], 'fabrica', 800)
     },
     'ind-002': {
         etiqueta: 'I2',
         label:    'Granja',
-        fabrica:  (id) => new Industrial(3000, id, 'Granja', 100, 0, 10, true, 8, [], 'granja', 50)
+        fabrica:  (id) => new Industrial(3000, id, 'Granja', 3, 0, 10, true, 8, [], 'granja', 50)
     },
     'serv-001': {
         etiqueta: 'S1',
         label:    'Estación de Policía',
-        fabrica:  (id) => new Servicio(4000, id, 'Estación de Policía', 120, 15, 0, true, 'policia', 10, 5)
+        fabrica:  (id) => new Servicio(4000, id, 'Estación de Policía', 4, 15, 0, true, 'policia', 10, 5)
     },
     'serv-002': {
         etiqueta: 'S2',
         label:    'Estación de Bomberos',
-        fabrica:  (id) => new Servicio(4000, id, 'Estación de Bomberos', 120, 15, 0, true, 'bomberos', 10, 5)
+        fabrica:  (id) => new Servicio(4000, id, 'Estación de Bomberos', 4, 15, 0, true, 'bomberos', 10, 5)
     },
     'serv-003': {
         etiqueta: 'S3',
         label:    'Hospital',
-        fabrica:  (id) => new Servicio(6000, id, 'Hospital', 200, 20, 10, true, 'hospital', 10, 7)
+        fabrica:  (id) => new Servicio(6000, id, 'Hospital', 6, 20, 10, true, 'hospital', 10, 7)
     },
     'util-001': {
         etiqueta: 'U1',
         label:    'Planta Eléctrica',
-        fabrica:  (id) => new PlantasDeUtilidad(10000, id, 'Planta Eléctrica', 300, 0, 0, true, 'electrica', 200)
+        fabrica:  (id) => new PlantasDeUtilidad(10000, id, 'Planta Eléctrica', 10, 0, 0, true, 'electrica', 200)
     },
     'util-002': {
         etiqueta: 'U2',
         label:    'Planta de Agua',
-        fabrica:  (id) => new PlantasDeUtilidad(8000, id, 'Planta de Agua', 250, 20, 0, true, 'agua', 150)
+        fabrica:  (id) => new PlantasDeUtilidad(8000, id, 'Planta de Agua', 8, 20, 0, true, 'agua', 150)
     },
     'parque-001': {
         etiqueta: 'P1',
         label:    'Parque',
-        fabrica:  () => new Parques(1500, 5)
+        fabrica:  () => new Parques(1500, 5, 1)
     },
     'via-001': {
         etiqueta: 'r',
         label:    'Vía',
-        fabrica:  () => new Vias(100)
+        fabrica:  () => new Vias(100, 0)
     }
 };
  

@@ -211,7 +211,7 @@
         <button id="btn-zoom-in"  title="Acercar">+</button>
         <div id="zoom-label">100%</div>
         <button id="btn-zoom-out" title="Alejar">−</button>
-        <button id="btn-zoom-reset" title="Restablecer">⌂</button>
+        <button id="btn-zoom-reset" class="zoom-btn-reset" title="Restablecer">⌂</button>
     </div>
 
     <div id="tooltip"></div>
@@ -283,13 +283,13 @@
     <!-- ===== MODAL GAME OVER ===== -->
     <div id="modal-game-over" class="modal-overlay" data-visible="false">
         <div class="modal-caja">
-            <div class="modal-titulo" id="modal-game-over-titulo">🔴 GAME OVER</div>
-            <div id="modal-game-over-razon-container">
-                <p id="modal-game-over-razon-label">Razón:</p>
-                <p id="modal-game-over-razon">Dinero negativo</p>
+            <div class="modal-titulo modal-titulo-game-over">🔴 GAME OVER</div>
+            <div class="game-over-razon-box">
+                <p class="game-over-razon-label">Razón:</p>
+                <p id="modal-game-over-razon" class="game-over-razon-valor">Dinero negativo</p>
             </div>
-            <div id="modal-game-over-stats">
-                <p id="modal-game-over-info">
+            <div class="game-over-resumen-box">
+                <p class="game-over-resumen-texto">
                     Turno: <span id="modal-game-over-turno">0</span> | 
                     Puntuación: <span id="modal-game-over-score">0</span>
                 </p>
@@ -545,7 +545,7 @@
 
     <!-- Botón para abrir el panel de construcción -->
     <button id="sidebarTab" title="Abrir panel de construcción">
-        <span>🏗️</span>
+        <span class="sidebar-tab-icon">🏗️</span>
         <span>CONSTRUIR</span>
     </button>
 
@@ -575,7 +575,7 @@
     </div>
 
     <!-- Input de archivo oculto para importar ciudad JSON -->
-    <input type="file" id="input-importar-ciudad" accept=".json">
+    <input type="file" id="input-importar-ciudad" class="input-file-oculto" accept=".json">
 
     <script type="module" src="../../negocio/controladores/menuConstruccion.js"></script>
 
@@ -628,35 +628,35 @@
     <div id="notif-construccion"></div>
 
     <!-- ===== TEMPLATE: MODAL DE INFORMACIÓN DE EDIFICIO ===== -->
-    <div id="modal-info-edificio">
-        <div id="modal-info-header">
-            <h3 id="modal-info-titulo">Edificio</h3>
-            <button id="modal-cerrar">✕</button>
+    <div id="modal-info-edificio" class="construct-modal">
+        <div class="construct-modal-header">
+            <h3 class="construct-modal-title" id="modal-info-titulo">Edificio</h3>
+            <button id="modal-cerrar" class="construct-modal-close">✕</button>
         </div>
-        <table id="modal-info-tabla"></table>
-        <div id="modal-info-footer">
-            <button id="modal-info-demoler">
+        <table id="modal-info-tabla" class="construct-modal-table"></table>
+        <div class="construct-modal-actions">
+            <button id="modal-info-demoler" class="construct-btn-demoler">
                 🗑️ DEMOLER
             </button>
         </div>
     </div>
 
     <!-- ===== TEMPLATE: MODAL DE CONFIRMACIÓN DE DEMOLICIÓN ===== -->
-    <div id="modal-confirmar-demolicion">
-        <div id="modal-demolicion-header">
-            <h3 id="modal-demolicion-titulo">🗑️ ¿DEMOLER?</h3>
-            <button id="modal-demolicion-cerrar">✕</button>
+    <div id="modal-confirmar-demolicion" class="construct-modal construct-modal-demolicion">
+        <div class="construct-modal-header">
+            <h3 class="construct-modal-title construct-modal-title-danger" id="modal-demolicion-titulo">🗑️ ¿DEMOLER?</h3>
+            <button id="modal-demolicion-cerrar" class="construct-modal-close">✕</button>
         </div>
-        <div id="modal-demolicion-info-container">
-            <p id="modal-demolicion-ubicacion">Ubicación: (0, 0)</p>
-            <p id="modal-demolicion-reembolso">Recibirás $0 (50% del costo)</p>
+        <div class="construct-modal-warning-box">
+            <p class="construct-modal-ubicacion" id="modal-demolicion-ubicacion">Ubicación: (0, 0)</p>
+            <p class="construct-modal-reembolso" id="modal-demolicion-reembolso">Recibirás $0 (50% del costo)</p>
         </div>
         <div id="modal-demolicion-ciudadanos"></div>
-        <div id="modal-demolicion-footer">
-            <button id="modal-demolicion-confirmar">
+        <div class="construct-modal-actions">
+            <button id="modal-demolicion-confirmar" class="construct-btn-confirm-danger">
                 ✔ CONFIRMAR DEMOLICIÓN
             </button>
-            <button id="modal-demolicion-cancelar">
+            <button id="modal-demolicion-cancelar" class="construct-btn-cancel">
                 ✕ CANCELAR
             </button>
         </div>

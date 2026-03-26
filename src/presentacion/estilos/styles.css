@@ -50,6 +50,10 @@ html, body {
     color: #fff;
 }
 
+#btn-zoom-reset.zoom-btn-reset {
+    font-size: 0.75rem;
+}
+
 #zoom-label {
     text-align: center;
     font-size: 0.65rem;
@@ -173,3 +177,7 @@ html, body {
 }
 
 #tooltip.visible { opacity: 1; }
+
+.input-file-oculto {
+    display: none;
+}

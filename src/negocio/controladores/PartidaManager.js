@@ -195,7 +195,7 @@ export function abrirModalImportar() {
 export function procesarArchivoImportacion(archivo) {
     const reader = new FileReader();
 
-    reader.onload = function (e) {
+    reader.addEventListener('load', function (e) {
         try {
             const datos = JSON.parse(e.target.result);
 
@@ -248,16 +248,16 @@ export function procesarArchivoImportacion(archivo) {
             }
             console.error('[PartidaManager] Error al importar ciudad:', err);
         }
-    };
+    });
 
-    reader.onerror = function () {
+    reader.addEventListener('error', function () {
         const aviso = document.getElementById('importar-aviso-error');
         const texto = document.getElementById('importar-error-texto');
         if (aviso && texto) {
             texto.textContent = 'No se pudo leer el archivo.';
             aviso.dataset.visible = 'true';
         }
-    };
+    });
 
     reader.readAsText(archivo);
 }

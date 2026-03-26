@@ -465,6 +465,163 @@ body {
   text-orientation: mixed;
   line-height: 1;
 }
+
+.sidebar-tab-icon {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+#notif-construccion {
+  display: none;
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #0a1628;
+  border: 1px solid #2e7a94;
+  color: #a8dff0;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  z-index: 9999;
+  pointer-events: none;
+  transition: opacity 0.3s;
+  white-space: nowrap;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+}
+
+#notif-construccion.notif-construccion--error {
+  border-color: #e05555;
+  color: #f08080;
+}
+
+.construct-modal {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #0a1628;
+  border: 1px solid #2e7a94;
+  border-radius: 10px;
+  padding: 24px 28px;
+  z-index: 10000;
+  min-width: 280px;
+  max-width: 420px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.75);
+  color: #a8dff0;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+.construct-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.construct-modal-title {
+  font-size: 1rem;
+  color: #a8dff0;
+  margin: 0;
+}
+
+.construct-modal-close {
+  background: none;
+  border: none;
+  color: #4a9fb5;
+  font-size: 1.2rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+}
+
+.construct-modal-table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.construct-modal-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.construct-btn-demoler,
+.construct-btn-confirm-danger,
+.construct-btn-cancel {
+  flex: 1;
+  padding: 10px;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.construct-btn-demoler,
+.construct-btn-confirm-danger {
+  background: #e05555;
+  border: none;
+  color: #fff;
+  font-weight: 700;
+}
+
+.construct-btn-demoler {
+  font-size: 0.9rem;
+}
+
+.construct-btn-cancel {
+  background: #2a3a48;
+  border: 1px solid #2e7a94;
+  color: #a8dff0;
+}
+
+.construct-modal-demolicion {
+  border-width: 2px;
+  border-color: #e05555;
+  min-width: 320px;
+  max-width: 450px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.9);
+}
+
+.construct-modal-title-danger {
+  color: #f08080;
+}
+
+.construct-modal-warning-box {
+  background: #1a2a38;
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 16px;
+}
+
+.construct-modal-ubicacion {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.construct-modal-reembolso {
+  margin: 8px 0 0;
+  font-size: 0.9rem;
+  color: #2e7a94;
+}
+
+.construct-modal-row-label {
+  color: #4a9fb5;
+  padding: 5px 14px 5px 0;
+  white-space: nowrap;
+  font-size: 0.78rem;
+}
+
+.construct-modal-row-value {
+  color: #a8dff0;
+  padding: 5px 0;
+  font-size: 0.82rem;
+}
+
+.construct-modal-alerta {
+  color: #f08080;
+  margin-top: 8px;
+}
+
 /* ---- Ítem activo (edificio seleccionado para construir) ---- */
 .build-item--activo {
   background: var(--bg-item-active);

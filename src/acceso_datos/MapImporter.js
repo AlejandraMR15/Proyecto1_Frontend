@@ -66,7 +66,7 @@ export default class MapImporter {
 
             const reader = new FileReader();
 
-            reader.onload = (evento) => {
+            reader.addEventListener('load', (evento) => {
                 try {
                     const contenidoTXT = evento.target.result;
                     const resultado = this._parsearYValidarTXT(contenidoTXT);
@@ -75,11 +75,11 @@ export default class MapImporter {
                 } catch (error) {
                     reject(error);
                 }
-            };
+            });
 
-            reader.onerror = () => {
+            reader.addEventListener('error', () => {
                 reject(new Error('No se pudo leer el archivo.'));
-            };
+            });
 
             reader.readAsText(archivo);
         });

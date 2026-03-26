@@ -20,6 +20,7 @@
     <link rel="stylesheet" href="../estilos/ResponsiveTablet.css">
     <link rel="stylesheet" href="../estilos/ResponsiveMovilPortrait.css">
     <link rel="stylesheet" href="../estilos/ResponsiveMovilLandscape.css">
+    <link rel="stylesheet" href="../estilos/TemplatesToasts.css">
 </head>
 <body>
 
@@ -210,7 +211,7 @@
         <button id="btn-zoom-in"  title="Acercar">+</button>
         <div id="zoom-label">100%</div>
         <button id="btn-zoom-out" title="Alejar">−</button>
-        <button id="btn-zoom-reset" title="Restablecer" style="font-size:0.75rem">⌂</button>
+        <button id="btn-zoom-reset" title="Restablecer">⌂</button>
     </div>
 
     <div id="tooltip"></div>
@@ -282,13 +283,13 @@
     <!-- ===== MODAL GAME OVER ===== -->
     <div id="modal-game-over" class="modal-overlay" data-visible="false">
         <div class="modal-caja">
-            <div class="modal-titulo" style="color:#ff4444">🔴 GAME OVER</div>
-            <div style="background:#1a2a38;padding:16px;border-radius:6px;margin:16px 0;text-align:center">
-                <p style="font-size:11px;color:#aaa;margin:0">Razón:</p>
-                <p id="modal-game-over-razon" style="font-size:13px;color:#ff8888;margin:8px 0;font-weight:bold">Dinero negativo</p>
+            <div class="modal-titulo" id="modal-game-over-titulo">🔴 GAME OVER</div>
+            <div id="modal-game-over-razon-container">
+                <p id="modal-game-over-razon-label">Razón:</p>
+                <p id="modal-game-over-razon">Dinero negativo</p>
             </div>
-            <div style="background:#1a2a38;padding:12px;border-radius:6px;margin-bottom:16px">
-                <p style="font-size:9px;color:#6878a8;margin:0">
+            <div id="modal-game-over-stats">
+                <p id="modal-game-over-info">
                     Turno: <span id="modal-game-over-turno">0</span> | 
                     Puntuación: <span id="modal-game-over-score">0</span>
                 </p>
@@ -323,7 +324,7 @@
                     </thead>
                     <tbody id="ranking-tbody-go"></tbody>
                 </table>
-                <div id="ranking-vacio-go" style="display:none;">Sin partidas aún.</div>
+                <div id="ranking-vacio-go">Sin partidas aún.</div>
             </div>
             <div class="modal-opciones modal-opciones-go-ranking">
                 <button class="modal-btn modal-btn-peligro" id="btn-go-ranking-nueva-partida">🏙️ NUEVA PARTIDA</button>
@@ -354,7 +355,7 @@
                 </thead>
                 <tbody id="ranking-tbody"></tbody>
             </table>
-            <div id="ranking-vacio" style="display:none;">Sin partidas aún.</div>
+            <div id="ranking-vacio">Sin partidas aún.</div>
         </div>
         <div class="ranking-panel-footer">
             <button class="modal-btn modal-btn-peligro" id="btn-ranking-reiniciar">🗑 REINICIAR</button>
@@ -544,7 +545,7 @@
 
     <!-- Botón para abrir el panel de construcción -->
     <button id="sidebarTab" title="Abrir panel de construcción">
-        <span style="font-size:1.4rem;line-height:1">🏗️</span>
+        <span>🏗️</span>
         <span>CONSTRUIR</span>
     </button>
 
@@ -574,7 +575,7 @@
     </div>
 
     <!-- Input de archivo oculto para importar ciudad JSON -->
-    <input type="file" id="input-importar-ciudad" accept=".json" style="display:none">
+    <input type="file" id="input-importar-ciudad" accept=".json">
 
     <script type="module" src="../../negocio/controladores/menuConstruccion.js"></script>
 
@@ -624,38 +625,38 @@
     </section>
 
     <!-- ===== TEMPLATE: NOTIFICACIÓN DE CONSTRUCCIÓN ===== -->
-    <div id="notif-construccion" style="display:none;position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#0a1628;border:1px solid #2e7a94;color:#a8dff0;padding:10px 20px;border-radius:6px;font-size:0.82rem;z-index:9999;pointer-events:none;transition:opacity 0.3s;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,0.6)"></div>
+    <div id="notif-construccion"></div>
 
     <!-- ===== TEMPLATE: MODAL DE INFORMACIÓN DE EDIFICIO ===== -->
-    <div id="modal-info-edificio" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#0a1628;border:1px solid #2e7a94;border-radius:10px;padding:24px 28px;z-index:10000;min-width:280px;max-width:420px;box-shadow:0 8px 32px rgba(0,0,0,0.75);color:#a8dff0;font-family:Segoe UI,system-ui,sans-serif">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-            <h3 style="font-size:1rem;color:#a8dff0;margin:0" id="modal-info-titulo">Edificio</h3>
-            <button id="modal-cerrar" style="background:none;border:none;color:#4a9fb5;font-size:1.2rem;cursor:pointer;line-height:1;padding:0">✕</button>
+    <div id="modal-info-edificio">
+        <div id="modal-info-header">
+            <h3 id="modal-info-titulo">Edificio</h3>
+            <button id="modal-cerrar">✕</button>
         </div>
-        <table id="modal-info-tabla" style="border-collapse:collapse;width:100%"></table>
-        <div style="display:flex;gap:8px;margin-top:16px">
-            <button id="modal-info-demoler" style="flex:1;padding:10px;background:#e05555;border:none;color:#fff;cursor:pointer;border-radius:6px;font-weight:bold;font-size:0.9rem">
+        <table id="modal-info-tabla"></table>
+        <div id="modal-info-footer">
+            <button id="modal-info-demoler">
                 🗑️ DEMOLER
             </button>
         </div>
     </div>
 
     <!-- ===== TEMPLATE: MODAL DE CONFIRMACIÓN DE DEMOLICIÓN ===== -->
-    <div id="modal-confirmar-demolicion" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#0a1628;border:2px solid #e05555;border-radius:10px;padding:24px 28px;z-index:10000;min-width:320px;max-width:450px;box-shadow:0 8px 32px rgba(0,0,0,0.9);color:#a8dff0;font-family:Segoe UI,system-ui,sans-serif">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-            <h3 style="font-size:1rem;color:#f08080;margin:0" id="modal-demolicion-titulo">🗑️ ¿DEMOLER?</h3>
-            <button id="modal-demolicion-cerrar" style="background:none;border:none;color:#4a9fb5;font-size:1.2rem;cursor:pointer;line-height:1;padding:0">✕</button>
+    <div id="modal-confirmar-demolicion">
+        <div id="modal-demolicion-header">
+            <h3 id="modal-demolicion-titulo">🗑️ ¿DEMOLER?</h3>
+            <button id="modal-demolicion-cerrar">✕</button>
         </div>
-        <div style="background:#1a2a38;padding:12px;border-radius:6px;margin-bottom:16px">
-            <p style="margin:0;font-size:0.9rem" id="modal-demolicion-ubicacion">Ubicación: (0, 0)</p>
-            <p style="margin:8px 0 0 0;font-size:0.9rem;color:#2e7a94" id="modal-demolicion-reembolso">Recibirás $0 (50% del costo)</p>
+        <div id="modal-demolicion-info-container">
+            <p id="modal-demolicion-ubicacion">Ubicación: (0, 0)</p>
+            <p id="modal-demolicion-reembolso">Recibirás $0 (50% del costo)</p>
         </div>
         <div id="modal-demolicion-ciudadanos"></div>
-        <div style="display:flex;gap:8px;margin-top:16px">
-            <button id="modal-demolicion-confirmar" style="flex:1;padding:10px;background:#e05555;border:none;color:#fff;cursor:pointer;border-radius:6px;font-weight:bold">
+        <div id="modal-demolicion-footer">
+            <button id="modal-demolicion-confirmar">
                 ✔ CONFIRMAR DEMOLICIÓN
             </button>
-            <button id="modal-demolicion-cancelar" style="flex:1;padding:10px;background:#2a3a48;border:1px solid #2e7a94;color:#a8dff0;cursor:pointer;border-radius:6px">
+            <button id="modal-demolicion-cancelar">
                 ✕ CANCELAR
             </button>
         </div>

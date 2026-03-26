@@ -1,0 +1,264 @@
+/* ========================================
+   CIUDAD VIRTUAL — templates-toasts.css
+   Estilos para notificaciones, tooltips 
+   y modales inline (originalmente con style inline)
+   ======================================== */
+
+/* ======== ELEMENTOS CON DISPLAY:NONE ======== */
+#ranking-vacio,
+#ranking-vacio-go,
+#input-importar-ciudad {
+    display: none;
+}
+
+/* ---- NOTIFICACIÓN DE CONSTRUCCIÓN ---- */
+#notif-construccion {
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #0a1628;
+    border: 1px solid #2e7a94;
+    color: #a8dff0;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    z-index: 9999;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    white-space: nowrap;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+    display: none;
+}
+
+/* ---- MODAL DE INFORMACIÓN DE EDIFICIO ---- */
+#modal-info-edificio {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #0a1628;
+    border: 1px solid #2e7a94;
+    border-radius: 10px;
+    padding: 24px 28px;
+    z-index: 10000;
+    min-width: 280px;
+    max-width: 420px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.75);
+    color: #a8dff0;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    display: none;
+}
+
+#modal-info-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+#modal-info-titulo {
+    font-size: 1rem;
+    color: #a8dff0;
+    margin: 0;
+}
+
+#modal-cerrar {
+    background: none;
+    border: none;
+    color: #4a9fb5;
+    font-size: 1.2rem;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+}
+
+#modal-cerrar:hover {
+    color: #a8dff0;
+}
+
+#modal-info-tabla {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+#modal-info-footer {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+#modal-info-demoler {
+    flex: 1;
+    padding: 10px;
+    background: #e05555;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    transition: background 0.12s;
+}
+
+#modal-info-demoler:hover {
+    background: #ff6666;
+}
+
+/* ---- MODAL DE CONFIRMACIÓN DE DEMOLICIÓN ---- */
+#modal-confirmar-demolicion {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #0a1628;
+    border: 2px solid #e05555;
+    border-radius: 10px;
+    padding: 24px 28px;
+    z-index: 10000;
+    min-width: 320px;
+    max-width: 450px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.9);
+    color: #a8dff0;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    display: none;
+}
+
+#modal-demolicion-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+#modal-demolicion-titulo {
+    font-size: 1rem;
+    color: #f08080;
+    margin: 0;
+}
+
+#modal-demolicion-cerrar {
+    background: none;
+    border: none;
+    color: #4a9fb5;
+    font-size: 1.2rem;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+}
+
+#modal-demolicion-cerrar:hover {
+    color: #a8dff0;
+}
+
+#modal-demolicion-info-container {
+    background: #1a2a38;
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 16px;
+}
+
+#modal-demolicion-info-container p {
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+#modal-demolicion-ubicacion {
+    margin: 0;
+}
+
+#modal-demolicion-reembolso {
+    margin: 8px 0 0 0;
+    color: #2e7a94;
+}
+
+#modal-demolicion-ciudadanos {
+    margin-bottom: 16px;
+}
+
+#modal-demolicion-footer {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+#modal-demolicion-confirmar {
+    flex: 1;
+    padding: 10px;
+    background: #e05555;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    border-radius: 6px;
+    font-weight: bold;
+    transition: background 0.12s;
+}
+
+#modal-demolicion-confirmar:hover {
+    background: #ff6666;
+}
+
+#modal-demolicion-cancelar {
+    flex: 1;
+    padding: 10px;
+    background: #2a3a48;
+    border: 1px solid #2e7a94;
+    color: #a8dff0;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: background 0.12s;
+}
+
+#modal-demolicion-cancelar:hover {
+    background: #3a4a58;
+}
+
+/* ---- MODAL GAME OVER ---- */
+#modal-game-over-titulo {
+    color: #ff4444;
+}
+
+#modal-game-over-razon-container {
+    background: #1a2a38;
+    padding: 16px;
+    border-radius: 6px;
+    margin: 16px 0;
+    text-align: center;
+}
+
+#modal-game-over-razon-label {
+    font-size: 11px;
+    color: #aaa;
+    margin: 0;
+}
+
+#modal-game-over-razon {
+    font-size: 13px;
+    color: #ff8888;
+    margin: 8px 0;
+    font-weight: bold;
+}
+
+#modal-game-over-stats {
+    background: #1a2a38;
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 16px;
+}
+
+#modal-game-over-info {
+    font-size: 9px;
+    color: #6878a8;
+    margin: 0;
+}
+
+/* ---- SIDEBAR TAB ICON ---- */
+#sidebarTab span:first-child {
+    font-size: 1.4rem;
+    line-height: 1;
+}
+
+/* ---- ZOOM CONTROLS ---- */
+#btn-zoom-reset {
+    font-size: 0.75rem;
+}

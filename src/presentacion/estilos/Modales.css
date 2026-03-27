@@ -97,6 +97,31 @@
     color: #ff4444;
 }
 
+/* Emojis títulos modales (PASO 4) */
+.modal-titulo-pausa::before {
+    content: '⏸ ';
+}
+
+.modal-titulo-config::before {
+    content: '⚙ ';
+}
+
+.modal-titulo-finalizar::before {
+    content: '⚠ ';
+}
+
+.modal-titulo-game-over-emoji::before {
+    content: '🔴 ';
+}
+
+.modal-titulo-ranking::before {
+    content: '🏆 ';
+}
+
+.modal-titulo-importar::before {
+    content: '📥 ';
+}
+
 .game-over-razon-box {
     background: #1a2a38;
     padding: 16px;
@@ -197,6 +222,35 @@
     border-color: #cc6a6a;
 }
 
+/* Emojis botones modales (PASO 5) + font-size para visibility */
+.btn-reanudar::before,
+.btn-configuraciones::before,
+.btn-guardar-partida::before,
+.btn-exportar-ciudad::before,
+.btn-importar-ciudad::before,
+.btn-finalizar::before,
+.btn-cfg-guardar::before,
+.btn-cfg-cancelar::before,
+.btn-finalizar-confirmar::before,
+/* Estilos base heredados de emoji-variables.css */
+
+.btn-reanudar::before { content: '▶ '; }
+.btn-configuraciones::before { content: '⚙ '; }
+.btn-guardar-partida::before { content: '💾 '; }
+.btn-exportar-ciudad::before { content: '📤 '; }
+.btn-importar-ciudad::before { content: '📥 '; }
+.btn-finalizar::before { content: '✕ '; }
+.btn-cfg-guardar::before { content: '✔ '; }
+.btn-cfg-cancelar::before { content: '✕ '; }
+.btn-finalizar-confirmar::before { content: '✔ '; }
+.btn-finalizar-cancelar::before { content: '✕ '; }
+.btn-game-over-ranking::before { content: '🏆 '; }
+.btn-game-over-nueva::before { content: '🏙️ '; }
+.btn-go-ranking-nueva::before { content: '🏙️ '; }
+.btn-go-ranking-cerrar::before { content: '✕ '; }
+.btn-importar-confirmar::before { content: '📂 '; }
+.btn-importar-cancelar::before { content: '✕ '; }
+
 /* ---- IMPORTAR CIUDAD ---- */
 .importar-advertencia {
     color: #ff6b6b !important;
@@ -219,7 +273,10 @@
 .importar-error[data-visible="true"] {
     display: block;
 }
-
+/* Advertencia emoji (PASO 12) */
+.importar-advertencia-emoji::before {
+    content: '⚠️ ';
+}
 /* ---- CONFIGURACIONES ---- */
 .config-lista {
     display: flex;
@@ -305,6 +362,17 @@
 #ranking-tabla tbody tr.ranking-actual {
     background: #1a3a14;
     color: #a0e870;
+}
+
+/* ============================================================
+    MODAL DEMOLICIÓN - Emojis (PASO 11)
+    ============================================================ */
+.btn-demoler-modal-info::before {
+    content: '🗑️ ';
+}
+
+.construct-modal-title-demolicion::before {
+    content: '🗑️ ';
 }
 
 #ranking-tabla-go {

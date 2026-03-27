@@ -163,7 +163,7 @@ function mostrarInfoEdificio(construccion, col, row) {
         produccionPorTurno:        'Producción/turno',
         tipoDeUtilidad:            'Tipo de utilidad',
         tipoDeServicio:            'Tipo servicio',
-        felicidadAportada:         '😊 Felicidad aportada',
+        felicidadAportada:         'Felicidad aportada',
         radio:                     'Radio influencia (celdas)'
     };
  
@@ -317,7 +317,7 @@ function mostrarConfirmacionDemolicion(construccion, col, row) {
     const textoReembolso = `Recibirás $${reembolso} (50% del costo)`;
 
     // Actualizar contenido del modal
-    document.getElementById('modal-demolicion-titulo').textContent = `🗑️ ¿DEMOLER ${info.nombre.toUpperCase()}?`;
+    document.getElementById('modal-demolicion-titulo').textContent = `¿DEMOLER ${info.nombre.toUpperCase()}?`;
     document.getElementById('modal-demolicion-ubicacion').textContent = `Ubicación: (${col}, ${row})`;
     document.getElementById('modal-demolicion-reembolso').textContent = textoReembolso;
     document.getElementById('modal-demolicion-ciudadanos').innerHTML = mensajeCiudadanos;

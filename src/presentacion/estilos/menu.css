@@ -1,9 +1,19 @@
 /* ========================================
    CIUDAD VIRTUAL — Menú de inicio
-   menu.css
    ======================================== */
 
-/* Fondo base igual al juego */
+/* Variables de color — Tema */
+:root {
+    --text-normal: #a0cce0;
+    --text-secondary: #5a9abf;
+    --text-light: #c8e8f8;
+    --bg-button: #1a2838;
+    --bg-input: #0f1e2e;
+    --border-primary: #3d6b8a;
+    --border-disabled: #1a3050;
+}
+
+/* Incluye color de fondo si la imágen no se carga correctamente */
 .menu-body {
     display: flex;
     align-items: center;
@@ -11,8 +21,10 @@
     min-height: 100vh;
     background: #111b24;
     font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
-    color: #a0cce0;
+    color: var(--text-normal);
     overflow: auto;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 /* ---- Pantallas (una visible a la vez) ---- */
@@ -34,10 +46,6 @@
     background-attachment: fixed;
 }
 
-.pantalla::before {
-    content: none;
-}
-
 .pantalla.activa {
     display: flex;
 }
@@ -57,14 +65,14 @@
 .menu-titulo {
     font-size: 3rem;
     font-weight: 800;
-    color: #c8e8f8;
+    color: var(--text-light);
     letter-spacing: 0.06em;
     margin-bottom: 8px;
 }
 
 .menu-subtitulo {
     font-size: 1rem;
-    color: #5a9abf;
+    color: var(--text-secondary);
     margin-bottom: 48px;
     opacity: 0.8;
 }
@@ -81,9 +89,9 @@
     position: relative;
     width: 280px;
     padding: 16px 24px;
-    background: #1a2838;
-    border: 1px solid #3d6b8a;
-    color: #a0cce0;
+    background: var(--bg-button);
+    border: 1px solid var(--border-primary);
+    color: var(--text-normal);
     border-radius: 8px;
     font-size: 1rem;
     font-family: inherit;
@@ -96,22 +104,22 @@
 }
 
 .btn-menu:hover:not(:disabled) {
-    background: #3d6b8a;
+    background: var(--border-primary);
     color: #fff;
-    border-color: #a0cce0;
+    border-color: var(--text-normal);
 }
 
 .btn-menu:disabled {
     opacity: 0.4;
     cursor: not-allowed;
-    border-color: #1a3050;
+    border-color: var(--border-disabled);
 }
 
 /* Texto secundario pequeño dentro del botón */
 .btn-hint {
     font-size: 0.7rem;
     opacity: 0.7;
-    color: #5a9abf;
+    color: var(--text-secondary);
 }
 
 .btn-menu:hover:not(:disabled) .btn-hint {
@@ -124,8 +132,8 @@
     max-width: 520px;
     margin: 0 auto;
     padding: 40px 32px 48px;
-    background: #1a2838;
-    border: 1px solid #1a3050;
+    background: var(--bg-button);
+    border: 1px solid var(--border-disabled);
     border-radius: 12px;
     position: relative;
 }
@@ -133,7 +141,7 @@
 .btn-volver {
     background: none;
     border: none;
-    color: #5a9abf;
+    color: var(--text-secondary);
     font-size: 0.85rem;
     font-family: inherit;
     cursor: pointer;
@@ -143,12 +151,12 @@
     transition: color 0.15s;
 }
 
-.btn-volver:hover { color: #c8e8f8; }
+.btn-volver:hover { color: var(--text-light); }
 
 .form-titulo {
     font-size: 1.6rem;
     font-weight: 700;
-    color: #c8e8f8;
+    color: var(--text-light);
     margin-bottom: 28px;
 }
 
@@ -160,7 +168,7 @@
 .campo label {
     display: block;
     font-size: 0.82rem;
-    color: #5a9abf;
+    color: var(--text-secondary);
     margin-bottom: 6px;
     letter-spacing: 0.03em;
 }
@@ -169,10 +177,10 @@
 .campo input[type="number"] {
     width: 100%;
     padding: 10px 14px;
-    background: #0f1e2e;
-    border: 1px solid #3d6b8a;
+    background: var(--bg-input);
+    border: 1px solid var(--border-primary);
     border-radius: 6px;
-    color: #c8e8f8;
+    color: var(--text-light);
     font-size: 0.95rem;
     font-family: inherit;
     outline: none;
@@ -182,12 +190,12 @@
 
 .campo input[type="text"]:focus,
 .campo input[type="number"]:focus {
-    border-color: #a0cce0;
+    border-color: var(--text-normal);
 }
 
 .campo-hint {
     font-size: 0.72rem;
-    color: #3d6b8a;
+    color: var(--border-primary);
     margin-left: 8px;
 }
 
@@ -196,8 +204,6 @@
     color: #e05555;
     margin-top: 5px;
 }
-
-.campo-error.oculto { display: none; }
 
 /* ---- Slider del tamaño de mapa ---- */
 .slider-wrap {
@@ -209,7 +215,7 @@
 
 .slider-extremo {
     font-size: 0.78rem;
-    color: #5a9abf;
+    color: var(--text-secondary);
     min-width: 24px;
     text-align: center;
 }
@@ -219,7 +225,7 @@ input[type="range"] {
     -webkit-appearance: none;
     appearance: none;
     height: 4px;
-    background: #1a3050;
+    background: var(--border-disabled);
     border-radius: 2px;
     outline: none;
     cursor: pointer;
@@ -231,22 +237,22 @@ input[type="range"]::-webkit-slider-thumb {
     width: 18px;
     height: 18px;
     border-radius: 50%;
-    background: #3d6b8a;
-    border: 2px solid #a0cce0;
+    background: var(--border-primary);
+    border: 2px solid var(--text-normal);
     cursor: pointer;
     transition: background 0.15s;
 }
 
 input[type="range"]::-webkit-slider-thumb:hover {
-    background: #a0cce0;
+    background: var(--text-normal);
 }
 
 input[type="range"]::-moz-range-thumb {
     width: 18px;
     height: 18px;
     border-radius: 50%;
-    background: #3d6b8a;
-    border: 2px solid #a0cce0;
+    background: var(--border-primary);
+    border: 2px solid var(--text-normal);
     cursor: pointer;
 }
 
@@ -255,21 +261,13 @@ input[type="range"]::-moz-range-thumb {
     position: relative;
 }
 
-.ac-spinner {
-    font-size: 0.78rem;
-    color: #5a9abf;
-    padding: 6px 0;
-}
-
-.ac-spinner.oculto { display: none; }
-
 .ac-lista {
     position: absolute;
     top: calc(100% + 4px);
     left: 0;
     right: 0;
-    background: #0f1e2e;
-    border: 1px solid #3d6b8a;
+    background: var(--bg-input);
+    border: 1px solid var(--border-primary);
     border-radius: 6px;
     list-style: none;
     max-height: 200px;
@@ -279,24 +277,22 @@ input[type="range"]::-moz-range-thumb {
     padding: 4px 0;
 }
 
-.ac-lista.oculto { display: none; }
-
 .ac-lista li {
     padding: 9px 14px;
     font-size: 0.88rem;
-    color: #c8e8f8;
+    color: var(--text-light);
     cursor: pointer;
     transition: background 0.1s;
 }
 
 .ac-lista li:hover,
 .ac-lista li.ac-activo {
-    background: #1a3050;
+    background: var(--border-disabled);
     color: #fff;
 }
 
 .ac-lista li.ac-vacio {
-    color: #5a9abf;
+    color: var(--text-secondary);
     cursor: default;
     font-style: italic;
 }
@@ -308,19 +304,19 @@ input[type="range"]::-moz-range-thumb {
     padding: 14px;
     font-size: 1rem;
     font-weight: 600;
-    background: #1a3050;
-    border-color: #3d6b8a;
+    background: var(--border-disabled);
+    border-color: var(--border-primary);
 }
 
 .btn-crear:hover:not(:disabled) {
-    background: #3d6b8a;
+    background: var(--border-primary);
 }
 
 /* ---- Opciones de mapa (manual vs JSON) ---- */
 .label-opciones {
     display: block;
     font-size: 0.82rem;
-    color: #5a9abf;
+    color: var(--text-secondary);
     margin-bottom: 12px;
     letter-spacing: 0.03em;
 }
@@ -337,7 +333,7 @@ input[type="range"]::-moz-range-thumb {
     gap: 6px;
     cursor: pointer;
     font-size: 0.92rem;
-    color: #c8e8f8;
+    color: var(--text-light);
     user-select: none;
     transition: color 0.15s;
 }
@@ -350,17 +346,17 @@ input[type="range"]::-moz-range-thumb {
     cursor: pointer;
     width: 16px;
     height: 16px;
-    accent-color: #3d6b8a;
+    accent-color: var(--border-primary);
 }
 
 /* ---- File input para JSON ---- */
 .campo input[type="file"] {
     width: 100%;
     padding: 10px 14px;
-    background: #0f1e2e;
-    border: 1px solid #3d6b8a;
+    background: var(--bg-input);
+    border: 1px solid var(--border-primary);
     border-radius: 6px;
-    color: #c8e8f8;
+    color: var(--text-light);
     font-size: 0.95rem;
     font-family: inherit;
     outline: none;
@@ -370,8 +366,8 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .campo input[type="file"]::file-selector-button {
-    background: #3d6b8a;
-    color: #c8e8f8;
+    background: var(--border-primary);
+    color: var(--text-light);
     border: none;
     border-radius: 4px;
     padding: 6px 12px;
@@ -383,31 +379,27 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .campo input[type="file"]::file-selector-button:hover {
-    background: #a0cce0;
+    background: var(--text-normal);
     color: #1a2838;
 }
 
 .campo input[type="file"]:focus {
-    border-color: #a0cce0;
+    border-color: var(--text-normal);
 }
 
 /* ---- Información del archivo TXT cargado ---- */
 .txt-info {
     margin-top: 10px;
     padding: 10px 12px;
-    background: #0f1e2e;
-    border-left: 3px solid #3d6b8a;
+    background: var(--bg-input);
+    border-left: 3px solid var(--border-primary);
     border-radius: 4px;
-}
-
-.txt-info.oculto {
-    display: none;
 }
 
 .txt-info p {
     margin: 4px 0;
     font-size: 0.85rem;
-    color: #a0cce0;
+    color: var(--text-normal);
 }
 
 .txt-info p:first-child {
@@ -418,12 +410,7 @@ input[type="range"]::-moz-range-thumb {
     margin-bottom: 0;
 }
 
-/* ---- Corrección de scroll para menú en landscape/tablet ---- */
-body.menu-body {
-    overflow-y: auto;
-    overflow-x: hidden;
-}
-
+/* Permite que el menú sea responsive. Se adapta a pantallas pequeñas como celulares o tablets en modo horizontal. */
 @media (orientation: landscape) and (max-height: 700px) and (max-width: 1024px) {
     html {
         height: 100dvh;

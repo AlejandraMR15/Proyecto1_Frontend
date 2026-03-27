@@ -294,6 +294,19 @@ body.sidebar-cerrado #hud-perfil {
     color: #ffd700;
 }
 
+/* Emojis del panel perfil (PASO 1) */
+#perfil-nombre-ciudad::before {
+    content: '🏙️ ';
+}
+
+#perfil-alcalde::before {
+    content: '👤 ';
+}
+
+#perfil-puntuacion::before {
+    content: '⭐ ';
+}
+
 /* ---- PANEL BIENESTAR: felicidad, comida y ciudadanos (separado del perfil) ---- */
 #hud-bienestar {
     position: fixed;
@@ -342,12 +355,23 @@ body.sidebar-cerrado #hud-bienestar {
     justify-content: space-between;
 }
 
-.bienestar-icono {
-    font-size: 16px;
-    flex-shrink: 0;
+.bienestar-fila::before {
+    content: '';
     width: 20px;
     text-align: center;
+    font-size: 16px;
+    flex-shrink: 0;
 }
+
+/* Emojis bienestar (PASO 2) */
+/* Estilos base heredados de emoji-variables.css */
+
+.bienestar-felicidad::before { content: '😊'; }
+.bienestar-comida::before { content: '🍎'; }
+.bienestar-ciudadanos::before { content: '👥'; }
+.bienestar-empleados::before { content: '✓'; }
+.bienestar-desempleados::before { content: '✗'; }
+.bienestar-residenciales::before { content: '🏠'; }
 
 .bienestar-datos {
     display: flex;
@@ -526,6 +550,19 @@ body.sidebar-cerrado #hud-turno {
 
 .ranking-panel-header button:hover { color: #e8f0f7; }
 
+/* Emojis ranking panel (PASO 6) */
+.ranking-panel-titulo::before {
+    content: '🏆 ';
+}
+
+.btn-ranking-reiniciar::before {
+    content: '🗑 ';
+}
+
+.btn-ranking-exportar::before {
+    content: '⬇ ';
+}
+
 .ranking-panel-body {
     flex: 1;
     overflow-y: auto;
@@ -637,6 +674,11 @@ body.sidebar-cerrado #hud-turno {
     animation: guardando-pulso 1s ease-in-out infinite;
 }
 
+/* Emoji guardando (PASO 8) */
+.guardando-icono::before {
+    content: '💾';
+}
+
 @keyframes guardando-pulso {
     0%, 100% { opacity: 1; }
     50%       { opacity: 0.4; }
@@ -648,6 +690,32 @@ body.sidebar-cerrado #hud-turno {
 
 #hud-guardando.guardado #guardando-icono {
     animation: none;
+}
+
+/* ============================================================
+    ZOOM RESET BUTTON (PASO 11)
+    ============================================================ */
+.btn-zoom-reset-emoji::before {
+    content: '⌂';
+}
+
+/* ============================================================
+    SIDEBAR NOTICIAS ICON (PASO 11)
+    ============================================================ */
+.sidebar-icon-noticias::before {
+    content: '📰';
+}
+
+/* Flecha desglose estadísticas (PASO 12) */
+.hud-desglose-arrow::before {
+    content: '▼';
+}
+
+/* X botón cerrar ranking (PASO 13) */
+.btn-ranking-cerrar-x::before {
+    content: '✕';
+    font-size: 1.2rem;
+    line-height: 1;
 }
 
 /* ============================================================
@@ -740,6 +808,28 @@ body.sidebar-cerrado #hud-turno {
 
 .desglose-titulo-verde { color: #6acc7a; }
 .desglose-titulo-rojo  { color: #e87070; }
+
+/* Emojis desglose (PASO 3) */
+#hud-desglose-toggle::before {
+    content: '📊 ';
+    margin-right: 2px;
+}
+
+.desglose-puntos-base::before {
+    content: '📊 ';
+}
+
+.desglose-bonif::before {
+    content: '🎁 ';
+}
+
+.desglose-penal::before {
+    content: '⚠ ';
+}
+
+.desglose-total::before {
+    content: '📈 ';
+}
 
 /* ---- Filas de dato ---- */
 .desglose-fila {

@@ -54,7 +54,8 @@ body.sidebar-cerrado #btn-calcular-ruta {
 }
 
 /* Icono del botón */
-#btn-calcular-ruta .ruta-icono {
+#btn-calcular-ruta .ruta-icono::before {
+    content: '🗺️';
     font-size: 1.4rem;
     line-height: 1;
     filter: drop-shadow(1px 1px 0 rgba(0, 0, 0, 0.9));

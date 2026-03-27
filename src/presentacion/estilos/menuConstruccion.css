@@ -123,6 +123,17 @@ body {
   filter: drop-shadow(0 0 5px rgba(104, 104, 204, 0.8));
 }
 
+/* Emojis sidebar panel (PASO 7) */
+.sidebar-icon-construir::before {
+  content: '🏗️';
+}
+
+.btn-demolicion-sidebar::before {
+  content: '🚫 ';
+  margin-right: 4px;
+  font-size: 12px;
+}
+
 .sidebar-title {
   font-size: 12px;
   font-weight: 400;
@@ -148,6 +159,13 @@ body {
   box-shadow:
     inset 1px 1px 0 var(--border-hi),
     inset -1px -1px 0 var(--border-dk);
+}
+
+/* X cerrar sidebar (PASO 13) */
+.sidebar-close-x::before {
+  content: '✕';
+  font-size: 12px;
+  line-height: 1;
 }
 
 .sidebar-close:hover {
@@ -295,6 +313,33 @@ body {
   filter: drop-shadow(1px 1px 0 rgba(0, 0, 0, 0.9));
 }
 
+/* Emojis categorías sidebar (PASO 7) */
+.cat-icon-vias::before { content: '🛣️'; }
+.cat-icon-residencial::before { content: '🏠'; }
+.cat-icon-comercial::before { content: '🏪'; }
+.cat-icon-industrial::before { content: '🏭'; }
+.cat-icon-servicios::before { content: '🚒'; }
+.cat-icon-utilidades::before { content: '⚡'; }
+.cat-icon-parques::before { content: '🌳'; }
+
+/* Emojis construcciones individuales (PASO 10) */
+li[data-id="via-001"] .build-icon::before { content: '🛣️'; }
+li[data-id="res-001"] .build-icon::before { content: '🏠'; }
+li[data-id="res-002"] .build-icon::before { content: '🏢'; }
+li[data-id="com-001"] .build-icon::before { content: '🏪'; }
+li[data-id="com-002"] .build-icon::before { content: '🏬'; }
+li[data-id="ind-001"] .build-icon::before { content: '🏭'; }
+li[data-id="ind-002"] .build-icon::before { content: '🌾'; }
+li[data-id="serv-001"] .build-icon::before { content: '👮'; }
+li[data-id="serv-002"] .build-icon::before { content: '🚒'; }
+li[data-id="serv-003"] .build-icon::before { content: '🏥'; }
+li[data-id="util-001"] .build-icon::before { content: '⚡'; }
+li[data-id="util-002"] .build-icon::before { content: '💧'; }
+li[data-id="parque-001"] .build-icon::before { content: '🌳'; }
+
+/* Emoji de costo en cada construcción */
+.build-cost::before { content: var(--emoji-dinero) ' '; }
+
 .cat-name {
   flex: 1;
   transition: color var(--transition), text-shadow var(--transition);
@@ -304,6 +349,13 @@ body {
   font-size: 10px;
   color: var(--border-hi);
   transition: transform 0.12s steps(3);
+  line-height: 1;
+}
+
+/* Flechas expandir/contraer categorías (PASO 12) */
+.cat-arrow::before {
+  content: '▼';
+  font-size: 10px;
   line-height: 1;
 }
 
@@ -542,6 +594,11 @@ body {
   padding: 0;
 }
 
+/* X cerrar modal (PASO 13) */
+.construct-modal-close-x::before {
+  content: '✕';
+}
+
 .construct-modal-table {
   border-collapse: collapse;
   width: 100%;
@@ -572,6 +629,16 @@ body {
 
 .construct-btn-demoler {
   font-size: 0.9rem;
+}
+
+/* Estilos base heredados de emoji-variables.css */
+
+.construct-btn-confirm-danger::before {
+  content: '✔ ';
+}
+
+.construct-btn-cancel::before {
+  content: '✕ ';
 }
 
 .construct-btn-cancel {

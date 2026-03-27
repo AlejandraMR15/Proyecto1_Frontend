@@ -30,3 +30,28 @@
     border-color: #9f8a32;
     color: #f0de9a;
 }
+
+/* ============================================================
+   EMOJIS DE RECURSOS (Burbujas flotantes - GridRenderer.js)
+   ============================================================ */
+
+.icono-recurso::before {
+    font-size: 24px;
+    line-height: 1;
+}
+
+.icono-recurso-dinero::before {
+    content: '💵';
+}
+
+.icono-recurso-comida::before {
+    content: '🍎';
+}
+
+.icono-recurso-agua::before {
+    content: '💧';
+}
+
+.icono-recurso-produccion::before {
+    content: '📦';
+}

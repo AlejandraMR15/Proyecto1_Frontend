@@ -79,7 +79,7 @@ export function togglePausa() {
         if (window.movimientoCiudadanos) window.movimientoCiudadanos.detener();
         document.getElementById('viewport')?.classList.add('bloqueado');
         const titulo = modalPausa?.querySelector('.modal-titulo');
-        if (titulo) titulo.textContent = '⏸ JUEGO PAUSADO';
+        if (titulo) titulo.textContent = 'JUEGO PAUSADO';
         setModal(modalPausa, true);
 
     } else if (juego.EstadoDeJuego.estaEnPausa()) {
@@ -90,7 +90,7 @@ export function togglePausa() {
         btnPausa.classList.add('pausado');
         document.getElementById('viewport')?.classList.add('bloqueado');
         const titulo = modalPausa?.querySelector('.modal-titulo');
-        if (titulo) titulo.textContent = '🔴 GAME OVER';
+        if (titulo) titulo.textContent = 'GAME OVER';
         const btnReanudar = document.getElementById('btn-reanudar');
         if (btnReanudar) btnReanudar.style.display = 'none';
         setModal(modalPausa, true);
@@ -106,13 +106,13 @@ export function reanudarJuego() {
     if (juego.EstadoDeJuego.estadoActual === 'game_over') return;
 
     juego.reanudarJuego();
-    btnPausa.textContent = '⏸';
+    btnPausa.textContent = '';
     btnPausa.classList.remove('pausado');
     if (window.movimientoCiudadanos) window.movimientoCiudadanos.iniciar();
     document.getElementById('viewport')?.classList.remove('bloqueado');
 
     const titulo = modalPausa?.querySelector('.modal-titulo');
-    if (titulo) titulo.textContent = '⏸ JUEGO PAUSADO';
+    if (titulo) titulo.textContent = 'JUEGO PAUSADO';
     const btnReanudar = document.getElementById('btn-reanudar');
     if (btnReanudar) btnReanudar.style.display = '';
 

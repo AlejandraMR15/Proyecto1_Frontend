@@ -29,28 +29,29 @@ const PAIS_NOTICIAS = 'co';
  
 /**
  * Mapa de condición climática (descripción en inglés de OpenWeather)
- * a emoji representativo. Se hace match parcial (includes).
+ * a clase CSS para emoji representativo (centralizado en emoji-variables.css).
+ * Se hace match parcial (includes).
  */
 const ICONOS_CLIMA = [
-  { clave: 'thunderstorm',  icono: '⛈️' },
-  { clave: 'drizzle',       icono: '🌦️' },
-  { clave: 'rain',          icono: '🌧️' },
-  { clave: 'snow',          icono: '❄️' },
-  { clave: 'mist',          icono: '🌫️' },
-  { clave: 'fog',           icono: '🌫️' },
-  { clave: 'haze',          icono: '🌫️' },
-  { clave: 'smoke',         icono: '🌫️' },
-  { clave: 'dust',          icono: '🌫️' },
-  { clave: 'sand',          icono: '🌫️' },
-  { clave: 'ash',           icono: '🌫️' },
-  { clave: 'squall',        icono: '💨' },
-  { clave: 'tornado',       icono: '🌪️' },
-  { clave: 'clear',         icono: '☀️' },
-  { clave: 'few clouds',    icono: '🌤️' },
-  { clave: 'scattered',     icono: '⛅' },
-  { clave: 'broken',        icono: '🌥️' },
-  { clave: 'overcast',      icono: '☁️' },
-  { clave: 'clouds',        icono: '☁️' },
+  { clave: 'thunderstorm',  clase: 'icono-clima icono-clima-tormenta' },
+  { clave: 'drizzle',       clase: 'icono-clima icono-clima-llovizna' },
+  { clave: 'rain',          clase: 'icono-clima icono-clima-lluvia' },
+  { clave: 'snow',          clase: 'icono-clima icono-clima-nieve' },
+  { clave: 'mist',          clase: 'icono-clima icono-clima-niebla' },
+  { clave: 'fog',           clase: 'icono-clima icono-clima-niebla' },
+  { clave: 'haze',          clase: 'icono-clima icono-clima-niebla' },
+  { clave: 'smoke',         clase: 'icono-clima icono-clima-niebla' },
+  { clave: 'dust',          clase: 'icono-clima icono-clima-niebla' },
+  { clave: 'sand',          clase: 'icono-clima icono-clima-niebla' },
+  { clave: 'ash',           clase: 'icono-clima icono-clima-niebla' },
+  { clave: 'squall',        clase: 'icono-clima icono-clima-viento' },
+  { clave: 'tornado',       clase: 'icono-clima icono-clima-tornado' },
+  { clave: 'clear',         clase: 'icono-clima icono-clima-despejado' },
+  { clave: 'few clouds',    clase: 'icono-clima icono-clima-pocas-nubes' },
+  { clave: 'scattered',     clase: 'icono-clima icono-clima-disperso' },
+  { clave: 'broken',        clase: 'icono-clima icono-clima-nublado-roto' },
+  { clave: 'overcast',      clase: 'icono-clima icono-clima-nublado' },
+  { clave: 'clouds',        clase: 'icono-clima icono-clima-nublado' },
 ];
  
 /* ================================================================
@@ -58,14 +59,14 @@ const ICONOS_CLIMA = [
 ================================================================ */
  
 /**
- * Devuelve el emoji que mejor describe la condición climática dada.
+ * Devuelve la clase CSS que describe mejor la condición climática dada.
  * @param {string} condicion - descripción del clima (ej: "light rain")
- * @returns {string} emoji
+ * @returns {string} clase CSS con el icono del emoji
  */
 function obtenerIconoClima(condicion = '') {
   const lower = condicion.toLowerCase();
   const entrada = ICONOS_CLIMA.find(({ clave }) => lower.includes(clave));
-  return entrada ? entrada.icono : '🌡️';
+  return entrada ? entrada.clase : 'icono-clima icono-clima-termometro';
 }
  
 /**
@@ -261,12 +262,14 @@ const clima = (function () {
   /** Actualiza el ícono y la temperatura en el botón flotante */
   function renderizarBoton(datos) {
     if (!iconoEl || !tempEl) return;
-    const icono = obtenerIconoClima(datos.condicionClimatica);
+    const claseIcono = obtenerIconoClima(datos.condicionClimatica);
     const temp  = datos.temperatura !== null
       ? Math.round(datos.temperatura) + '°C'
       : '--°C';
  
-    iconoEl.textContent = icono;
+    // Limpiar clases de clima previas y agregar las nuevas
+    iconoEl.classList.remove(...Array.from(iconoEl.classList).filter(c => c.startsWith('icono-clima')));
+    iconoEl.classList.add(...claseIcono.split(' '));
     tempEl.textContent  = temp;
   }
  
@@ -274,7 +277,7 @@ const clima = (function () {
   function renderizarInfobox(datos) {
     if (!infoboxBody) return;
  
-    const icono     = obtenerIconoClima(datos.condicionClimatica);
+    const claseIcono = obtenerIconoClima(datos.condicionClimatica);
     const temp      = datos.temperatura !== null ? Math.round(datos.temperatura) + '°C' : '--';
     const condicion = capitalizar(traducirCondicionClimatica(datos.condicionClimatica)) || '--';
     const humedad   = datos.humedad     !== null ? datos.humedad + '%'      : '--';
@@ -289,7 +292,7 @@ const clima = (function () {
       </div>
       <div class="clima-fila">
         <span class="clima-fila-label">CONDICIÓN</span>
-        <span class="clima-fila-valor">${icono} ${condicion}</span>
+        <span class="clima-fila-valor"><span class="${claseIcono}"></span> ${condicion}</span>
       </div>
       <div class="clima-fila">
         <span class="clima-fila-label">TEMPERATURA</span>

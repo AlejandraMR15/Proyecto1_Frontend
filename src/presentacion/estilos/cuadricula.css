@@ -1,0 +1,183 @@
+/* ========================================
+   CIUDAD VIRTUAL — Cuadrícula Isométrica
+   styles.css — Base: reset, layout, grid
+   ======================================== */
+
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    background: #87ceeb;
+    overflow: hidden;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    color: #7ec8e3;
+}
+
+
+/* ---- ZOOM CONTROLS ---- */
+#zoom-controls {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    z-index: 200;
+}
+
+#zoom-controls button {
+    width: 36px;
+    height: 36px;
+    background: #0a1628;
+    border: 1px solid #2e7a94;
+    color: #7ec8e3;
+    border-radius: 6px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, color 0.15s;
+}
+
+#zoom-controls button:hover {
+    background: #2e7a94;
+    color: #fff;
+}
+
+#btn-zoom-reset.zoom-btn-reset {
+    font-size: 0.75rem;
+}
+
+#zoom-label {
+    text-align: center;
+    font-size: 0.65rem;
+    color: #4a9fb5;
+    padding: 2px 0;
+}
+
+/* ---- VIEWPORT ---- */
+#viewport {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    overflow: hidden;
+    cursor: grab;
+    user-select: none;
+}
+
+#viewport.dragging {
+    cursor: grabbing;
+}
+
+#viewport.bloqueado {
+    pointer-events: none;
+}
+
+/* ---- CANVAS WRAP (zoom + pan) ---- */
+#canvas-wrap {
+    position: absolute;
+    top: 0; left: 0;
+    transform-origin: 0 0;
+    will-change: transform;
+}
+
+/* ---- ESCENA ISO ---- */
+#iso-scene {
+    position: relative;
+    display: inline-block;
+    padding: 120px 180px 200px 180px;
+}
+
+/* ---- GRID ---- */
+#iso-grid {
+    position: relative;
+}
+
+/* ---- CUBO (SVG inline, sin skewY) ---- */
+.iso-cube {
+    position: absolute;
+    overflow: visible;
+    cursor: pointer;
+    /* pointer-events: all — el div está posicionado sobre poly-bottom exactamente,
+       así que el hit-test nativo del navegador ya es correcto. */
+    pointer-events: all;
+}
+
+.iso-cube svg {
+    overflow: visible;
+    display: block;
+    pointer-events: none;
+}
+
+/* El grid no necesita capturar eventos directamente */
+#iso-grid {
+    position: relative;
+}
+
+/* Hover controlado por JS via hit-test: solo poly-bottom baja a 50% opacidad */
+.iso-cube.hovered .poly-bottom {
+    fill-opacity: 0.5;
+}
+
+/* Las caras fantasma NUNCA se revelan */
+.iso-cube.hovered .poly-top,
+.iso-cube.hovered .poly-left,
+.iso-cube.hovered .poly-right {
+    fill-opacity: 0 !important;
+}
+
+.iso-cube.hovered {
+    z-index: 9999 !important;
+    filter: drop-shadow(0 0 5px rgba(150, 255, 100, 0.6));
+}
+
+/* ---- SELECTED: overlay CSS puro, sin tocar el SVG ---- */
+.iso-cube.selected::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(240, 208, 64, 0.45);
+    pointer-events: none;
+    /* Diamante isométrico exacto: cubre todo el div de poly-bottom */
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+}
+
+.iso-cube.selected {
+    filter: drop-shadow(0 0 8px rgba(240, 208, 64, 0.9));
+    z-index: 9999 !important;
+}
+
+/* ---- BLOQUE DE VOLUMEN (caras laterales decorativas del mapa) ---- */
+#iso-volume {
+    position: absolute;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* ---- TOOLTIP ---- */
+#tooltip {
+    position: fixed;
+    background: #071018;
+    border: 1px solid #2e7a94;
+    color: #a8dff0;
+    padding: 5px 11px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    pointer-events: none;
+    z-index: 9999;
+    white-space: nowrap;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.6);
+    opacity: 0;
+    transition: opacity 0.1s;
+}
+
+#tooltip.visible { opacity: 1; }
+
+.input-file-oculto {
+    display: none;
+}

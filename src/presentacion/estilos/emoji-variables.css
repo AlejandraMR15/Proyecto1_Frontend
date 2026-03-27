@@ -1,0 +1,95 @@
+/* ============================================================
+    EMOJI VARIABLES & BASE STYLES
+    ============================================================
+    
+    Centraliza todas las variables de emojis reutilizables y
+    estilos base comunes para pseudo-elementos ::before que 
+    generan emojis en todo el proyecto.
+    
+    VENTAJAS:
+    - Reutilización: Definir un emoji una sola vez, usarlo en múltiples lugares
+    - Consistencia: Garantiza que todos los emojis tengan el mismo font-size y line-height
+    - Mantenimiento: Cambiar un emoji es tan simple como editar esta variable
+    - Claridad: Documento central de referencia para todos los emojis del proyecto
+    
+    USO EN OTROS ARCHIVOS CSS:
+    - Hud.css: Emojis de paneles (perfiles, bienestar, ranking, etc.)
+    - menuConstruccion.css: Emojis de construcciones, sidebar
+    - Modales.css: Emojis de títulos y botones de modales
+    - Widgets.css: Emojis de clima, noticias
+    - rutas.css: Emoji de ruta
+    
+    ============================================================ */
+
+:root {
+    /* ---- EMOJIS REUTILIZABLES ---- */
+    --emoji-dinero: '💰';
+    --emoji-basura: '🗑️';
+    --emoji-prohibido: '🚫';
+    --emoji-confirmar: '✔';
+    --emoji-cancelar: '✕';
+    --emoji-martillo: '🔨';
+    --emoji-flecha-abajo: '▼';
+    --emoji-advertencia: '⚠️';
+    --emoji-guardando: '💾';
+    
+    /* ---- ESTILOS BASE PARA PSEUDO-ELEMENTOS CON EMOJIS ---- */
+    /* 
+       Applied to all ::before elements that render emojis.
+       Garantiza que los emojis se vean correctamente en todos los navegadores.
+    */
+    --emoji-font-size: inherit;
+    --emoji-line-height: 1;
+    --emoji-margin: 0;
+}
+
+/* ============================================================
+    PSEUDO-ELEMENTO BASE PARA EMOJIS
+    ============================================================
+    
+    Selector universal que aplica el estilo base a todos los
+    pseudo-elementos ::before que contienen emojis.
+    
+    Esto reduce redundancia: en lugar de repetir
+        font-size: inherit;
+        line-height: 1;
+    en 60+ selectores diferentes, lo definimos UNA sola vez aquí.
+    
+    ============================================================ */
+
+::before {
+    /* Base styles - solo se aplican el font-size y line-height si es necesario */
+    font-size: var(--emoji-font-size);
+    line-height: var(--emoji-line-height);
+}
+
+/* ============================================================
+    REFERENCIA DE EMOJIS POR ARCHIVO
+    ============================================================
+    
+    HUD.CSS (Emojis en paneles del HUD):
+    - PASO 1: Perfil panel (🏙️, 👤, ⭐)
+    - PASO 2: Bienestar (😊, 🍎, 👥, ✓, ✗, 🏠)
+    - PASO 3: Desglose (📊, 🎁, ⚠, 📈, ▼)
+    - PASO 6: Ranking (🏆, 🗑, ⬇)
+    - PASO 8: Guardando (💾)
+    - PASO 11: Zoom reset (🔄)
+    - PASO 13: X cerrar ranking (✕)
+    
+    MENUCONSTRUCCION.CSS (Emojis en panel de construcción):
+    - PASO 7: Sidebar categorías (🏗️, 🛣️, 🏠, etc.)
+    - PASO 12: Flechas categorías (▼) y costo (💰)
+    - PASO 13: X cerrar sidebar (✕)
+    
+    MODALES.CSS (Emojis en diálogos):
+    - PASO 4-5: Títulos modales (⏸, ⚙, ⚠, 🔴, 🏆, 📥)
+    - PASO 4-5: Botones modales (✔, ✕, etc.)
+    - PASO 11: Títulos demolición (🗑️)
+    
+    WIDGETS.CSS (Emojis en widgets):
+    - Clima (🌤️, 🌍, etc.) — Emojis centralizados
+    
+    RECOLECCIONBURBUJAS.CSS (Emojis en burbujas flotantes):
+    - Recursos (💵, 🍎, 💧, 📦) — Emojis de GridRenderer.js
+    
+    ============================================================ */

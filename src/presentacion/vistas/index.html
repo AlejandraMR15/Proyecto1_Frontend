@@ -7,6 +7,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- EMOJI VARIABLES & BASE STYLES (debe importarse PRIMERO) -->
+    <link rel="stylesheet" href="../estilos/emoji-variables.css">
     <link rel="stylesheet" href="../estilos/menuConstruccion.css">
     <link rel="stylesheet" href="../estilos/rutas.css">
     <link rel="stylesheet" href="../estilos/cuadricula.css">
@@ -29,7 +31,7 @@
             <span class="hud-recurso-icono">💰</span>
             <div class="hud-recurso-datos">
                 <span class="hud-recurso-label">DINERO</span>
-                <span class="hud-recurso-valor" id="val-dinero">$50.000</span>
+                <span class="hud-recurso-valor" id="val-dinero">—</span>
             </div>
             <div class="hud-recurso-tooltip" id="tooltip-dinero" data-resource-panel>
                 <div class="tooltip-item">Producción: <span class="tooltip-prod">+0</span></div>
@@ -76,53 +78,47 @@
 
     <!-- ===== PANEL PERFIL (esquina superior izquierda) ===== -->
     <div id="hud-perfil">
-        <div id="perfil-nombre-ciudad">🏙️ <span id="perfil-ciudad">Mi Ciudad</span></div>
-        <div id="perfil-alcalde">👤 <span id="perfil-alcalde-nombre">Alcalde</span></div>
-        <div id="perfil-puntuacion">⭐ <span id="perfil-score">0</span></div>
+        <div id="perfil-nombre-ciudad"><span id="perfil-ciudad">Mi Ciudad</span></div>
+        <div id="perfil-alcalde"><span id="perfil-alcalde-nombre">Alcalde</span></div>
+        <div id="perfil-puntuacion"><span id="perfil-score">0</span></div>
     </div>
 
     <!-- ===== PANEL BIENESTAR: felicidad, comida y ciudadanos (separado del perfil) ===== -->
     <div id="hud-bienestar">
-        <div class="bienestar-fila">
-            <span class="bienestar-icono">😊</span>
+        <div class="bienestar-fila bienestar-felicidad">
             <div class="bienestar-datos">
                 <span class="bienestar-label">FELICIDAD</span>
                 <span class="bienestar-valor" id="val-felicidad">0%</span>
             </div>
         </div>
-        <div class="bienestar-fila">
-            <span class="bienestar-icono">🍎</span>
+        <div class="bienestar-fila bienestar-comida">
             <div class="bienestar-datos">
                 <span class="bienestar-label">COMIDA</span>
-                <span class="bienestar-valor" id="val-comida">0 u</span>
+                <span class="bienestar-valor" id="val-comida">—</span>
             </div>
         </div>
-        <div class="bienestar-fila">
-            <span class="bienestar-icono">👥</span>
+        <div class="bienestar-fila bienestar-ciudadanos">
             <div class="bienestar-datos">
                 <span class="bienestar-label">CIUDADANOS</span>
-                <span class="bienestar-valor" id="val-ciudadanos">0</span>
+                <span class="bienestar-valor" id="val-ciudadanos">—</span>
             </div>
         </div>
-        <div class="bienestar-fila">
-            <span class="bienestar-icono">✓</span>
+        <div class="bienestar-fila bienestar-empleados">
             <div class="bienestar-datos">
                 <span class="bienestar-label">EMPLEADOS</span>
-                <span class="bienestar-valor" id="val-empleados">0</span>
+                <span class="bienestar-valor" id="val-empleados">—</span>
             </div>
         </div>
-        <div class="bienestar-fila">
-            <span class="bienestar-icono">✗</span>
+        <div class="bienestar-fila bienestar-desempleados">
             <div class="bienestar-datos">
                 <span class="bienestar-label">DESEMPLEADOS</span>
-                <span class="bienestar-valor" id="val-desempleados">0</span>
+                <span class="bienestar-valor" id="val-desempleados">—</span>
             </div>
         </div>
-        <div class="bienestar-fila">
-            <span class="bienestar-icono">🏠</span>
+        <div class="bienestar-fila bienestar-residenciales">
             <div class="bienestar-datos">
                 <span class="bienestar-label">VIVIENDAS</span>
-                <span class="bienestar-valor" id="val-residenciales">0</span>
+                <span class="bienestar-valor" id="val-residenciales">—</span>
             </div>
         </div>
     </div>
@@ -130,13 +126,13 @@
     <!-- ===== PANEL ESTADÍSTICAS DE PUNTUACIÓN ===== -->
     <div id="hud-desglose" data-open="false">
         <button id="hud-desglose-toggle" title="Ver estadísticas de puntuación">
-            <span>📊 ESTADÍSTICAS</span>
-            <span id="hud-desglose-arrow">▼</span>
+            <span>ESTADÍSTICAS</span>
+            <span id="hud-desglose-arrow" class="hud-desglose-arrow"></span>
         </button>
         <div id="hud-desglose-cuerpo">
             <!-- Puntos base -->
             <div class="desglose-seccion">
-                <div class="desglose-seccion-titulo">📊 PUNTOS BASE</div>
+                <div class="desglose-seccion-titulo desglose-puntos-base">PUNTOS BASE</div>
                 <div class="desglose-fila">
                     <span class="desglose-label">Población</span>
                     <span class="desglose-valor" id="dsg-poblacion">0</span>
@@ -168,17 +164,17 @@
             </div>
             <!-- Bonificaciones -->
             <div class="desglose-seccion">
-                <div class="desglose-seccion-titulo desglose-titulo-verde">🎁 BONIF. <span id="dsg-total-bonif">+0</span></div>
+                <div class="desglose-seccion-titulo desglose-titulo-verde desglose-bonif">BONIF. <span id="dsg-total-bonif">+0</span></div>
                 <div id="dsg-bonif-lista"></div>
             </div>
             <!-- Penalizaciones -->
             <div class="desglose-seccion">
-                <div class="desglose-seccion-titulo desglose-titulo-rojo">⚠ PENAL. <span id="dsg-total-penal">-0</span></div>
+                <div class="desglose-seccion-titulo desglose-titulo-rojo desglose-penal">PENAL. <span id="dsg-total-penal">-0</span></div>
                 <div id="dsg-penal-lista"></div>
             </div>
             <!-- Total -->
             <div class="desglose-total-wrap">
-                <span class="desglose-total-label">📈 TOTAL</span>
+                <span class="desglose-total-label desglose-total">TOTAL</span>
                 <span class="desglose-total-valor" id="dsg-total">0</span>
             </div>
         </div>
@@ -186,14 +182,14 @@
 
     <!-- ===== TIMER DE TURNO ===== -->
     <div id="hud-turno">
-        <div id="turno-numero">TURNO <span id="val-turno">0</span></div>
+        <div id="turno-numero">TURNO <span id="val-turno">—</span></div>
         <div id="turno-barra-wrap">
             <div id="turno-barra-fill"></div>
         </div>
         <div id="turno-tiempo">
-            <span id="val-tiempo-actual">0s</span>
+            <span id="val-tiempo-actual">—</span>
             <span class="turno-sep">/</span>
-            <span id="val-tiempo-total">10s</span>
+            <span id="val-tiempo-total">—</span>
         </div>
     </div>
 
@@ -210,7 +206,7 @@
         <button id="btn-zoom-in"  title="Acercar">+</button>
         <div id="zoom-label">100%</div>
         <button id="btn-zoom-out" title="Alejar">−</button>
-        <button id="btn-zoom-reset" class="zoom-btn-reset" title="Restablecer">⌂</button>
+        <button id="btn-zoom-reset" class="zoom-btn-reset btn-zoom-reset-emoji" title="Restablecer"></button>
     </div>
 
     <div id="tooltip"></div>
@@ -218,14 +214,14 @@
     <!-- ===== MODAL DE PAUSA ===== -->
     <div id="modal-pausa" class="modal-overlay" data-visible="false">
         <div class="modal-caja">
-            <div class="modal-titulo">⏸ JUEGO PAUSADO</div>
+            <div class="modal-titulo modal-titulo-pausa">JUEGO PAUSADO</div>
             <div class="modal-opciones">
-                <button class="modal-btn modal-btn-primario" id="btn-reanudar">▶ REANUDAR</button>
-                <button class="modal-btn" id="btn-configuraciones">⚙ CONFIGURACIONES</button>
-                <button class="modal-btn" id="btn-guardar-partida">💾 GUARDAR PARTIDA</button>
-                <button class="modal-btn" id="btn-exportar-ciudad">📤 EXPORTAR CIUDAD</button>
-                <button class="modal-btn" id="btn-importar-ciudad">📥 IMPORTAR CIUDAD</button>
-                <button class="modal-btn modal-btn-peligro" id="btn-finalizar">✕ FINALIZAR PARTIDA</button>
+                <button class="modal-btn modal-btn-primario btn-reanudar" id="btn-reanudar">REANUDAR</button>
+                <button class="modal-btn btn-configuraciones" id="btn-configuraciones">CONFIGURACIONES</button>
+                <button class="modal-btn btn-guardar-partida" id="btn-guardar-partida">GUARDAR PARTIDA</button>
+                <button class="modal-btn btn-exportar-ciudad" id="btn-exportar-ciudad">EXPORTAR CIUDAD</button>
+                <button class="modal-btn btn-importar-ciudad" id="btn-importar-ciudad">IMPORTAR CIUDAD</button>
+                <button class="modal-btn modal-btn-peligro btn-finalizar" id="btn-finalizar">FINALIZAR PARTIDA</button>
             </div>
         </div>
     </div>
@@ -233,7 +229,7 @@
     <!-- ===== MODAL DE CONFIGURACIONES ===== -->
     <div id="modal-config" class="modal-overlay" data-visible="false">
         <div class="modal-caja modal-caja-config">
-            <div class="modal-titulo">⚙ CONFIGURACIONES</div>
+            <div class="modal-titulo modal-titulo-config">CONFIGURACIONES</div>
             <div class="config-lista">
                 <div class="config-grupo">
                     <label class="config-label">Duración del turno (segundos)</label>
@@ -273,8 +269,8 @@
                 </div>
             </div>
             <div class="modal-opciones">
-                <button class="modal-btn modal-btn-primario" id="btn-cfg-guardar">✔ GUARDAR</button>
-                <button class="modal-btn" id="btn-cfg-cancelar">✕ CANCELAR</button>
+                <button class="modal-btn modal-btn-primario btn-cfg-guardar" id="btn-cfg-guardar">GUARDAR</button>
+                <button class="modal-btn btn-cfg-cancelar" id="btn-cfg-cancelar">CANCELAR</button>
             </div>
         </div>
     </div>
@@ -282,11 +278,11 @@
     <!-- ===== MODAL FINALIZAR PARTIDA ===== -->
     <div id="modal-finalizar" class="modal-overlay" data-visible="false">
         <div class="modal-caja">
-            <div class="modal-titulo">⚠ FINALIZAR PARTIDA</div>
+            <div class="modal-titulo modal-titulo-finalizar">FINALIZAR PARTIDA</div>
             <p class="modal-texto">¿Deseas finalizar la partida? El puntaje actual se guardará en el ranking.</p>
             <div class="modal-opciones">
-                <button class="modal-btn modal-btn-peligro" id="btn-finalizar-confirmar">✔ CONFIRMAR</button>
-                <button class="modal-btn" id="btn-finalizar-cancelar">✕ CANCELAR</button>
+                <button class="modal-btn modal-btn-peligro btn-finalizar-confirmar" id="btn-finalizar-confirmar">CONFIRMAR</button>
+                <button class="modal-btn btn-finalizar-cancelar" id="btn-finalizar-cancelar">CANCELAR</button>
             </div>
         </div>
     </div>
@@ -294,7 +290,7 @@
     <!-- ===== MODAL GAME OVER ===== -->
     <div id="modal-game-over" class="modal-overlay" data-visible="false">
         <div class="modal-caja">
-            <div class="modal-titulo modal-titulo-game-over">🔴 GAME OVER</div>
+            <div class="modal-titulo modal-titulo-game-over modal-titulo-game-over-emoji">GAME OVER</div>
             <div class="game-over-razon-box">
                 <p class="game-over-razon-label">Razón:</p>
                 <p id="modal-game-over-razon" class="game-over-razon-valor">Dinero negativo</p>
@@ -306,8 +302,8 @@
                 </p>
             </div>
             <div class="modal-opciones">
-                <button class="modal-btn modal-btn-primario" id="btn-game-over-ranking">🏆 VER RANKING</button>
-                <button class="modal-btn modal-btn-peligro" id="btn-game-over-nueva-partida">🏙️ NUEVA PARTIDA</button>
+                <button class="modal-btn modal-btn-primario btn-game-over-ranking" id="btn-game-over-ranking">VER RANKING</button>
+                <button class="modal-btn modal-btn-peligro btn-game-over-nueva" id="btn-game-over-nueva-partida">NUEVA PARTIDA</button>
             </div>
         </div>
     </div>
@@ -316,7 +312,7 @@
     <div id="modal-ranking-gameover" class="modal-overlay" data-visible="false">
         <div class="modal-caja modal-caja-ranking">
             <div class="ranking-go-header">
-                <div class="modal-titulo ranking-go-titulo">🏆 Ranking Final</div>
+                <div class="modal-titulo ranking-go-titulo modal-titulo-ranking">Ranking Final</div>
                 <p class="ranking-go-subtitulo">Top de partidas registradas</p>
             </div>
             <div id="ranking-tabla-wrap">
@@ -338,8 +334,8 @@
                 <div id="ranking-vacio-go">Sin partidas aún.</div>
             </div>
             <div class="modal-opciones modal-opciones-go-ranking">
-                <button class="modal-btn modal-btn-peligro" id="btn-go-ranking-nueva-partida">🏙️ NUEVA PARTIDA</button>
-                <button class="modal-btn" id="btn-go-ranking-cerrar">✕ CERRAR</button>
+                <button class="modal-btn modal-btn-peligro btn-go-ranking-nueva" id="btn-go-ranking-nueva-partida">NUEVA PARTIDA</button>
+                <button class="modal-btn btn-go-ranking-cerrar" id="btn-go-ranking-cerrar">CERRAR</button>
             </div>
         </div>
     </div>
@@ -347,8 +343,8 @@
     <!-- ===== PANEL LATERAL DE RANKING ===== -->
     <aside id="panel-ranking" data-open="false">
         <div class="ranking-panel-header">
-            <span>🏆 RANKING</span>
-            <button id="btn-ranking-cerrar" title="Cerrar">✕</button>
+            <span class="ranking-panel-titulo">RANKING</span>
+            <button id="btn-ranking-cerrar" class="btn-ranking-cerrar-x" title="Cerrar"></button>
         </div>
         <div class="ranking-panel-body">
             <table id="ranking-tabla">
@@ -369,40 +365,37 @@
             <div id="ranking-vacio">Sin partidas aún.</div>
         </div>
         <div class="ranking-panel-footer">
-            <button class="modal-btn modal-btn-peligro" id="btn-ranking-reiniciar">🗑 REINICIAR</button>
-            <button class="modal-btn" id="btn-ranking-exportar">⬇ EXPORTAR</button>
+            <button class="modal-btn modal-btn-peligro btn-ranking-reiniciar" id="btn-ranking-reiniciar">REINICIAR</button>
+            <button class="modal-btn btn-ranking-exportar" id="btn-ranking-exportar">EXPORTAR</button>
         </div>
     </aside>
-
-    <script type="module" src="../../negocio/controladores/Hud.js"></script>
-    <script type="module" src="../../negocio/controladores/grid.js"></script>
 
     <!-- ===== PANEL LATERAL DE CONSTRUCCIÓN ===== -->
     <aside class="sidebar" id="sidebar" data-open="false">
         <div class="sidebar-header">
             <div class="sidebar-title-wrap">
-                <span class="sidebar-icon">🏗️</span>
+                <span class="sidebar-icon sidebar-icon-construir"></span>
                 <h2 class="sidebar-title">CONSTRUIR</h2>
             </div>
             <div class="sidebar-header-buttons">
-                <button class="sidebar-btn-demoler demolicion" id="btnDemolicion" title="Modo demolición (🚫)"></button>
-                <button class="sidebar-close" id="sidebarClose" title="Cerrar panel">✕</button>
+                <button class="sidebar-btn-demoler demolicion btn-demolicion-sidebar" id="btnDemolicion" title="Modo demolición"></button>
+                <button class="sidebar-close sidebar-close-x" id="sidebarClose" title="Cerrar panel"></button>
             </div>
         </div>
         <div class="sidebar-body">
             <!-- VÍAS — primero para ser siempre visible en landscape -->
             <div class="category" data-open="true">
                 <button class="cat-header">
-                    <span class="cat-icon">🛣️</span>
+                    <span class="cat-icon cat-icon-vias"></span>
                     <span class="cat-name">VÍAS</span>
-                    <span class="cat-arrow">▼</span>
+                    <span class="cat-arrow"></span>
                 </button>
                 <ul class="cat-items">
-                    <li class="build-item" data-id="via-001">
-                        <span class="build-icon">🛣️</span>
+                    <li class="build-item build-item-via" data-id="via-001">
+                        <span class="build-icon"></span>
                         <div class="build-info">
                             <span class="build-name">Vía</span>
-                            <span class="build-cost">💰 $100</span>
+                            <span class="build-cost">$100</span>
                         </div>
                     </li>
                 </ul>
@@ -410,23 +403,23 @@
             <!-- RESIDENCIAL -->
             <div class="category" data-open="true">
                 <button class="cat-header">
-                    <span class="cat-icon">🏠</span>
+                    <span class="cat-icon cat-icon-residencial"></span>
                     <span class="cat-name">RESIDENCIAL</span>
-                    <span class="cat-arrow">▼</span>
+                    <span class="cat-arrow"></span>
                 </button>
                 <ul class="cat-items">
                     <li class="build-item" data-id="res-001">
-                        <span class="build-icon">🏠</span>
+                        <span class="build-icon"></span>
                         <div class="build-info">
                             <span class="build-name">Casa</span>
-                            <span class="build-cost">💰 $1.000</span>
+                            <span class="build-cost">$1.000</span>
                         </div>
                     </li>
                     <li class="build-item" data-id="res-002">
-                        <span class="build-icon">🏢</span>
+                        <span class="build-icon"></span>
                         <div class="build-info">
                             <span class="build-name">Apartamento</span>
-                            <span class="build-cost">💰 $3.000</span>
+                            <span class="build-cost">$3.000</span>
                         </div>
                     </li>
                 </ul>
@@ -434,23 +427,23 @@
             <!-- COMERCIAL -->
             <div class="category" data-open="false">
                 <button class="cat-header">
-                    <span class="cat-icon">🏪</span>
+                    <span class="cat-icon cat-icon-comercial"></span>
                     <span class="cat-name">COMERCIAL</span>
-                    <span class="cat-arrow">▼</span>
+                    <span class="cat-arrow"></span>
                 </button>
                 <ul class="cat-items">
                     <li class="build-item" data-id="com-001">
-                        <span class="build-icon">🏪</span>
+                        <span class="build-icon"></span>
                         <div class="build-info">
                             <span class="build-name">Tienda</span>
-                            <span class="build-cost">💰 $2.000</span>
+                            <span class="build-cost">$2.000</span>
                         </div>
                     </li>
                     <li class="build-item" data-id="com-002">
-                        <span class="build-icon">🏬</span>
+                        <span class="build-icon"></span>
                         <div class="build-info">
                             <span class="build-name">C. Comercial</span>
-                            <span class="build-cost">💰 $8.000</span>
+                            <span class="build-cost">$8.000</span>
                         </div>
                     </li>
                 </ul>
@@ -458,23 +451,23 @@
             <!-- INDUSTRIAL -->
             <div class="category" data-open="false">
                 <button class="cat-header">
-                    <span class="cat-icon">🏭</span>
+                    <span class="cat-icon cat-icon-industrial"></span>
                     <span class="cat-name">INDUSTRIAL</span>
-                    <span class="cat-arrow">▼</span>
+                    <span class="cat-arrow"></span>
                 </button>
                 <ul class="cat-items">
                     <li class="build-item" data-id="ind-001">
-                        <span class="build-icon">🏭</span>
+                        <span class="build-icon"></span>
                         <div class="build-info">
                             <span class="build-name">Fábrica</span>
-                            <span class="build-cost">💰 $5.000</span>
+                            <span class="build-cost">$5.000</span>
                         </div>
                     </li>
                     <li class="build-item" data-id="ind-002">
-                        <span class="build-icon">🌾</span>
+                        <span class="build-icon"></span>
                         <div class="build-info">
                             <span class="build-name">Granja</span>
-                            <span class="build-cost">💰 $3.000</span>
+                            <span class="build-cost">$3.000</span>
                         </div>
                     </li>
                 </ul>
@@ -482,30 +475,30 @@
             <!-- SERVICIOS -->
             <div class="category" data-open="false">
                 <button class="cat-header">
-                    <span class="cat-icon">🚒</span>
+                    <span class="cat-icon cat-icon-servicios"></span>
                     <span class="cat-name">SERVICIOS</span>
-                    <span class="cat-arrow">▼</span>
+                    <span class="cat-arrow"></span>
                 </button>
                 <ul class="cat-items">
                     <li class="build-item" data-id="serv-001">
-                        <span class="build-icon">👮</span>
+                        <span class="build-icon"></span>
                         <div class="build-info">
                             <span class="build-name">Est. Policía</span>
-                            <span class="build-cost">💰 $4.000</span>
+                            <span class="build-cost">$4.000</span>
                         </div>
                     </li>
                     <li class="build-item" data-id="serv-002">
-                        <span class="build-icon">🚒</span>
+                        <span class="build-icon"></span>
                         <div class="build-info">
                             <span class="build-name">Est. Bomberos</span>
-                            <span class="build-cost">💰 $4.000</span>
+                            <span class="build-cost">$4.000</span>
                         </div>
                     </li>
                     <li class="build-item" data-id="serv-003">
-                        <span class="build-icon">🏥</span>
+                        <span class="build-icon"></span>
                         <div class="build-info">
                             <span class="build-name">Hospital</span>
-                            <span class="build-cost">💰 $6.000</span>
+                            <span class="build-cost">$6.000</span>
                         </div>
                     </li>
                 </ul>
@@ -513,23 +506,23 @@
             <!-- PLANTAS DE UTILIDAD -->
             <div class="category" data-open="false">
                 <button class="cat-header">
-                    <span class="cat-icon">⚡</span>
+                    <span class="cat-icon cat-icon-utilidades"></span>
                     <span class="cat-name">UTILIDADES</span>
-                    <span class="cat-arrow">▼</span>
+                    <span class="cat-arrow"></span>
                 </button>
                 <ul class="cat-items">
                     <li class="build-item" data-id="util-001">
-                        <span class="build-icon">⚡</span>
+                        <span class="build-icon"></span>
                         <div class="build-info">
                             <span class="build-name">Pl. Eléctrica</span>
-                            <span class="build-cost">💰 $10.000</span>
+                            <span class="build-cost">$10.000</span>
                         </div>
                     </li>
                     <li class="build-item" data-id="util-002">
-                        <span class="build-icon">💧</span>
+                        <span class="build-icon"></span>
                         <div class="build-info">
                             <span class="build-name">Pl. de Agua</span>
-                            <span class="build-cost">💰 $8.000</span>
+                            <span class="build-cost">$8.000</span>
                         </div>
                     </li>
                 </ul>
@@ -537,16 +530,16 @@
             <!-- PARQUES -->
             <div class="category" data-open="false">
                 <button class="cat-header">
-                    <span class="cat-icon">🌳</span>
+                    <span class="cat-icon cat-icon-parques"></span>
                     <span class="cat-name">PARQUES</span>
-                    <span class="cat-arrow">▼</span>
+                    <span class="cat-arrow"></span>
                 </button>
                 <ul class="cat-items">
                     <li class="build-item" data-id="parque-001">
-                        <span class="build-icon">🌳</span>
+                        <span class="build-icon"></span>
                         <div class="build-info">
                             <span class="build-name">Parque</span>
-                            <span class="build-cost">💰 $500</span>
+                            <span class="build-cost">$500</span>
                         </div>
                     </li>
                 </ul>
@@ -563,16 +556,16 @@
 
     <!-- Mensaje de guardado (aparece a la derecha del botón construir) -->
     <div id="hud-guardando" data-visible="false">
-        <span id="guardando-icono">💾</span>
+        <span id="guardando-icono" class="guardando-icono"></span>
         <span id="guardando-texto">Guardando...</span>
     </div>
 
     <!-- ===== MODAL IMPORTAR CIUDAD ===== -->
     <div id="modal-importar" class="modal-overlay" data-visible="false">
         <div class="modal-caja">
-            <div class="modal-titulo">📥 IMPORTAR CIUDAD</div>
+            <div class="modal-titulo modal-titulo-importar">IMPORTAR CIUDAD</div>
             <p class="modal-texto">
-                ⚠️ <strong class="importar-advertencia">Tu partida actual se perderá permanentemente.</strong>
+                <strong class="importar-advertencia-emoji"></strong><strong class="importar-advertencia">Tu partida actual se perderá permanentemente.</strong>
                 Esta acción no se puede deshacer. Si quieres conservarla,
                 cancela y usa <em>Exportar Ciudad</em> primero.
             </p>
@@ -580,8 +573,8 @@
                 <span id="importar-error-texto">Error al leer el archivo.</span>
             </div>
             <div class="modal-opciones">
-                <button class="modal-btn modal-btn-primario" id="btn-importar-confirmar">📂 SELECCIONAR ARCHIVO</button>
-                <button class="modal-btn" id="btn-importar-cancelar">✕ CANCELAR</button>
+                <button class="modal-btn modal-btn-primario btn-importar-confirmar" id="btn-importar-confirmar">SELECCIONAR ARCHIVO</button>
+                <button class="modal-btn btn-importar-cancelar" id="btn-importar-cancelar">CANCELAR</button>
             </div>
         </div>
     </div>
@@ -589,30 +582,26 @@
     <!-- Input de archivo oculto para importar ciudad JSON -->
     <input type="file" id="input-importar-ciudad" class="input-file-oculto" accept=".json">
 
-    <script type="module" src="../../negocio/controladores/menuConstruccion.js"></script>
-
     <!-- ===== BOTÓN CALCULAR RUTA ===== -->
     <button id="btn-calcular-ruta" data-activo="false" title="Calcular ruta entre dos edificios">
-        <span class="ruta-icono">🗺️</span>
+        <span class="ruta-icono"></span>
         <span>RUTA</span>
     </button>
-
-    <script type="module" src="../../negocio/logica/GestorRutas.js"></script>
 
     <!-- ===== WIDGETS CLIMA Y NOTICIAS ===== -->
     <div id="widgets-container">
         <button class="widget-btn" id="widget-clima-btn" title="Ver clima">
-            <span class="widget-clima-icono" id="widget-clima-icono">🌤️</span>
+            <span class="widget-clima-icono" id="widget-clima-icono"></span>
             <span class="widget-clima-temp" id="widget-clima-temp">--°C</span>
         </button>
         <button class="widget-btn" id="widget-noticias-btn" title="Ver noticias">
-            <span class="widget-noticias-icono">📰</span>
+            <span class="widget-noticias-icono"></span>
         </button>
     </div>
 
     <div class="clima-infobox" id="clima-infobox" data-visible="false">
         <div class="clima-infobox-header">
-            <span class="clima-infobox-titulo">🌍 CLIMA ACTUAL</span>
+            <span class="clima-infobox-titulo">CLIMA ACTUAL</span>
         </div>
         <div class="clima-infobox-body" id="clima-infobox-body">
             <div class="clima-loading">Cargando...</div>
@@ -622,7 +611,7 @@
     <aside class="noticias-panel" id="noticias-panel" data-open="false">
         <div class="sidebar-header">
             <div class="sidebar-title-wrap">
-                <span class="sidebar-icon">📰</span>
+                <span class="sidebar-icon sidebar-icon-noticias"></span>
                 <h2 class="sidebar-title">NOTICIAS</h2>
             </div>
         </div>
@@ -643,12 +632,12 @@
     <div id="modal-info-edificio" class="construct-modal">
         <div class="construct-modal-header">
             <h3 class="construct-modal-title" id="modal-info-titulo">Edificio</h3>
-            <button id="modal-cerrar" class="construct-modal-close">✕</button>
+            <button id="modal-cerrar" class="construct-modal-close construct-modal-close-x"></button>
         </div>
         <table id="modal-info-tabla" class="construct-modal-table"></table>
         <div class="construct-modal-actions">
-            <button id="modal-info-demoler" class="construct-btn-demoler">
-                🗑️ DEMOLER
+            <button id="modal-info-demoler" class="construct-btn-demoler btn-demoler-modal-info">
+                DEMOLER
             </button>
         </div>
     </div>
@@ -656,8 +645,8 @@
     <!-- ===== TEMPLATE: MODAL DE CONFIRMACIÓN DE DEMOLICIÓN ===== -->
     <div id="modal-confirmar-demolicion" class="construct-modal construct-modal-demolicion">
         <div class="construct-modal-header">
-            <h3 class="construct-modal-title construct-modal-title-danger" id="modal-demolicion-titulo">🗑️ ¿DEMOLER?</h3>
-            <button id="modal-demolicion-cerrar" class="construct-modal-close">✕</button>
+            <h3 class="construct-modal-title construct-modal-title-danger construct-modal-title-demolicion" id="modal-demolicion-titulo">¿DEMOLER?</h3>
+            <button id="modal-demolicion-cerrar" class="construct-modal-close construct-modal-close-x"></button>
         </div>
         <div class="construct-modal-warning-box">
             <p class="construct-modal-ubicacion" id="modal-demolicion-ubicacion">Ubicación: (0, 0)</p>
@@ -666,14 +655,19 @@
         <div id="modal-demolicion-ciudadanos"></div>
         <div class="construct-modal-actions">
             <button id="modal-demolicion-confirmar" class="construct-btn-confirm-danger">
-                ✔ CONFIRMAR DEMOLICIÓN
+                CONFIRMAR DEMOLICIÓN
             </button>
             <button id="modal-demolicion-cancelar" class="construct-btn-cancel">
-                ✕ CANCELAR
+                CANCELAR
             </button>
         </div>
     </div>
 
+    <!-- ===== SCRIPTS (consolidados al final) ===== -->
+    <script type="module" src="../../negocio/controladores/Hud.js"></script>
+    <script type="module" src="../../negocio/controladores/grid.js"></script>
+    <script type="module" src="../../negocio/controladores/menuConstruccion.js"></script>
+    <script type="module" src="../../negocio/logica/GestorRutas.js"></script>
     <script type="module" src="../../negocio/controladores/WidgetsInfo.js"></script>
 </body>
 </html>

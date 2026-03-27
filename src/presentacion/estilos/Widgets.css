@@ -56,9 +56,9 @@
   transform: translate(2px, 2px);
 }
 
-/* Icono grande del botón clima */
-.widget-clima-icono {
-  font-size: 22px;
+/* Icono grande del botón clima — dinámico según clima actual */
+.widget-clima-icono::before {
+  font-size: 36px;
   line-height: 1;
   filter: drop-shadow(1px 1px 0 rgba(0,0,0,0.9));
 }
@@ -73,10 +73,72 @@
 }
 
 /* Icono del botón noticias */
-.widget-noticias-icono {
+.widget-noticias-icono::before {
+  content: '📰';
   font-size: 26px;
   line-height: 1;
   filter: drop-shadow(1px 1px 0 rgba(0,0,0,0.9));
+}
+
+/* ============================================================
+   EMOJIS DE CLIMA (Widgets.js)
+   ============================================================ */
+
+.icono-clima::before {
+  font-size: inherit;
+  line-height: 1;
+}
+
+.icono-clima-tormenta::before {
+  content: '⛈️';
+}
+
+.icono-clima-llovizna::before {
+  content: '🌦️';
+}
+
+.icono-clima-lluvia::before {
+  content: '🌧️';
+}
+
+.icono-clima-nieve::before {
+  content: '❄️';
+}
+
+.icono-clima-niebla::before {
+  content: '🌫️';
+}
+
+.icono-clima-viento::before {
+  content: '💨';
+}
+
+.icono-clima-tornado::before {
+  content: '🌪️';
+}
+
+.icono-clima-despejado::before {
+  content: '☀️';
+}
+
+.icono-clima-pocas-nubes::before {
+  content: '🌤️';
+}
+
+.icono-clima-disperso::before {
+  content: '⛅';
+}
+
+.icono-clima-nublado-roto::before {
+  content: '🌥️';
+}
+
+.icono-clima-nublado::before {
+  content: '☁️';
+}
+
+.icono-clima-termometro::before {
+  content: '🌡️';
 }
 
 /* ============================================================
@@ -148,6 +210,10 @@
   padding: 8px 10px;
   background: var(--bg-header);
   border-bottom: 3px solid var(--border);
+}
+
+.clima-infobox-titulo::before {
+  content: '🌍 ';
 }
 
 .clima-infobox-titulo {

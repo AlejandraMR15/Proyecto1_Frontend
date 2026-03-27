@@ -691,16 +691,15 @@ export default class GridRenderer {
             return;
         }
 
-        // Mapeo de tipos de recurso a emojis
-        const iconos = {
-            'dinero': '💵',
-            'comida': '🍎',
-            'electricidad': '⚡',
-            'agua': '💧',
-            'produccion': '📦'
+        // Mapeo de tipos de recurso a clases CSS de emojis
+        const iconoClases = {
+            'dinero': 'icono-recurso icono-recurso-dinero',
+            'comida': 'icono-recurso icono-recurso-comida',
+            'agua': 'icono-recurso icono-recurso-agua',
+            'produccion': 'icono-recurso icono-recurso-produccion'
         };
 
-        const icono = iconos[tipo] || '📦';
+        const claseIcono = iconoClases[tipo] || 'icono-recurso icono-recurso-produccion';
 
         // Obtener posición en pantalla usando el cubo DOM real.
         // Como el contenedor de burbujas es position:fixed en el body,
@@ -738,7 +737,10 @@ export default class GridRenderer {
             burbuja.appendChild(cantidad_span);
         }
 
-        burbuja.appendChild(document.createTextNode(icono));
+        // Crear span para el icono con la clase CSS correspondiente
+        const iconoSpan = document.createElement('span');
+        iconoSpan.className = claseIcono;
+        burbuja.appendChild(iconoSpan);
 
         this._burbujesEl.appendChild(burbuja);
 

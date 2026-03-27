@@ -3,7 +3,7 @@
  *
  * Responsabilidad única: gestión de modales del juego.
  *  - Toggle pausa / reanudar
- *  - Modal de configuraciones (leer y aplicar valores)
+ *  - Modal de configuraciones (LEER inputs y DELEGAR a ConfiguradorJuego)
  *  - Modal de finalizar partida
  *  - Detección y muestra del modal Game Over al cargar
  *  - Cerrar modales al hacer click en el overlay
@@ -13,11 +13,13 @@
  *  - guardarConMensaje, detenerTimerTurno, detenerAutosave (PartidaManager.js)
  *  - actualizarOAgregarEnRanking (RankingUI.js)
  *  - storage (PartidaManager.js)
+ *  - ConfiguradorJuego (ConfiguradorJuego.js) ← DELEGADO
  */
 
 import { timerEstado, actualizarTimerDOM, detenerTimerTurno } from './HudPanel.js';
 import { detenerAutosave, storage } from './PartidaManager.js';
 import { actualizarOAgregarEnRanking } from './RankingUi.js';
+import ConfiguradorJuego from './ConfiguradorJuego.js';
 
 /* ================================================================
    ESTADO INTERNO DE CONFIGURACIÓN
@@ -30,6 +32,9 @@ export const config = {
     comidaPorCiudadano:       1,
     beneficioServicio:        10,
     tasaCrecimiento:          3,
+    energiaActual:            0,
+    aguaActual:               0,
+    comidaActual:             0,
 };
 
 /* ================================================================
@@ -122,45 +127,95 @@ export function reanudarJuego() {
  * Abre el modal de configuraciones con los valores actuales.
  */
 function abrirConfig() {
+    const juego = window.juego;
+    
     setModal(modalPausa, false);
     setModal(modalConfig, true);
 
+    // Cargar valores actuales de consumo por ciudadano
     document.getElementById('cfg-duracion-turno').value     = timerEstado.duracionTurno;
     document.getElementById('cfg-agua-ciudadano').value     = config.aguaPorCiudadano;
     document.getElementById('cfg-elec-ciudadano').value     = config.electricidadPorCiudadano;
     document.getElementById('cfg-comida-ciudadano').value   = config.comidaPorCiudadano;
     document.getElementById('cfg-beneficio-servicio').value = config.beneficioServicio;
     document.getElementById('cfg-tasa-crecimiento').value   = config.tasaCrecimiento;
+    
+    // Cargar valores actuales de recursos totales desde la ciudad
+    if (juego?.ciudad?.recursos) {
+        config.energiaActual = juego.ciudad.recursos.electricidad;
+        config.aguaActual = juego.ciudad.recursos.agua;
+        config.comidaActual = juego.ciudad.recursos.comida;
+        
+        document.getElementById('cfg-energia-total').value = config.energiaActual;
+        document.getElementById('cfg-agua-total').value = config.aguaActual;
+        document.getElementById('cfg-comida-total').value = config.comidaActual;
+    }
 }
 
 /**
- * Lee los inputs, aplica los valores y cierra el modal de configuraciones.
+ * Lee los inputs, delega al ConfiguradorJuego, y cierra el modal de configuraciones.
  */
 function guardarConfig() {
     const juego = window.juego;
+    if (!juego) {
+        console.error("No hay juego disponible");
+        return;
+    }
 
+    // ===== LEER DEL DOM =====
     const nuevaDuracion = Math.max(5,
         parseInt(document.getElementById('cfg-duracion-turno').value) || 10);
+    const electricidadPorCiudadano = Math.max(0, parseInt(document.getElementById('cfg-elec-ciudadano').value) || 0);
+    const aguaPorCiudadano = Math.max(0, parseInt(document.getElementById('cfg-agua-ciudadano').value) || 0);
+    const comidaPorCiudadano = Math.max(0, parseInt(document.getElementById('cfg-comida-ciudadano').value) || 0);
+    const beneficioServicio = Math.max(1, parseInt(document.getElementById('cfg-beneficio-servicio').value) || 10);
+    const tasaCrecimiento = Math.min(3, Math.max(1, parseInt(document.getElementById('cfg-tasa-crecimiento').value) || 3));
+    const energiaTotal = Math.max(0, parseInt(document.getElementById('cfg-energia-total').value) || 0);
+    const aguaTotal = Math.max(0, parseInt(document.getElementById('cfg-agua-total').value) || 0);
+    const comidaTotal = Math.max(0, parseInt(document.getElementById('cfg-comida-total').value) || 0);
 
-    config.aguaPorCiudadano         = Math.max(0, parseInt(document.getElementById('cfg-agua-ciudadano').value)      || 0);
-    config.electricidadPorCiudadano = Math.max(0, parseInt(document.getElementById('cfg-elec-ciudadano').value)      || 0);
-    config.comidaPorCiudadano       = Math.max(0, parseInt(document.getElementById('cfg-comida-ciudadano').value)    || 0);
-    config.beneficioServicio        = Math.max(1, parseInt(document.getElementById('cfg-beneficio-servicio').value)  || 10);
-    config.tasaCrecimiento          = Math.min(3, Math.max(1,
-        parseInt(document.getElementById('cfg-tasa-crecimiento').value) || 3));
+    // ===== ACTUALIZAR OBJETO CONFIG Local =====
+    config.electricidadPorCiudadano = electricidadPorCiudadano;
+    config.aguaPorCiudadano = aguaPorCiudadano;
+    config.comidaPorCiudadano = comidaPorCiudadano;
+    config.beneficioServicio = beneficioServicio;
+    config.tasaCrecimiento = tasaCrecimiento;
 
+    // ===== DELEGAR AL CONFIGURADOR =====
+    const configurador = new ConfiguradorJuego();
+    configurador.aplicarTodas({
+        juego,
+        config,
+        nuevosValores: {
+            duracion: nuevaDuracion,
+            electricidadPorCiudadano,
+            aguaPorCiudadano,
+            comidaPorCiudadano,
+            energiaTotal,
+            aguaTotal,
+            comidaTotal,
+            beneficioServicio,
+            tasaCrecimiento
+        },
+        previosRecursos: {
+            energia: config.energiaActual,
+            agua: config.aguaActual,
+            comida: config.comidaActual
+        }
+    });
+
+    // ===== GUARDAR NUEVOS VALORES EN CONFIG =====
+    config.energiaActual = energiaTotal;
+    config.aguaActual = aguaTotal;
+    config.comidaActual = comidaTotal;
+
+    // ===== ACTUALIZAR UI (responsabilidad de ModalPausa) =====
     timerEstado.duracionTurno = nuevaDuracion;
-    if (juego?.SistemaDeTurnos) {
-        juego.SistemaDeTurnos.cambiarDuracion(nuevaDuracion * 1000);
-    }
     if (juego?.StorageManager) {
         juego.StorageManager.guardar('config-turno', { duracionTurno: nuevaDuracion });
     }
-    if (juego?.gestorCiudadanos) {
-        juego.gestorCiudadanos.tasaCrecimiento = config.tasaCrecimiento;
-    }
 
-    actualizarTimerDOM();
+    // ===== CERRAR MODAL =====
     setModal(modalConfig, false);
     setModal(modalPausa, true);
 }

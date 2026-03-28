@@ -696,10 +696,10 @@ export default class GridRenderer {
             'dinero': 'icono-recurso icono-recurso-dinero',
             'comida': 'icono-recurso icono-recurso-comida',
             'agua': 'icono-recurso icono-recurso-agua',
-            'produccion': 'icono-recurso icono-recurso-produccion'
+            'electricidad': 'icono-recurso icono-recurso-electricidad'
         };
 
-        const claseIcono = iconoClases[tipo] || 'icono-recurso icono-recurso-produccion';
+        const claseIcono = iconoClases[tipo] || 'icono-recurso icono-recurso-prohibido';
 
         // Obtener posición en pantalla usando el cubo DOM real.
         // Como el contenedor de burbujas es position:fixed en el body,
@@ -761,6 +761,41 @@ export default class GridRenderer {
         setTimeout(() => {
             burbuja.remove();
         }, 1800);
+    }
+
+    /**
+     * Visualiza la producción de un edificio individual mostrando burbujas de recursos.
+     * Encapsula la lógica de mostrar burbujas para cada tipo de recurso producido.
+     *
+     * @param {object} edificio - El edificio que produjo (debe tener _coordX y _coordY)
+     * @param {object} produccion - Objeto con dinero, electricidad, agua, comida
+     */
+    visualizarProduccionDeEdificio(edificio, produccion) {
+        if (!edificio || produccion === null || typeof produccion !== 'object') {
+            return;
+        }
+
+        if (edificio._coordX === undefined || edificio._coordY === undefined) {
+            console.warn('[GridRenderer.visualizarProduccionDeEdificio] Coordenadas no definidas para:', edificio);
+            return;
+        }
+
+        const col = edificio._coordX;
+        const row = edificio._coordY;
+
+        // Mostrar burbuja para cada tipo de recurso producido
+        if (produccion.dinero > 0) {
+            this.mostrarBurbuja(col, row, 'dinero', produccion.dinero);
+        }
+        if (produccion.electricidad > 0) {
+            this.mostrarBurbuja(col, row, 'electricidad', produccion.electricidad);
+        }
+        if (produccion.agua > 0) {
+            this.mostrarBurbuja(col, row, 'agua', produccion.agua);
+        }
+        if (produccion.comida > 0) {
+            this.mostrarBurbuja(col, row, 'comida', produccion.comida);
+        }
     }
 }
 

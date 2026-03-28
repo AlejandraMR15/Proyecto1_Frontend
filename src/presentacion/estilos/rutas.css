@@ -54,11 +54,12 @@ body.sidebar-cerrado #btn-calcular-ruta {
 }
 
 /* Icono del botón */
-#btn-calcular-ruta .ruta-icono::before {
+#btn-calcular-ruta.ruta-icono-btn::before {
     content: '🗺️';
     font-size: 1.4rem;
     line-height: 1;
     filter: drop-shadow(1px 1px 0 rgba(0, 0, 0, 0.9));
+    margin-right: 2px;
 }
 
 /* Estado ACTIVO: borde y brillo cian para indicar que el modo está habilitado */

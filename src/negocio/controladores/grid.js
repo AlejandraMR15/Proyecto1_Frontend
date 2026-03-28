@@ -13,7 +13,7 @@
 import Mapa         from '../../modelos/Mapa.js';
 import GridRenderer  from './GridRenderer.js';
 import Juego         from '../logica/Juego.js';
-import MovimientoCiudadanos from '../logica/MovimientoCiudadanos.js';
+import MovimientoCiudadanos from '../controladores/MovimientoCiudadanos.js';
 
 (function () {
     "use strict";

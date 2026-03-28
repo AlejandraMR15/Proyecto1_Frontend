@@ -37,21 +37,24 @@
 
 .icono-recurso::before {
     font-size: 24px;
-    line-height: 1;
 }
 
 .icono-recurso-dinero::before {
-    content: '💵';
+    content: var(--emoji-dinero);
 }
 
 .icono-recurso-comida::before {
-    content: '🍎';
+    content: var(--emoji-comida);
 }
 
 .icono-recurso-agua::before {
-    content: '💧';
+    content: var(--emoji-agua);
 }
 
-.icono-recurso-produccion::before {
-    content: '📦';
+.icono-recurso-electricidad::before {
+    content: var(--emoji-electricidad);
+}
+
+.icono-recurso-prohibido::before {
+    content: var(--emoji-prohibido);
 }

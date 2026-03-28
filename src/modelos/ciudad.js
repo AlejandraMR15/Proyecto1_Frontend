@@ -194,8 +194,11 @@ export default class Ciudad {
      * 2. Luego otros edificios producen recursos.
      * 3. Finalmente todos los edificios aplican sus consumos.
      * @param {Ciudadano[]} [ciudadanos=[]]  - Array con todos los ciudadanos de la ciudad.
+     * @param {function} [onVisualizarProduccion]  - Callback opcional: (edificio, produccion) => void.
+     *                   Se llama para cada edificio tras calcular su producción.
+     *                   Permite mostrar visualizaciones sin acoplar Ciudad con la presentación.
      */
-    procesarTurno(ciudadanos = []) {
+    procesarTurno(ciudadanos = [], onVisualizarProduccion = null) {
         const produccionPendiente = {
             dinero: 0,
             electricidad: 0,
@@ -218,8 +221,10 @@ export default class Ciudad {
             if (produccion?.electricidad) produccionPlantasElectricidad += produccion.electricidad;
             if (produccion?.agua) produccionPlantasAgua += produccion.agua;
             
-            // Mostrar burbuja visual si produjo algo
-            this._mostrarBurbujaProduccion(planta, produccion);
+            // Invocar callback para visualización (si fue proporcionado)
+            if (onVisualizarProduccion) {
+                onVisualizarProduccion(planta, produccion);
+            }
         }
 
         // Aplicar producción de plantas inmediatamente (la planta de agua la necesita)
@@ -245,8 +250,10 @@ export default class Ciudad {
                 const produccion = edificio.procesarProduccion(this.recursos);
                 this._acumularProduccionPendiente(produccionPendiente, produccion);
                 
-                // Mostrar burbuja visual si produjo algo
-                this._mostrarBurbujaProduccion(edificio, produccion);
+                // Invocar callback para visualización (si fue proporcionado)
+                if (onVisualizarProduccion) {
+                    onVisualizarProduccion(edificio, produccion);
+                }
             }
         }
 
@@ -292,42 +299,7 @@ export default class Ciudad {
         }
     }
 
-    /**
-     * Muestra una burbuja visual para cada tipo de recurso producido.
-     * @private
-     * @param {object} edificio - El edificio que produjo
-     * @param {object} produccion - Objeto con dinero, electricidad, agua, comida
-     */
-    _mostrarBurbujaProduccion(edificio, produccion) {  
-        if (!window.gridRenderer) {
-            console.warn('[Ciudad._mostrarBurbujaProduccion] window.gridRenderer no existe');
-            return;
-        }
-        if (edificio._coordX === undefined || edificio._coordY === undefined) {
-            console.warn('[Ciudad._mostrarBurbujaProduccion] Coordenadas no definidas', { 
-                coordX: edificio._coordX, 
-                coordY: edificio._coordY 
-            });
-            return;
-        }
 
-        const col = edificio._coordX;
-        const row = edificio._coordY;
-
-        // Mapeo de tipos a nombres para mostrarBurbuja
-        if (produccion.dinero > 0) {
-            window.gridRenderer.mostrarBurbuja(col, row, 'dinero', produccion.dinero);
-        }
-        if (produccion.electricidad > 0) {
-            window.gridRenderer.mostrarBurbuja(col, row, 'electricidad', produccion.electricidad);
-        }
-        if (produccion.agua > 0) {
-            window.gridRenderer.mostrarBurbuja(col, row, 'agua', produccion.agua);
-        }
-        if (produccion.comida > 0) {
-            window.gridRenderer.mostrarBurbuja(col, row, 'produccion', produccion.comida);
-        }
-    }
 
     /**
      * Puebla la ciudad con construcciones basadas en la matriz del mapa.

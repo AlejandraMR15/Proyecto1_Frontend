@@ -32,6 +32,12 @@
     --emoji-flecha-abajo: '▼';
     --emoji-advertencia: '⚠️';
     --emoji-guardando: '💾';
+    --emoji-comida: '🍎';
+    --emoji-agua: '💧';
+    --emoji-electricidad: '⚡';
+    --emoji-pausa: '⏸';
+    --emoji-trofeo: '🏆';
+    --emoji-construir: '🏗️';
     
     /* ---- ESTILOS BASE PARA PSEUDO-ELEMENTOS CON EMOJIS ---- */
     /* 
@@ -90,6 +96,6 @@
     - Clima (🌤️, 🌍, etc.) — Emojis centralizados
     
     RECOLECCIONBURBUJAS.CSS (Emojis en burbujas flotantes):
-    - Recursos (💵, 🍎, 💧, 📦) — Emojis de GridRenderer.js
+    - Recursos (�, 🍎, 💧, 📦) — Emojis de GridRenderer.js (ahora usando variables centralizadas)
     
     ============================================================ */

@@ -28,7 +28,7 @@
     <!-- ===== RECURSOS FLOTANTES (arriba centro) ===== -->
     <div id="hud-recursos">
         <div class="hud-recurso" id="hud-dinero" data-resource role="button" tabindex="0" aria-expanded="false">
-            <span class="hud-recurso-icono">💰</span>
+            <span class="hud-recurso-icono hud-dinero-icon"></span>
             <div class="hud-recurso-datos">
                 <span class="hud-recurso-label">DINERO</span>
                 <span class="hud-recurso-valor" id="val-dinero">—</span>
@@ -42,7 +42,7 @@
         </div>
 
         <div class="hud-recurso" id="hud-electricidad" data-resource role="button" tabindex="0" aria-expanded="false">
-            <span class="hud-recurso-icono">⚡</span>
+            <span class="hud-recurso-icono hud-electricidad-icon"></span>
             <div class="hud-recurso-datos">
                 <span class="hud-recurso-label">ELECTRICIDAD</span>
                 <span class="hud-recurso-valor" id="val-electricidad">0</span>
@@ -56,7 +56,7 @@
         </div>
 
         <div class="hud-recurso" id="hud-agua" data-resource role="button" tabindex="0" aria-expanded="false">
-            <span class="hud-recurso-icono">💧</span>
+            <span class="hud-recurso-icono hud-agua-icon"></span>
             <div class="hud-recurso-datos">
                 <span class="hud-recurso-label">AGUA</span>
                 <span class="hud-recurso-valor" id="val-agua">0</span>
@@ -72,8 +72,8 @@
 
     <!-- ===== BOTONES CONTROL (esquina superior derecha) ===== -->
     <div id="hud-controles">
-        <button id="btn-pausa" title="Pausar / Reanudar (ESC)">⏸</button>
-        <button id="btn-ranking" title="Ver Ranking">🏆</button>
+        <button id="btn-pausa" class="btn-pausa-icon" title="Pausar / Reanudar (ESC)"></button>
+        <button id="btn-ranking" class="btn-ranking-icon" title="Ver Ranking"></button>
     </div>
 
     <!-- ===== PANEL PERFIL (esquina superior izquierda) ===== -->
@@ -550,7 +550,7 @@
 
     <!-- Botón para abrir el panel de construcción -->
     <button id="sidebarTab" title="Abrir panel de construcción">
-        <span class="sidebar-tab-icon">🏗️</span>
+        <span class="sidebar-tab-icon sidebar-tab-construir-icon"></span>
         <span>CONSTRUIR</span>
     </button>
 
@@ -583,8 +583,7 @@
     <input type="file" id="input-importar-ciudad" class="input-file-oculto" accept=".json">
 
     <!-- ===== BOTÓN CALCULAR RUTA ===== -->
-    <button id="btn-calcular-ruta" data-activo="false" title="Calcular ruta entre dos edificios">
-        <span class="ruta-icono"></span>
+    <button id="btn-calcular-ruta" class="ruta-icono-btn" data-activo="false" title="Calcular ruta entre dos edificios">
         <span>RUTA</span>
     </button>
 

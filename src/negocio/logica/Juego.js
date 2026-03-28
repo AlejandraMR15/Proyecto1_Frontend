@@ -137,16 +137,9 @@ export default class Juego {
      * 
      * @private
      * @param {object} produccionPendiente Producción del turno actual
+     * @param {object} recursoAnterior Estado de recursos ANTES de procesarTurno()
      */
-    _procesarRecursosDelTurno(produccionPendiente) {
-        // Guardar estado anterior de recursos antes de procesar
-        const recursoAnterior = {
-            dinero: this.ciudad.recursos.dinero,
-            electricidad: this.ciudad.recursos.electricidad,
-            agua: this.ciudad.recursos.agua,
-            comida: this.ciudad.recursos.comida
-        };
-
+    _procesarRecursosDelTurno(produccionPendiente, recursoAnterior) {
         // Estado actual después de procesarTurno
         const recursoActual = {
             dinero: this.ciudad.recursos.dinero,
@@ -216,12 +209,23 @@ export default class Juego {
         
         if (!this.ciudad) return;
 
-        // 1. Procesar turno en la ciudad y registrar producción
-        const produccionPendiente = this.ciudad.procesarTurno(this.gestorCiudadanos.ciudadanos);
+        // 0. Guardar estado de recursos ANTES de procesar el turno
+        const recursoAnterior = {
+            dinero: this.ciudad.recursos.dinero,
+            electricidad: this.ciudad.recursos.electricidad,
+            agua: this.ciudad.recursos.agua,
+            comida: this.ciudad.recursos.comida
+        };
+
+        // 1. Procesar turno en la ciudad con callback para visualización de burbujas
+        const onVisualizarProduccion = window.gridRenderer
+            ? (edificio, produccion) => window.gridRenderer.visualizarProduccionDeEdificio(edificio, produccion)
+            : null;
+        const produccionPendiente = this.ciudad.procesarTurno(this.gestorCiudadanos.ciudadanos, onVisualizarProduccion);
         this.recolectorBurbujas.registrarProduccionLote(produccionPendiente);
 
         // 2. Procesar recursos y guardar estadísticas para el HUD
-        this._procesarRecursosDelTurno(produccionPendiente);
+        this._procesarRecursosDelTurno(produccionPendiente, recursoAnterior);
 
         // 3. Validar que no haya game over por recursos negativos
         if (!this._validarRecursosYGameOver()) return;

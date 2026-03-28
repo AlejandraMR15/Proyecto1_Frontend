@@ -47,6 +47,19 @@ body.panel-noticias-abierto #hud-controles {
     flex-shrink: 0;
 }
 
+/* Emojis de recursos HUD (PASO 1 - dinero/electricidad/agua) */
+.hud-dinero-icon::before {
+    content: var(--emoji-dinero);
+}
+
+.hud-electricidad-icon::before {
+    content: var(--emoji-electricidad);
+}
+
+.hud-agua-icon::before {
+    content: var(--emoji-agua);
+}
+
 .hud-recurso-datos {
     display: flex;
     flex-direction: column;
@@ -249,6 +262,15 @@ body.panel-noticias-abierto #hud-controles {
     background: #1e3a14;
     border-color: #3d8a5a;
     color: #a0e870;
+}
+
+/* Emojis de botones de control (PASO 1 - pausa/ranking) */
+.btn-pausa-icon::before {
+    content: var(--emoji-pausa);
+}
+
+.btn-ranking-icon::before {
+    content: var(--emoji-trofeo);
 }
 
 /* ---- PANEL PERFIL (esquina superior izquierda) ---- */
@@ -498,6 +520,11 @@ body.sidebar-cerrado #hud-turno {
 #sidebarTab:active {
     transform: translate(2px, 2px);
     box-shadow: inset -3px -3px 0 #5a9abf44, inset 3px 3px 0 #0a1520;
+}
+
+/* Emoji del botón CONSTRUIR (PASO 7 - construir icon) */
+.sidebar-tab-construir-icon::before {
+    content: var(--emoji-construir);
 }
 
 /* ---- PANEL LATERAL RANKING (derecha, debajo del botón ranking) ---- */

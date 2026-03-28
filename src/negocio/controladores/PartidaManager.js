@@ -6,15 +6,20 @@
  *  - Autosave cada 30 segundos
  *  - Exportar ciudad a JSON descargable (HU-021)
  *  - Importar ciudad desde archivo JSON (HU-021)
+ *  - Finalizar partida: registra en ranking, limpia localStorage y vuelve al menú
+ *  - Ir al menú desde Game Over sin guardar
+ *  - Detectar si la partida cargada estaba en game_over
  *
  * Depende de:
  *  - timerEstado  (HudPanel.js) — para persistir duración del turno
  *  - detenerTimerTurno / detenerAutosave (propios o importados)
  *  - StorageManager (acceso_datos)
+ *  - actualizarOAgregarEnRanking (RankingUI.js)
  */
 
 import StorageManager from '../../acceso_datos/StorageManager.js';
 import { timerEstado, detenerTimerTurno } from './HudPanel.js';
+import { actualizarOAgregarEnRanking } from './RankingUi.js';
 
 export const storage = new StorageManager();
 
@@ -263,6 +268,64 @@ export function procesarArchivoImportacion(archivo) {
 }
 
 /* ================================================================
+   FINALIZAR PARTIDA
+================================================================ */
+
+/**
+ * Finaliza la partida: registra en ranking, limpia localStorage y vuelve al menú.
+ */
+export function finalizarPartida() {
+    const juego = window.juego;
+    if (juego) {
+        juego.pausarJuego();
+        actualizarOAgregarEnRanking();
+        juego.guardarPartida();
+    }
+    detenerTimerTurno();
+    detenerAutosave();
+    storage.eliminar('partida');
+    storage.eliminar('config-turno');
+    storage.eliminar('estado-juego');
+    window.location.href = '../vistas/menu.html';
+}
+
+/**
+ * Limpia localStorage y redirige al menú sin guardar.
+ * Usado desde la pantalla de Game Over.
+ */
+export function irAlMenuDesdeGameOver() {
+    detenerTimerTurno();
+    detenerAutosave();
+    storage.eliminar('partida');
+    storage.eliminar('config-turno');
+    storage.eliminar('estado-juego');
+    window.location.href = '../vistas/menu.html';
+}
+
+/* ================================================================
+   GAME OVER AL CARGAR
+================================================================ */
+
+/**
+ * Detecta si la partida guardada estaba en game_over y muestra el modal.
+ * Devuelve true si estaba en game_over (para que Hud.js no arranque el timer).
+ * @returns {boolean}
+ */
+export function detectarGameOverAlCargar() {
+    const juego = window.juego;
+    const estadoPersistido = juego.StorageManager.cargar('estado-juego');
+    if (estadoPersistido && estadoPersistido.esGameOver) {
+        juego.EstadoDeJuego.cambiarEstado('game_over');
+        setTimeout(() => {
+            if (window.movimientoCiudadanos) window.movimientoCiudadanos.detener();
+            juego._mostrarModalGameOver(estadoPersistido.razon || 'Desconocida');
+        }, 300);
+        return true;
+    }
+    return false;
+}
+
+/* ================================================================
    REGISTRAR EVENTOS DE BOTONES
 ================================================================ */
 
@@ -298,4 +361,17 @@ export function registrarEventosPartida() {
             if (archivo) procesarArchivoImportacion(archivo);
             e.target.value = '';
         });
+
+    // Modal finalizar
+    document.getElementById('btn-finalizar-confirmar')
+        ?.addEventListener('click', finalizarPartida);
+    document.getElementById('btn-finalizar-cancelar')
+        ?.addEventListener('click', () => {
+            setModal(document.getElementById('modal-finalizar'), false);
+            setModal(document.getElementById('modal-pausa'), true);
+        });
+
+    // Modal game over → nueva partida
+    document.getElementById('btn-game-over-nueva-partida')
+        ?.addEventListener('click', irAlMenuDesdeGameOver);
 }

@@ -72,7 +72,7 @@ function activarModoRuta() {
     modoRutaActivo = true;
     _actualizarBoton(true);
     _reiniciarSeleccion();
-    _mostrarNotificacionRuta('Modo ruta: selecciona el edificio de origen');
+    _mostrarToastRuta('Modo ruta: selecciona el edificio de origen');
 }
 
 /**
@@ -126,12 +126,12 @@ function manejarClickCelda(e) {
         origen = { col, row };
         cuboOrigen = _obtenerCubo(col, row);
         if (cuboOrigen) cuboOrigen.classList.add('ruta-origen');
-        _mostrarNotificacionRuta(`Origen: (${col}, ${row}) — ahora selecciona el destino`);
+        _mostrarToastRuta(`Origen: (${col}, ${row}) — ahora selecciona el destino`);
 
     } else {
         // ----- SEGUNDO CLICK: fijar destino y calcular -----
         if (origen.col === col && origen.row === row) {
-            _mostrarNotificacionRuta('⚠ El destino debe ser diferente al origen', 'error');
+            _mostrarToastRuta('⚠ El destino debe ser diferente al origen', 'error');
             return;
         }
 
@@ -170,23 +170,23 @@ async function _calcularYAnimarRuta(origen, destino) {
     };
 
     try {
-        _mostrarNotificacionRuta('⏳ Calculando ruta...');
+        _mostrarToastRuta('⏳ Calculando ruta...');
         const resultado = await apiDijkstra.calcularRuta(payload);
 
         const ruta = resultado?.route ?? [];
 
         if (ruta.length === 0) {
-            _mostrarNotificacionRuta('⚠ No existe ruta entre los puntos seleccionados', 'error');
+            _mostrarToastRuta('⚠ No existe ruta entre los puntos seleccionados', 'error');
             return;
         }
 
         _animarRuta(ruta);
         const celdasIntermedia = Math.max(0, ruta.length - 2);
-        _mostrarNotificacionRuta(`✔ Ruta encontrada: ${celdasIntermedia} celdas entre los edificios`);
+        _mostrarToastRuta(`✔ Ruta encontrada: ${celdasIntermedia} celdas entre los edificios`);
 
     } catch (err) {
         console.error('[GestorRutas] Error al calcular ruta:', err);
-        _mostrarNotificacionRuta(`✖ Error al calcular ruta: ${err.message}`, 'error');
+        _mostrarToastRuta(`✖ Error al calcular ruta: ${err.message}`, 'error');
     }
 }
 
@@ -271,23 +271,7 @@ function _actualizarBoton(activo) {
         : 'Calcular ruta entre dos edificios';
 }
 
-/**
- * Reutiliza la función de notificación del módulo de construcción si está
- * disponible; si no, hace console.log como fallback.
- *
- * @private
- * @param {string} mensaje
- * @param {'info'|'error'} [tipo='info']
- */
-function _mostrarNotificacionRuta(mensaje, tipo = 'info') {
-    // Intentar reutilizar el mismo sistema de notificaciones del sidebar
-    const evento = new CustomEvent('notificacion-ruta', {
-        bubbles: true,
-        detail: { mensaje, tipo }
-    });
-    document.dispatchEvent(evento);
-    console.debug('[GestorRutas]', mensaje);
-}
+
 
 /* ================================================================
    INIT
@@ -305,14 +289,6 @@ document.addEventListener('DOMContentLoaded', function () {
     /* ---- Escuchar clicks del grid para selección de origen / destino ---- */
     // Se suscribe a nivel de document para ser consistente con menuConstruccion.js
     document.addEventListener('celda-click', manejarClickCelda);
-
-    /* ---- Escuchar el evento de notificación para mostrarlo en el toast ---- */
-    document.addEventListener('notificacion-ruta', function (e) {
-        // Mostrar las notificaciones usando el mismo toast del sidebar de construcción
-        // La función mostrarNotificacion es local de menuConstruccion.js, así que
-        // disparamos el mismo evento custom que él usa, o creamos un toast propio.
-        _mostrarToastRuta(e.detail.mensaje, e.detail.tipo);
-    });
 });
 
 /* ================================================================

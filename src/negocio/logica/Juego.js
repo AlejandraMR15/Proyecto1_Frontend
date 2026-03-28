@@ -1,6 +1,5 @@
 import SistemaTurnos from "./SistemaTurnos.js";
-import { EstadoDeJuego } from "./EstadoDeJuego.js";
-import { ESTADOS } from "./estados.js";
+import { EstadoDeJuego, ESTADOS } from "./EstadoDeJuego.js";
 import GestorCiudadano from "./GestorCiudadanos.js";
 import Ciudad from "../../modelos/ciudad.js";
 import Puntuacion from "./Puntuacion.js";
@@ -102,82 +101,136 @@ export default class Juego {
     }
 
     /**
+     * Valida que los recursos críticos no sean negativos.
+     * Si alguno lo es, finaliza la partida automáticamente.
+     * 
+     * @private
+     * @returns {boolean} true si todos los recursos son OK, false si hay game over
+     */
+    _validarRecursosYGameOver() {
+        const recursos = this.ciudad.recursos;
+        
+        if (recursos.dinero < 0) {
+            console.error("¡GAME OVER! Te has quedado sin dinero.");
+            this.finalizarPartida("Sin dinero");
+            return false;
+        }
+        
+        if (recursos.electricidad < 0) {
+            console.error("¡GAME OVER! Te has quedado sin electricidad.");
+            this.finalizarPartida("Sin electricidad");
+            return false;
+        }
+        
+        if (recursos.agua < 0) {
+            console.error("¡GAME OVER! Te has quedado sin agua.");
+            this.finalizarPartida("Sin agua");
+            return false;
+        }
+        
+        return true;  // Todos los recursos OK
+    }
+
+    /**
+     * Procesa la producción y consumo de recursos del turno.
+     * Calcula estadísticas y las guarda en window para mostrar en el HUD.
+     * 
+     * @private
+     * @param {object} produccionPendiente Producción del turno actual
+     */
+    _procesarRecursosDelTurno(produccionPendiente) {
+        // Guardar estado anterior de recursos antes de procesar
+        const recursoAnterior = {
+            dinero: this.ciudad.recursos.dinero,
+            electricidad: this.ciudad.recursos.electricidad,
+            agua: this.ciudad.recursos.agua,
+            comida: this.ciudad.recursos.comida
+        };
+
+        // Estado actual después de procesarTurno
+        const recursoActual = {
+            dinero: this.ciudad.recursos.dinero,
+            electricidad: this.ciudad.recursos.electricidad,
+            agua: this.ciudad.recursos.agua,
+            comida: this.ciudad.recursos.comida
+        };
+
+        // Guardar estadísticas en variable global para mostrar en HUD
+        window.estadisticasRecursos = {
+            produccion: {
+                dinero: produccionPendiente.dinero || 0,
+                electricidad: produccionPendiente.electricidad || 0,
+                agua: produccionPendiente.agua || 0,
+                comida: produccionPendiente.comida || 0
+            },
+            consumo: {
+                dinero: (produccionPendiente.dinero || 0) - (recursoActual.dinero - recursoAnterior.dinero),
+                electricidad: (produccionPendiente.electricidad || 0) - (recursoActual.electricidad - recursoAnterior.electricidad),
+                agua: (produccionPendiente.agua || 0) - (recursoActual.agua - recursoAnterior.agua),
+                comida: (produccionPendiente.comida || 0) - (recursoActual.comida - recursoAnterior.comida)
+            },
+            actual: recursoActual
+        };
+    }
+
+    /**
+     * Actualiza el estado de los ciudadanos (reasignación, felicidad, crecimiento).
+     * 
+     * @private
+     * @param {number} valorServicios Valor de servicios activos (felicidad de servicios públicos)
+     */
+    _actualizarCiudadanos(valorServicios) {
+        const edificiosResidenciales = this.ciudad.obtenerEdificiosResidenciales();
+        const edificiosLaborales = this.ciudad.obtenerEdificiosLaborales();
+
+        // Reasignar ciudadanos que perdieron vivienda o empleo
+        this.gestorCiudadanos.reasignarCiudadanosSinRecursos(
+            edificiosResidenciales, 
+            edificiosLaborales
+        );
+
+        // Recalcular felicidad de toda la población
+        this.gestorCiudadanos.recalcularFelicidadCiudadanos(
+            valorServicios, 
+            this.ciudad.recursos.comida
+        );
+
+        // Procesar crecimiento poblacional del turno
+        this.gestorCiudadanos.procesarCrecimientoPoblacional(
+            edificiosResidenciales, 
+            edificiosLaborales, 
+            valorServicios
+        );
+    }
+
+    /**
      * Ejecuta la lógica completa de un turno y recalcula el puntaje.
-     * Valida que dinero, electricidad y agua no sean negativos.
+     * Coordina: procesamiento de ciudad, validación de recursos, 
+     * actualización de ciudadanos y recálculo de puntuación.
      */
     ejecutarTurno() {
         if (!this.EstadoDeJuego.estaJugando()) return;
+        
         this.numeroTurno++;
         console.log("Turno:", this.numeroTurno);
-        if (this.ciudad) {
-            // Guardar estado anterior de recursos antes de procesar el turno
-            const recursoAnterior = {
-                dinero: this.ciudad.recursos.dinero,
-                electricidad: this.ciudad.recursos.electricidad,
-                agua: this.ciudad.recursos.agua,
-                comida: this.ciudad.recursos.comida
-            };
+        
+        if (!this.ciudad) return;
 
-            // Procesar turno en la ciudad
-            const produccionPendiente = this.ciudad.procesarTurno(this.gestorCiudadanos.ciudadanos);
-            this.recolectorBurbujas.registrarProduccionLote(produccionPendiente);
+        // 1. Procesar turno en la ciudad y registrar producción
+        const produccionPendiente = this.ciudad.procesarTurno(this.gestorCiudadanos.ciudadanos);
+        this.recolectorBurbujas.registrarProduccionLote(produccionPendiente);
 
-            // Calcular consumo real de este turno
-            const recursoActual = {
-                dinero: this.ciudad.recursos.dinero,
-                electricidad: this.ciudad.recursos.electricidad,
-                agua: this.ciudad.recursos.agua,
-                comida: this.ciudad.recursos.comida
-            };
+        // 2. Procesar recursos y guardar estadísticas para el HUD
+        this._procesarRecursosDelTurno(produccionPendiente);
 
-            // Guardar estadísticas en variable global para mostrar en HUD
-            window.estadisticasRecursos = {
-                produccion: {
-                    dinero: produccionPendiente.dinero || 0,
-                    electricidad: produccionPendiente.electricidad || 0,
-                    agua: produccionPendiente.agua || 0,
-                    comida: produccionPendiente.comida || 0
-                },
-                consumo: {
-                    dinero: (produccionPendiente.dinero || 0) - (recursoActual.dinero - recursoAnterior.dinero),
-                    electricidad: (produccionPendiente.electricidad || 0) - (recursoActual.electricidad - recursoAnterior.electricidad),
-                    agua: (produccionPendiente.agua || 0) - (recursoActual.agua - recursoAnterior.agua),
-                    comida: (produccionPendiente.comida || 0) - (recursoActual.comida - recursoAnterior.comida)
-                },
-                actual: recursoActual
-            };
+        // 3. Validar que no haya game over por recursos negativos
+        if (!this._validarRecursosYGameOver()) return;
 
+        // 4. Actualizar ciudadanos (reasignación, felicidad, crecimiento)
+        const valorServicios = produccionPendiente.felicidad;
+        this._actualizarCiudadanos(valorServicios);
 
-            // VALIDACIÓN: Verificar si algún recurso crítico es negativo → GAME OVER
-            const recursos = this.ciudad.recursos;
-            if (recursos.dinero < 0) {
-                console.error("¡GAME OVER! Te has quedado sin dinero.");
-                this.finalizarPartida("Sin dinero");
-                return;
-            }
-            if (recursos.electricidad < 0) {
-                console.error("¡GAME OVER! Te has quedado sin electricidad.");
-                this.finalizarPartida("Sin electricidad");
-                return;
-            }
-            if (recursos.agua < 0) {
-                console.error("¡GAME OVER! Te has quedado sin agua.");
-                this.finalizarPartida("Sin agua");
-                return;
-            }
-
-            // Obtener datos agregados de ciudad para población y felicidad
-            const edificiosResidenciales = this.ciudad.obtenerEdificiosResidenciales();
-            const edificiosLaborales = this.ciudad.obtenerEdificiosLaborales();
-            const valorServicios = produccionPendiente.felicidad;  // Usar el valor calculado en ciudad.procesarTurno()
-            // Reasignar ciudadanos que perdieron vivienda o empleo
-            this.gestorCiudadanos.reasignarCiudadanosSinRecursos(edificiosResidenciales, edificiosLaborales);
-            // Recalcular felicidad de toda la población con el estado actual de la ciudad
-            this.gestorCiudadanos.recalcularFelicidadCiudadanos(valorServicios, this.ciudad.recursos.comida);
-            // Procesar crecimiento poblacional
-            this.gestorCiudadanos.procesarCrecimientoPoblacional(edificiosResidenciales, edificiosLaborales, valorServicios);
-        }
-
+        // 5. Recalcular y mostrar puntuación
         this.recalcularPuntaje();
         console.log("Puntaje:", this.puntaje);
     }

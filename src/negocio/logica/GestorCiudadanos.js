@@ -272,6 +272,9 @@ export default class GestorCiudadano {
      * - asigna el valor de servicios (suma de felicidad de parques, hospitales, policía, etc.)
      * - calcula felicidad inicial y lo agrega al gestor
      *
+     * Optimización: las listas de edificios disponibles se obtienen una sola vez
+     * fuera del loop para evitar recorridos repetidos.
+     *
      * @private
      * @param {number} cantidad Numero de ciudadanos a crear.
      * @param {Array<object>} edificiosResidenciales
@@ -280,26 +283,35 @@ export default class GestorCiudadano {
      * @returns {void}
      */
     _crearYAsignarCiudadanos(cantidad, edificiosResidenciales, edificiosLaborales, valorServicios = 0) {
+        // Obtener las listas de disponibles UNA SOLA VEZ, fuera del loop
+        let viviendasDisponibles = this.obtenerViviendaDisponible(edificiosResidenciales);
+        let trabajosDisponibles = this.obtenerEmpleosDisponibles(edificiosLaborales);
+        
         for (let i = 0; i < cantidad; i++) {
             const nuevoCiudadano = new Ciudadano(this._generarNuevoId(), 100, null, null, valorServicios);
             
-            // obtiene listas de viviendas y empleos disponibles
-            const viviendasLibres = this.obtenerViviendaDisponible(edificiosResidenciales);
-            const trabajosLibres = this.obtenerEmpleosDisponibles(edificiosLaborales);
-            
             // asigna vivienda si hay disponible (primera vivienda de la lista)
-            if (viviendasLibres.length > 0) {
-                const residencia = viviendasLibres[0];
+            if (viviendasDisponibles.length > 0) {
+                const residencia = viviendasDisponibles[0];
                 nuevoCiudadano.asignarVivienda(residencia);
                 residencia.añadirResidentes(nuevoCiudadano);
                 
+                // Si la vivienda se llenó, removerla de disponibles
+                if (residencia.residentes.length >= residencia.capacidad) {
+                    viviendasDisponibles.shift();
+                }
             }
             
             // asigna empleo si hay disponible (primer edificio con vacante)
-            if (trabajosLibres.length > 0) {
-                const empleo = trabajosLibres[0];
+            if (trabajosDisponibles.length > 0) {
+                const empleo = trabajosDisponibles[0];
                 nuevoCiudadano.asignarEmpleo(empleo);
                 empleo.añadirEmpleado(nuevoCiudadano);
+                
+                // Si el edificio se llenó, removerlo de disponibles
+                if (empleo.empleados.length >= empleo.empleo) {
+                    trabajosDisponibles.shift();
+                }
             }
             
             // calcula felicidad inicial basada en asignaciones y servicios

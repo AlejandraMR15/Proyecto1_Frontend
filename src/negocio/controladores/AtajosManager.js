@@ -168,7 +168,7 @@ function _onAtajos(e) {
         // D → Activar / desactivar modo demolición
         case 'KeyD': {
             e.preventDefault();
-            document.getElementById('sidebarDemolir')?.click();
+            document.getElementById('btnDemolicion')?.click();
             break;
         }
 

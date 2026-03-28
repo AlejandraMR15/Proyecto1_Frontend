@@ -56,9 +56,9 @@
   transform: translate(2px, 2px);
 }
 
-/* Icono grande del botón clima — dinámico según clima actual */
-.widget-clima-icono::before {
-  font-size: 36px;
+/* Icono grande del botón clima */
+.widget-clima-icono {
+  font-size: 22px;
   line-height: 1;
   filter: drop-shadow(1px 1px 0 rgba(0,0,0,0.9));
 }

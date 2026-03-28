@@ -268,6 +268,41 @@ export function procesarArchivoImportacion(archivo) {
 }
 
 /* ================================================================
+   MOSTRAR MODAL GAME OVER
+================================================================ */
+
+/**
+ * Muestra el modal de GAME OVER con la razón, número de turno y puntuación.
+ *
+ * @param {string} razon - Razón del game over
+ * @param {number} numeroTurno - Número del turno en que terminó
+ * @param {number} puntaje - Puntuación final
+ */
+export function mostrarModalGameOver(razon, numeroTurno, puntaje) {
+    const modalGameOver = document.getElementById('modal-game-over');
+    if (!modalGameOver) return;
+
+    // Actualizar contenido del modal
+    const elRazon = document.getElementById('modal-game-over-razon');
+    const elTurno = document.getElementById('modal-game-over-turno');
+    const elScore = document.getElementById('modal-game-over-score');
+
+    if (elRazon) {
+        const razones = {
+            'Sin dinero': '💰 Te has quedado sin dinero',
+            'Sin electricidad': '⚡ Te has quedado sin electricidad',
+            'Sin agua': '💧 Te has quedado sin agua'
+        };
+        elRazon.textContent = razones[razon] || razon;
+    }
+    if (elTurno) elTurno.textContent = numeroTurno;
+    if (elScore) elScore.textContent = puntaje || 0;
+
+    // Mostrar modal
+    modalGameOver.dataset.visible = 'true';
+}
+
+/* ================================================================
    FINALIZAR PARTIDA
 ================================================================ */
 
@@ -318,7 +353,7 @@ export function detectarGameOverAlCargar() {
         juego.EstadoDeJuego.cambiarEstado('game_over');
         setTimeout(() => {
             if (window.movimientoCiudadanos) window.movimientoCiudadanos.detener();
-            juego._mostrarModalGameOver(estadoPersistido.razon || 'Desconocida');
+            mostrarModalGameOver(estadoPersistido.razon || 'Desconocida', estadoPersistido.numeroTurno || 0, estadoPersistido.puntaje || 0);
         }, 300);
         return true;
     }

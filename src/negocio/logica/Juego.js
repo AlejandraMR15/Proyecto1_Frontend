@@ -9,6 +9,7 @@ import RecoleccionBurbujas from "./RecoleccionBurbujas.js";
 import Mapa from "../../modelos/Mapa.js";
 import MapImporter from "../../acceso_datos/MapImporter.js";
 import { actualizarOAgregarEnRanking } from "../controladores/RankingUi.js";
+import { mostrarModalGameOver } from "../controladores/PartidaManager.js";
 
 /**
  * Clase principal que gestiona la lógica del juego.
@@ -26,7 +27,7 @@ export default class Juego {
         this.StorageManager = new StorageManager();
         this.EstadoDeJuego = new EstadoDeJuego();
         this.gestorCiudadanos = new GestorCiudadano();
-        this.recolectorBurbujas = new RecoleccionBurbujas(this);
+        this.recolectorBurbujas = new RecoleccionBurbujas(this, document.getElementById('recoleccion-burbujas-toast'));
         this.numeroTurno = 0;
         this.desglosePuntaje = null;
     }
@@ -256,37 +257,10 @@ export default class Juego {
         this.guardarPartida();
         
         // Mostrar modal de GAME OVER
-        this._mostrarModalGameOver(razon);
+        mostrarModalGameOver(razon, this.numeroTurno, this.puntaje);
     }
 
-    /**
-     * Muestra el modal de GAME OVER con la razón.
-     * @private
-     * @param {string} razon
-     */
-    _mostrarModalGameOver(razon) {
-        const modalGameOver = document.getElementById('modal-game-over');
-        if (!modalGameOver) return;
 
-        // Actualizar contenido del modal
-        const elRazon = document.getElementById('modal-game-over-razon');
-        const elTurno = document.getElementById('modal-game-over-turno');
-        const elScore = document.getElementById('modal-game-over-score');
-
-        if (elRazon) {
-            const razones = {
-                'Sin dinero': '💰 Te has quedado sin dinero',
-                'Sin electricidad': '⚡ Te has quedado sin electricidad',
-                'Sin agua': '💧 Te has quedado sin agua'
-            };
-            elRazon.textContent = razones[razon] || razon;
-        }
-        if (elTurno) elTurno.textContent = this.numeroTurno;
-        if (elScore) elScore.textContent = this.puntaje || 0;
-
-        // Mostrar modal
-        modalGameOver.dataset.visible = 'true';
-    }
 
     /**
      * Crea una nueva ciudad y la asigna al juego.

@@ -20,6 +20,7 @@ export default class Ciudadano {
         this.residencia = residencia;
         this.empleo = empleo;
         this.servicios = servicios; // Suma total de felicidad aportada por servicios cercanos
+        this.turnosConBajaFelicidad = 0; // Contador de turnos consecutivos con felicidad < 25
     }
 
     /**
@@ -131,7 +132,8 @@ export default class Ciudadano {
             felicidad: this.felicidad,
             residenciaId,
             empleoId,
-            servicios: this.servicios
+            servicios: this.servicios,
+            turnosConBajaFelicidad: this.turnosConBajaFelicidad
         };
     }
 
@@ -152,6 +154,7 @@ export default class Ciudadano {
         }
 
         const ciudadano = new Ciudadano(json.id, json.felicidad, residencia, empleo, json.servicios);
+        ciudadano.turnosConBajaFelicidad = json.turnosConBajaFelicidad ?? 0;
         return ciudadano;
     }
 

@@ -174,6 +174,8 @@ export default class Juego {
             this.gestorCiudadanos.reasignarCiudadanosSinRecursos(edificiosResidenciales, edificiosLaborales);
             // Recalcular felicidad de toda la población con el estado actual de la ciudad
             this.gestorCiudadanos.recalcularFelicidadCiudadanos(valorServicios, this.ciudad.recursos.comida);
+            // Eliminar los ciudadanos infelices
+            this.gestorCiudadanos.procesarEliminacionCiudadanosInfelices();
             // Procesar crecimiento poblacional
             this.gestorCiudadanos.procesarCrecimientoPoblacional(edificiosResidenciales, edificiosLaborales, valorServicios);
         }

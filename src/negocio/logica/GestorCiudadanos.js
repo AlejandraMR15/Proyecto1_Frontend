@@ -171,6 +171,61 @@ export default class GestorCiudadano {
     }
 
     /**
+     * Procesa la eliminación de ciudadanos que han estado infelices demasiado tiempo.
+     *
+     * Para cada ciudadano:
+     * - Si felicidad < 25: incrementa contador de turnos infelices
+     * - Si felicidad >= 25: reinicia contador a 0
+     * - Si contador alcanza 10 turnos: elimina al ciudadano (y sus referencias a edificios)
+     *
+     * Se debe llamar cada turno desde SistemaTurnos.
+     * MovimientoCiudadanos sincroniza automáticamente los sprites al desaparecer.
+     * @returns {Array<number>} Array con ids de ciudadanos eliminados.
+     */
+    procesarEliminacionCiudadanosInfelices() {
+        const eliminados = [];
+
+        // Actualizar contadores y detectar ciudadanos a eliminar
+        for (let i = this.ciudadanos.length - 1; i >= 0; i--) {
+            const ciudadano = this.ciudadanos[i];
+            
+            if (ciudadano.felicidad < 25) {
+                ciudadano.turnosConBajaFelicidad++;
+                if (ciudadano.turnosConBajaFelicidad >= 10) {
+                    eliminados.push(ciudadano.id);
+                    this._eliminarCiudadano(i);
+                }
+            } else {
+                ciudadano.turnosConBajaFelicidad = 0;
+            }
+        }
+
+        return eliminados;
+    }
+
+    /**
+     * Elimina un ciudadano del gestor y libera sus referencias a edificios.
+     * @private
+     * @param {number} indice Índice del ciudadano en el array.
+     */
+    _eliminarCiudadano(indice) {
+        const ciudadano = this.ciudadanos[indice];
+
+        // Remover de vivienda
+        if (ciudadano.residencia && typeof ciudadano.residencia.removerResidentes === 'function') {
+            ciudadano.residencia.removerResidentes(ciudadano);
+        }
+
+        // Remover de empleo
+        if (ciudadano.empleo && typeof ciudadano.empleo.removerEmpleado === 'function') {
+            ciudadano.empleo.removerEmpleado(ciudadano);
+        }
+
+        // Remover del array
+        this.ciudadanos.splice(indice, 1);
+    }
+
+    /**
      * Intenta reasignar vivienda y empleo a ciudadanos que quedaron sin ellos.
      * Se ejecuta cada turno para cubrir casos donde se demolió un edificio
      * y luego se construyó uno nuevo.

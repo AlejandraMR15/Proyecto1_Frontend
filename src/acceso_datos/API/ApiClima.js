@@ -32,8 +32,13 @@ export default class ApiClima extends ApiExternos {
      * Obtiene coordenadas por ciudad y luego consulta el clima actual.
      * @param {string} [nombreCiudad='']
      * @returns {Promise<{temperatura:number|null, condicionClimatica:string, humedad:number|null, velocidadViento:number|null}>}
+     * @throws {Error} Si nombreCiudad es inválido o no hay conexión a APIs externas
      */
     async obtenerInformacion(nombreCiudad = '') {
+        if (!nombreCiudad || typeof nombreCiudad !== 'string' || nombreCiudad.trim() === '') {
+            throw new Error('nombreCiudad debe ser una cadena de texto válida y no estar vacía');
+        }
+        
         const coordenadasCiudad = await this.obtenerCoordenadasPorCiudad(nombreCiudad);
         const datosClima = await this.obtenerDatosClima(coordenadasCiudad.latitud, coordenadasCiudad.longitud);
         const climaFormateado = this.formatearRespuestaClima(datosClima);

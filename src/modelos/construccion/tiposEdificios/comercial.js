@@ -86,7 +86,8 @@ export default class Comercial extends Edificio {
         return { dinero: 0 };
     }
 
-    /**     * Procesa consumos del turno: mantenimiento, electricidad, agua y comida por empleados actuales.
+    /**
+     * Procesa consumos del turno: mantenimiento, electricidad, agua y comida por empleados actuales.
      * @param {import('../../recursos.js').default} recursos
      */
     procesarConsumo(recursos) {
@@ -101,7 +102,8 @@ export default class Comercial extends Edificio {
         recursos.actualizarComida(-consumoComida);
     }
 
-    /**     * Procesa consumos e ingresos del turno.
+    /**
+     * Procesa consumos e ingresos del turno.
      * @param {import('../../recursos.js').default} recursos
      */
     procesarTurno(recursos) {

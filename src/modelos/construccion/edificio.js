@@ -65,16 +65,6 @@ export default class Edificio extends Construccion {
     }
 
     /**
-     * Procesa un turno: descuenta mantenimiento, electricidad y agua del objeto Recursos.
-     * El dinero puede ser negativo (GAME OVER se checkea después en Juego.ejecutarTurno).
-     * @deprecated Usar procesarConsumo() en su lugar. Este método se mantiene para compatibilidad.
-     * @param {Recursos} recursos
-     */
-    procesarTurno(recursos) {
-        this.procesarConsumo(recursos);
-    }
-
-    /**
      * Retorna información resumida del edificio.
      * @returns {object}
      */

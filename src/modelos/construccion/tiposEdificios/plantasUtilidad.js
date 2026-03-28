@@ -41,18 +41,6 @@ export default class PlantasDeUtilidad extends Edificio {
     }
 
     /**
-     * Ejecuta la producción del turno y actualiza el objeto Recursos.
-     * - Planta eléctrica: incrementa electricidad.
-     * - Planta de agua: produce solo si, tras descontar su consumo del turno,
-     *   la electricidad no queda en negativo.
-     * @deprecated Usar procesarProduccion() en su lugar
-     * @param {Recursos} recursos
-     */
-    produccion(recursos) {
-        return this.procesarProduccion(recursos);
-    }
-
-    /**
      * Procesa un turno: primero consumo, luego retorna producción.
      * @param {Recursos} recursos
      */

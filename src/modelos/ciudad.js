@@ -371,8 +371,6 @@ export default class Ciudad {
 
                 } else if (etiqueta === 'P1') {
                     construccion = new Parques(1500, 5, 1);
-                } else if (etiqueta === 'r') {
-                    construccion = new Vias(100, 0);
                 }
 
                 // Agregar construcción a la lista y al mapa si fue creada

@@ -40,14 +40,18 @@ class HistorialRecursos {
             return;
         }
 
-        // Click en botón para abrir/cerrar
-        this.btnEl.addEventListener('click', () => this.toggle());
+        // Click en botón para abrir/cerrar (usar stopPropagation para evitar cerrar inmediatamente)
+        this.btnEl.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.toggle();
+        });
 
-        // Click fuera del panel para cerrar
+        // Click fuera del panel para cerrar (verificar que no sea el botón ni su contenido)
         document.addEventListener('click', (e) => {
-            if (e.target !== this.btnEl && 
-                !this.panelEl.contains(e.target) && 
-                this.estaAbierto) {
+            // Verificar si el click fue dentro del botón o su contenido
+            const clickEnBoton = this.btnEl.contains(e.target);
+            
+            if (!clickEnBoton && !this.panelEl.contains(e.target) && this.estaAbierto) {
                 this.cerrar();
             }
         });
@@ -137,7 +141,7 @@ class HistorialRecursos {
         if (this.registros.length === 0) {
             const fila = document.createElement('tr');
             fila.className = 'historial-fila-vacia';
-            fila.innerHTML = '<td colspan="5">Sin historial aún</td>';
+            fila.innerHTML = '<td colspan="5">📊 Sin historial aún</td>';
             this.tablaEl.appendChild(fila);
             return;
         }
@@ -147,11 +151,11 @@ class HistorialRecursos {
             const thead = document.createElement('thead');
             thead.innerHTML = `
                 <tr class="historial-encabezado">
-                    <th>Turno</th>
-                    <th>💰 Dinero</th>
-                    <th>⚡ Electricidad</th>
-                    <th>💧 Agua</th>
-                    <th>🍎 Comida</th>
+                    <th style="width: 15%;">Turno</th>
+                    <th style="width: 28%;">💰 Dinero</th>
+                    <th style="width: 19%;">⚡ Elec.</th>
+                    <th style="width: 19%;">💧 Agua</th>
+                    <th style="width: 19%;">🍎 Comida</th>
                 </tr>
             `;
             this.tablaEl.appendChild(thead);
@@ -173,11 +177,11 @@ class HistorialRecursos {
             fila.className = idx === 0 ? 'historial-fila-actual' : 'historial-fila';
             
             fila.innerHTML = `
-                <td class="historial-turno">T${reg.turno}</td>
+                <td class="historial-turno">${reg.turno}</td>
                 <td class="historial-dinero">${this._formatearDinero(reg.dinero)}</td>
-                <td class="historial-electricidad">${reg.electricidad}</td>
-                <td class="historial-agua">${reg.agua}</td>
-                <td class="historial-comida">${reg.comida}</td>
+                <td class="historial-electricidad">${reg.electricidad.toLocaleString('es-CO')}</td>
+                <td class="historial-agua">${reg.agua.toLocaleString('es-CO')}</td>
+                <td class="historial-comida">${reg.comida.toLocaleString('es-CO')}</td>
             `;
             
             tbody.appendChild(fila);

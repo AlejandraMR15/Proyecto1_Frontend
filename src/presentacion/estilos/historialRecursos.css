@@ -4,12 +4,17 @@
    ============================================================ */
 
 :root {
-    --historial-bg: #1c2b3a;
-    --historial-border: #3d6b8a;
-    --historial-header: #152030;
+    --historial-bg: #0f1b28;
+    --historial-border: #2a5a7e;
+    --historial-header: #0a1218;
     --historial-text: #e8f0f7;
     --historial-accent: #ffd700;
-    --historial-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+    --historial-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+    
+    --historial-dinero: #76d94d;
+    --historial-electricidad: #ff6b9d;
+    --historial-agua: #4da6ff;
+    --historial-comida: #ffa726;
 }
 
 /* ── BOTÓN HISTORIAL EN EL WIDGETS CONTAINER ── */
@@ -27,18 +32,20 @@
     justify-content: center;
     transition: all 0.2s ease;
     position: relative;
+    box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.1);
 }
 
 #btn-historial-recursos:hover {
     background: var(--historial-bg);
     border-color: var(--historial-accent);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.1), 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 #btn-historial-recursos.historial-activo {
-    background: var(--historial-accent);
+    background: linear-gradient(135deg, var(--historial-accent), #ffb700);
     color: var(--historial-header);
-    border-color: var(--historial-accent);
+    border-color: #ffe66d;
+    box-shadow: 0 0 12px rgba(255, 215, 0, 0.4);
 }
 
 /* ── PANEL DESPLEGABLE DEL HISTORIAL ── */
@@ -46,20 +53,20 @@
     position: fixed;
     bottom: auto;
     right: 8px;
-    top: 100px; /* Por defecto desktop: debajo de los botones superiores */
-    width: 320px;
-    max-height: 400px;
-    background: var(--historial-bg);
+    top: 100px;
+    width: 380px;
+    max-height: 450px;
+    background: linear-gradient(180deg, var(--historial-bg) 0%, var(--historial-header) 100%);
     border: 2px solid var(--historial-border);
-    border-radius: 6px;
+    border-radius: 8px;
     box-shadow: var(--historial-shadow);
     z-index: 400;
     display: flex;
     flex-direction: column;
     opacity: 0;
     pointer-events: none;
-    transform: translateY(-10px);
-    transition: all 0.2s ease;
+    transform: translateY(-15px);
+    transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
 }
 
 #historial-recursos-panel[data-visible="true"] {
@@ -71,111 +78,131 @@
 /* ── HEADER DEL PANEL ── */
 .historial-panel-header {
     flex-shrink: 0;
-    padding: 12px 14px;
-    background: var(--historial-header);
+    padding: 14px 16px;
+    background: linear-gradient(90deg, #1a2d3a 0%, #0f1b28 100%);
     border-bottom: 2px solid var(--historial-border);
-    font-weight: 600;
+    font-weight: 700;
     color: var(--historial-accent);
-    font-size: 0.85rem;
-    border-radius: 4px 4px 0 0;
+    font-size: 0.9rem;
+    letter-spacing: 0.8px;
+    border-radius: 6px 6px 0 0;
     text-align: center;
+    text-transform: uppercase;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 /* ── TABLA DE HISTORIAL ── */
 #historial-recursos-tabla {
     flex: 1;
     overflow-y: auto;
-    font-size: 0.75rem;
+    font-size: 0.78rem;
     border-collapse: collapse;
     width: 100%;
+    padding: 0 2px;
 }
 
 #historial-recursos-tabla thead {
     position: sticky;
     top: 0;
-    background: var(--historial-header);
+    background: linear-gradient(90deg, #0a1218 0%, #0f1b28 100%);
     z-index: 10;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
 }
 
 .historial-encabezado {
     color: var(--historial-accent);
-    font-weight: 600;
+    font-weight: 700;
     text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .historial-encabezado th {
-    padding: 8px 4px;
-    border-bottom: 1px solid var(--historial-border);
+    padding: 10px 4px;
+    border-bottom: 2px solid var(--historial-border);
     text-align: center;
+    font-size: 0.68rem;
 }
 
 .historial-fila {
-    border-bottom: 1px solid rgba(61, 107, 138, 0.3);
+    border-bottom: 1px solid rgba(61, 107, 138, 0.4);
     color: var(--historial-text);
+    transition: all 0.15s ease;
 }
 
 .historial-fila:hover {
-    background: rgba(61, 107, 138, 0.2);
+    background: rgba(61, 107, 138, 0.3);
+    border-left: 3px solid var(--historial-accent);
 }
 
 .historial-fila-actual {
-    background: rgba(255, 215, 0, 0.1);
-    border-bottom: 1px solid var(--historial-border);
+    background: linear-gradient(90deg, rgba(255, 215, 0, 0.15), rgba(255, 215, 0, 0.05));
+    border-bottom: 2px solid var(--historial-accent);
+    border-left: 4px solid var(--historial-accent);
     color: var(--historial-accent);
-    font-weight: 600;
+    font-weight: 700;
+    box-shadow: inset 0 1px 0 rgba(255, 215, 0, 0.2);
 }
 
 .historial-fila-vacia {
-    color: #8a9fb5;
+    color: #6a8db5;
     text-align: center;
-    padding: 20px !important;
+    padding: 24px !important;
     font-style: italic;
+    font-size: 0.82rem;
 }
 
 .historial-fila td,
 .historial-fila-actual td {
-    padding: 6px 4px;
+    padding: 8px 5px;
     text-align: center;
 }
 
 .historial-turno {
-    font-weight: 600;
+    font-weight: 700;
     color: var(--historial-accent);
+    min-width: 45px;
 }
 
 .historial-dinero {
-    color: #90ee90;
+    color: var(--historial-dinero);
+    font-weight: 600;
 }
 
 .historial-electricidad {
-    color: #ffb6c1;
+    color: var(--historial-electricidad);
+    font-weight: 600;
 }
 
 .historial-agua {
-    color: #87ceeb;
+    color: var(--historial-agua);
+    font-weight: 600;
 }
 
 .historial-comida {
-    color: #ffa500;
+    color: var(--historial-comida);
+    font-weight: 600;
 }
 
 /* ── SCROLLBAR PERSONALIZADO ── */
 #historial-recursos-tabla::-webkit-scrollbar {
-    width: 6px;
+    width: 8px;
 }
 
 #historial-recursos-tabla::-webkit-scrollbar-track {
-    background: rgba(61, 107, 138, 0.1);
-    border-radius: 3px;
+    background: rgba(61, 107, 138, 0.15);
+    border-radius: 4px;
 }
 
 #historial-recursos-tabla::-webkit-scrollbar-thumb {
     background: var(--historial-border);
-    border-radius: 3px;
+    border-radius: 4px;
+    border: 2px solid rgba(61, 107, 138, 0.15);
 }
 
 #historial-recursos-tabla::-webkit-scrollbar-thumb:hover {
     background: var(--historial-accent);
+    border-color: rgba(255, 215, 0, 0.2);
 }
 
 /* ── RESPONSIVE: MOBILE PORTRAIT ── */
@@ -187,26 +214,32 @@
     }
 
     #historial-recursos-panel {
-        width: 280px;
-        max-height: 300px;
-        top: 8px; /* Esquina superior, no interfiere con widgets en bottom */
+        width: 290px;
+        max-height: 320px;
+        top: 8px;
         right: 8px;
+        border-radius: 6px;
+    }
+
+    .historial-panel-header {
+        font-size: 0.72rem;
+        padding: 10px 12px;
+        letter-spacing: 0.4px;
     }
 
     .historial-encabezado th {
-        padding: 6px 2px;
-        font-size: 0.65rem;
+        padding: 7px 3px;
+        font-size: 0.62rem;
     }
 
     .historial-fila td,
     .historial-fila-actual td {
-        padding: 4px 2px;
-        font-size: 0.68rem;
+        padding: 6px 3px;
+        font-size: 0.66rem;
     }
 
-    .historial-panel-header {
-        font-size: 0.75rem;
-        padding: 10px 12px;
+    .historial-turno {
+        min-width: 35px;
     }
 }
 
@@ -219,26 +252,31 @@
     }
 
     #historial-recursos-panel {
-        width: 280px;
-        max-height: 280px;
-        top: 8px; /* Esquina superior derecha */
+        width: 290px;
+        max-height: 290px;
+        top: 8px;
         right: 8px;
+    }
+
+    .historial-panel-header {
+        font-size: 0.68rem;
+        padding: 8px 10px;
+        letter-spacing: 0.3px;
     }
 
     .historial-encabezado th {
         padding: 5px 2px;
-        font-size: 0.60rem;
+        font-size: 0.58rem;
     }
 
     .historial-fila td,
     .historial-fila-actual td {
-        padding: 3px 2px;
+        padding: 4px 2px;
         font-size: 0.62rem;
     }
 
-    .historial-panel-header {
-        font-size: 0.70rem;
-        padding: 8px 10px;
+    .historial-turno {
+        min-width: 30px;
     }
 }
 
@@ -251,26 +289,31 @@
     }
 
     #historial-recursos-panel {
-        width: 300px;
-        max-height: 350px;
-        top: 60px; /* Debajo de controles en esquina superior */
+        width: 320px;
+        max-height: 370px;
+        top: 60px;
         right: 8px;
     }
 
+    .historial-panel-header {
+        font-size: 0.78rem;
+        padding: 11px 13px;
+        letter-spacing: 0.5px;
+    }
+
     .historial-encabezado th {
-        padding: 7px 3px;
-        font-size: 0.70rem;
+        padding: 8px 3px;
+        font-size: 0.66rem;
     }
 
     .historial-fila td,
     .historial-fila-actual td {
-        padding: 5px 3px;
-        font-size: 0.72rem;
+        padding: 7px 3px;
+        font-size: 0.70rem;
     }
 
-    .historial-panel-header {
-        font-size: 0.80rem;
-        padding: 11px 13px;
+    .historial-turno {
+        min-width: 40px;
     }
 }
 
@@ -283,25 +326,30 @@
     }
 
     #historial-recursos-panel {
-        width: 340px;
+        width: 380px;
         max-height: 450px;
-        top: 110px; /* Debajo de controles */
+        top: 110px;
         right: 12px;
-    }
-
-    .historial-encabezado th {
-        padding: 9px 5px;
-        font-size: 0.75rem;
-    }
-
-    .historial-fila td,
-    .historial-fila-actual td {
-        padding: 7px 5px;
-        font-size: 0.78rem;
     }
 
     .historial-panel-header {
         font-size: 0.90rem;
-        padding: 13px 15px;
+        padding: 14px 16px;
+        letter-spacing: 0.8px;
+    }
+
+    .historial-encabezado th {
+        padding: 10px 5px;
+        font-size: 0.68rem;
+    }
+
+    .historial-fila td,
+    .historial-fila-actual td {
+        padding: 8px 5px;
+        font-size: 0.78rem;
+    }
+
+    .historial-turno {
+        min-width: 45px;
     }
 }

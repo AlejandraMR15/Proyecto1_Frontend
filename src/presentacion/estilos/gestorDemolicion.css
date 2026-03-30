@@ -1,0 +1,142 @@
+/* ============================================================
+   CIUDAD VIRTUAL — gestorDemolicion.css
+   Estilos exclusivos para gestión de demolición
+   ============================================================ */
+
+/* ---- Botón de demolición en el sidebar ---- */
+.sidebar-btn-demoler {
+  background: var(--bg-item);
+  border: 2px solid var(--border);
+  color: var(--text-secondary);
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  font-size: 10px;
+  cursor: pointer;
+  padding: 5px 7px;
+  line-height: 1;
+  transition: color var(--transition), background var(--transition), border-color var(--transition);
+  /* Borde biselado pixel */
+  box-shadow:
+    inset 1px 1px 0 var(--border-hi),
+    inset -1px -1px 0 var(--border-dk);
+}
+
+.sidebar-btn-demoler:hover {
+  color: #ff8080;
+  background: var(--bg-item-hover);
+  border-color: #e05555;
+}
+
+.sidebar-btn-demoler:active {
+  box-shadow:
+    inset -1px -1px 0 var(--border-hi),
+    inset 1px 1px 0 var(--border-dk);
+  transform: translate(1px, 1px);
+}
+
+/* ---- Contenido del botón demolición con ::before ---- */
+.demolicion::before {
+  content: "🔨 ";
+  font-size: 18px;
+}
+
+/* ---- Botón de demolición ACTIVO ---- */
+.sidebar-btn-demoler.demoler-activo {
+  background: #8a2a2a;
+  border-color: #e05555;
+  color: #ff8080;
+  text-shadow: 0 0 8px rgba(224, 85, 85, 0.6);
+}
+
+/* ============================================================
+   Modal de confirmación de demolición
+   ============================================================ */
+.construct-modal-demolicion {
+  border-width: 2px;
+  border-color: #e05555;
+  min-width: 320px;
+  max-width: 450px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.9);
+}
+
+.construct-modal-title-danger {
+  color: #f08080;
+}
+
+.construct-modal-warning-box {
+  background: #1a2a38;
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 16px;
+}
+
+.construct-modal-ubicacion {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.construct-modal-reembolso {
+  margin: 8px 0 0;
+  font-size: 0.9rem;
+  color: #2e7a94;
+}
+
+.construct-modal-alerta {
+  color: #f08080;
+  margin-top: 8px;
+}
+
+/* ---- Botones del modal de demolición ---- */
+.construct-btn-confirm-danger {
+  flex: 1;
+  padding: 10px;
+  cursor: pointer;
+  border-radius: 6px;
+  background: #e05555;
+  border: none;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.construct-btn-confirm-danger:hover {
+  background: #ff6666;
+}
+
+.construct-btn-confirm-danger:active {
+  background: #cc3333;
+}
+
+.construct-btn-cancel {
+  flex: 1;
+  padding: 10px;
+  cursor: pointer;
+  border-radius: 6px;
+  background: #2a3a48;
+  border: 1px solid #2e7a94;
+  color: #a8dff0;
+  font-weight: 500;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.construct-btn-cancel:hover {
+  background: #364654;
+  border-color: #4a9fb5;
+}
+
+.construct-btn-cancel:active {
+  background: #2a3a48;
+}
+
+/* ---- Estilos de tabla para modal de confirmación ---- */
+.construct-modal-row-label {
+  color: #4a9fb5;
+  padding: 5px 14px 5px 0;
+  white-space: nowrap;
+  font-size: 0.78rem;
+}
+
+.construct-modal-row-value {
+  color: #a8dff0;
+  padding: 5px 0;
+  font-size: 0.82rem;
+}

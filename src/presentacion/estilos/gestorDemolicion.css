@@ -1,23 +1,20 @@
 /* ============================================================
    CIUDAD VIRTUAL — gestorDemolicion.css
-   Estilos exclusivos para gestión de demolición
+   Estilos de demolición — videojuego moderno y limpio
    ============================================================ */
 
 /* ---- Botón de demolición en el sidebar ---- */
 .sidebar-btn-demoler {
   background: var(--bg-item);
-  border: 2px solid var(--border);
+  border: 1px solid var(--border);
   color: var(--text-secondary);
   font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
   font-size: 10px;
   cursor: pointer;
-  padding: 5px 7px;
+  padding: 6px 10px;
   line-height: 1;
   transition: color var(--transition), background var(--transition), border-color var(--transition);
-  /* Borde biselado pixel */
-  box-shadow:
-    inset 1px 1px 0 var(--border-hi),
-    inset -1px -1px 0 var(--border-dk);
+  border-radius: 4px;
 }
 
 .sidebar-btn-demoler:hover {
@@ -27,10 +24,7 @@
 }
 
 .sidebar-btn-demoler:active {
-  box-shadow:
-    inset -1px -1px 0 var(--border-hi),
-    inset 1px 1px 0 var(--border-dk);
-  transform: translate(1px, 1px);
+  opacity: 0.8;
 }
 
 /* ---- Contenido del botón demolición con ::before ---- */
@@ -51,11 +45,11 @@
    Modal de confirmación de demolición
    ============================================================ */
 .construct-modal-demolicion {
-  border-width: 2px;
+  border-width: 1px;
   border-color: #e05555;
   min-width: 320px;
   max-width: 450px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.9);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
 }
 
 .construct-modal-title-danger {
@@ -90,12 +84,13 @@
   flex: 1;
   padding: 10px;
   cursor: pointer;
-  border-radius: 6px;
+  border-radius: 4px;
   background: #e05555;
   border: none;
   color: #fff;
   font-weight: 700;
   font-size: 0.9rem;
+  transition: background 0.2s;
 }
 
 .construct-btn-confirm-danger:hover {
@@ -104,13 +99,14 @@
 
 .construct-btn-confirm-danger:active {
   background: #cc3333;
+  opacity: 0.9;
 }
 
 .construct-btn-cancel {
   flex: 1;
   padding: 10px;
   cursor: pointer;
-  border-radius: 6px;
+  border-radius: 4px;
   background: #2a3a48;
   border: 1px solid #2e7a94;
   color: #a8dff0;
@@ -125,6 +121,7 @@
 
 .construct-btn-cancel:active {
   background: #2a3a48;
+  opacity: 0.9;
 }
 
 /* ---- Estilos de tabla para modal de confirmación ---- */

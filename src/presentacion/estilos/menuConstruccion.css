@@ -1,5 +1,5 @@
 /* ============================================================
-ñ   Pixel Art City Builder — Variables y reset
+   Videojuego City Builder — Variables y reset
    ============================================================ */
 *, *::before, *::after {
   box-sizing: border-box;
@@ -50,7 +50,7 @@ body {
 }
 
 /* ============================================================
-   Sidebar — estilo panel de videojuego pixel art
+   Sidebar — estilo videojuego moderno y limpio
    ============================================================ */
 .sidebar {
   position: fixed;
@@ -65,29 +65,13 @@ body {
   transform: translateX(0);
   transition: transform var(--transition);
 
-  /* Borde pixel art: 3 capas de sombra para efecto elevado */
-  border-right: 3px solid var(--border);
-  box-shadow:
-    3px 0 0 0 var(--border-hi),
-    6px 0 0 0 var(--border-dk),
-    inset -2px 0 0 0 var(--border-dk),
-    inset 0 2px 0 0 var(--border-hi);
+  /* Borde simple limpio */
+  border-right: 2px solid var(--border);
 }
 
-/* Efecto scanlines sutiles sobre todo el panel */
+/* Sin efecto scanlines - estilo limpio */
 .sidebar::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: repeating-linear-gradient(
-    to bottom,
-    transparent 0px,
-    transparent 3px,
-    rgba(0, 0, 0, 0.06) 3px,
-    rgba(0, 0, 0, 0.06) 4px
-  );
-  z-index: 10;
+  display: none;
 }
 
 /* Estado cerrado */
@@ -104,8 +88,7 @@ body {
   padding: 0 12px;
   height: var(--header-h);
   background: var(--bg-header);
-  border-bottom: 3px solid var(--border);
-  box-shadow: 0 2px 0 var(--border-dk);
+  border-bottom: 2px solid var(--border);
   flex-shrink: 0;
   position: relative;
   z-index: 1;
@@ -128,26 +111,21 @@ body {
   font-weight: 400;
   letter-spacing: 0.09em;
   color: var(--accent);
-  /* Sombra pixel doble — efecto retro */
-  text-shadow:
-    2px 2px 0 var(--accent-dim),
-    0 0 10px rgba(255, 215, 0, 0.25);
+  /* Sin text-shadow retro */
+  text-shadow: none;
 }
 
 .sidebar-close {
   background: var(--bg-item);
-  border: 2px solid var(--border);
+  border: 1px solid var(--border);
   color: var(--text-secondary);
   font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
   font-size: 12px;
   cursor: pointer;
-  padding: 5px 7px;
+  padding: 6px 10px;
   line-height: 1;
   transition: color var(--transition), background var(--transition);
-  /* Borde biselado pixel */
-  box-shadow:
-    inset 1px 1px 0 var(--border-hi),
-    inset -1px -1px 0 var(--border-dk);
+  border-radius: 4px;
 }
 
 .sidebar-close:hover {
@@ -157,10 +135,7 @@ body {
 }
 
 .sidebar-close:active {
-  box-shadow:
-    inset -1px -1px 0 var(--border-hi),
-    inset 1px 1px 0 var(--border-dk);
-  transform: translate(1px, 1px);
+  opacity: 0.8;
 }
 
 /* ---- Contenedor de botones en header ---- */
@@ -213,7 +188,7 @@ body {
   padding: 10px 12px;
   background: var(--bg-cat);
   border: none;
-  border-top: 2px solid var(--border);
+  border-top: 1px solid var(--border);
   border-bottom: 1px solid var(--border-dk);
   cursor: pointer;
   color: var(--text-primary);
@@ -226,12 +201,12 @@ body {
   position: relative;
 }
 
-/* Barra de color izquierda — efecto game UI */
+/* Línea de acento izquierda */
 .cat-header::before {
   content: '';
   position: absolute;
   left: 0; top: 0; bottom: 0;
-  width: 3px;
+  width: 2px;
   background: var(--border-hi);
 }
 
@@ -259,7 +234,7 @@ body {
 .cat-arrow {
   font-size: 10px;
   color: var(--border-hi);
-  transition: transform 0.12s steps(3);
+  transition: transform 0.15s ease;
   line-height: 1;
 }
 
@@ -272,7 +247,7 @@ body {
   list-style: none;
   max-height: 600px;
   overflow: hidden;
-  transition: max-height 0.18s steps(8);
+  transition: max-height 0.2s ease;
   background: var(--bg-item);
   border-left: 3px solid var(--border);
 }
@@ -301,7 +276,7 @@ body {
   left: 0; top: 0; bottom: 0;
   width: 0;
   background: var(--accent);
-  transition: width 0.1s steps(3);
+  transition: width 0.15s ease;
 }
 
 .build-item:last-child { border-bottom: none; }
@@ -324,11 +299,9 @@ body {
   align-items: center;
   justify-content: center;
   background: rgba(58, 58, 154, 0.25);
-  border: 2px solid var(--border);
-  box-shadow:
-    inset 1px 1px 0 var(--border-hi),
-    inset -1px -1px 0 var(--border-dk);
-  filter: drop-shadow(1px 1px 0 rgba(0, 0, 0, 0.9));
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
 }
 
 /* Contenedor de nombre + costo apilados */
@@ -360,18 +333,16 @@ body {
   border: 2px solid var(--accent-border);
   padding: 2px 5px;
   align-self: flex-start;
-  /* Sombra texto dorada pixel */
-  text-shadow: 1px 1px 0 var(--accent-dim);
-  box-shadow: inset 1px 1px 0 rgba(255, 215, 0, 0.12);
+  /* Sin text-shadow */
+  text-shadow: none;
+  box-shadow: none;
   transition: background var(--transition), border-color var(--transition);
 }
 
 .build-item:hover .build-cost {
   background: rgba(255, 215, 0, 0.18);
   border-color: rgba(255, 215, 0, 0.55);
-  box-shadow:
-    inset 1px 1px 0 rgba(255, 215, 0, 0.25),
-    0 0 6px rgba(255, 215, 0, 0.12);
+  box-shadow: 0 2px 6px rgba(255, 215, 0, 0.2);
 }
 
 /* ============================================================
@@ -390,25 +361,21 @@ body {
   gap: 7px;
 
   background: var(--bg-cat);
-  border: 3px solid var(--border);
+  border: 2px solid var(--border);
   border-left: none;
   color: var(--text-primary);
   font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
   font-size: 9px;
   letter-spacing: 0.05em;
-  padding: 14px 8px;
+  padding: 12px 8px;
   cursor: pointer;
+  border-radius: 0 4px 4px 0;
 
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.1s steps(2), background var(--transition),
-              transform 0.14s steps(3);
+  transition: opacity 0.2s, background var(--transition);
 
-  /* Bisel pixel art */
-  box-shadow:
-    inset 0 2px 0 var(--border-hi),
-    inset -2px 0 0 var(--border-dk),
-    3px 0 0 0 var(--border-dk);
+  box-shadow: -2px 4px 8px rgba(0, 0, 0, 0.4);
 }
 
 .sidebar[data-open="false"] ~ .sidebar-tab {
@@ -442,14 +409,14 @@ body {
   background: #0a1628;
   border: 1px solid #2e7a94;
   color: #a8dff0;
-  padding: 10px 20px;
+  padding: 12px 20px;
   border-radius: 6px;
   font-size: 0.82rem;
   z-index: 9999;
   pointer-events: none;
   transition: opacity 0.3s;
   white-space: nowrap;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
 }
 
 #notif-construccion.notif-construccion--error {
@@ -465,12 +432,12 @@ body {
   transform: translate(-50%, -50%);
   background: #0a1628;
   border: 1px solid #2e7a94;
-  border-radius: 10px;
+  border-radius: 8px;
   padding: 24px 28px;
   z-index: 10000;
   min-width: 280px;
   max-width: 420px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.75);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
   color: #a8dff0;
   font-family: 'Segoe UI', system-ui, sans-serif;
 }

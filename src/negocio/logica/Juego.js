@@ -10,6 +10,7 @@ import RecoleccionBurbujas from "./RecoleccionBurbujas.js";
 import Mapa from "../../modelos/Mapa.js";
 import MapImporter from "../../acceso_datos/MapImporter.js";
 import { actualizarOAgregarEnRanking } from "../controladores/RankingUi.js";
+import { historialRecursos } from "../controladores/historialRecursos.js";
 
 /**
  * Clase principal que gestiona la lógica del juego.
@@ -178,6 +179,17 @@ export default class Juego {
             this.gestorCiudadanos.procesarEliminacionCiudadanosInfelices();
             // Procesar crecimiento poblacional
             this.gestorCiudadanos.procesarCrecimientoPoblacional(edificiosResidenciales, edificiosLaborales, valorServicios);
+        }
+
+        // Registrar snapshot de recursos en el historial
+        if (this.ciudad) {
+            historialRecursos.registrarRecursos(
+                this.numeroTurno,
+                this.ciudad.recursos.dinero,
+                this.ciudad.recursos.electricidad,
+                this.ciudad.recursos.agua,
+                this.ciudad.recursos.comida
+            );
         }
 
         this.recalcularPuntaje();

@@ -14,6 +14,7 @@ import Mapa         from '../../modelos/Mapa.js';
 import GridRenderer  from './GridRenderer.js';
 import Juego         from '../logica/Juego.js';
 import MovimientoCiudadanos from '../logica/MovimientoCiudadanos.js';
+import { historialRecursos } from './historialRecursos.js';
 
 (function () {
     "use strict";
@@ -428,6 +429,18 @@ import MovimientoCiudadanos from '../logica/MovimientoCiudadanos.js';
             window.movimientoCiudadanos = movimientoCiudadanos;
         } catch (err) {
             console.error('[MovimientoCiudadanos] Error al inicializar:', err);
+        }
+
+        /* ----------------------------------------------------------
+           Inicializar historial de recursos
+        ---------------------------------------------------------- */
+        try {
+            historialRecursos.inicializar();
+            window.historialRecursos = historialRecursos;
+            // Limpiar el historial para nueva partida
+            historialRecursos.limpiar();
+        } catch (err) {
+            console.error('[HistorialRecursos] Error al inicializar:', err);
         }
         
         /* ----------------------------------------------------------

@@ -1,0 +1,307 @@
+/* ============================================================
+   CIUDAD VIRTUAL — historialRecursos.css
+   Panel desplegable de historial de últimos 20 turnos
+   ============================================================ */
+
+:root {
+    --historial-bg: #1c2b3a;
+    --historial-border: #3d6b8a;
+    --historial-header: #152030;
+    --historial-text: #e8f0f7;
+    --historial-accent: #ffd700;
+    --historial-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+}
+
+/* ── BOTÓN HISTORIAL EN EL WIDGETS CONTAINER ── */
+#btn-historial-recursos {
+    width: 44px;
+    height: 44px;
+    border-radius: 4px;
+    border: 2px solid var(--historial-border);
+    background: var(--historial-header);
+    color: var(--historial-text);
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+#btn-historial-recursos:hover {
+    background: var(--historial-bg);
+    border-color: var(--historial-accent);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+#btn-historial-recursos.historial-activo {
+    background: var(--historial-accent);
+    color: var(--historial-header);
+    border-color: var(--historial-accent);
+}
+
+/* ── PANEL DESPLEGABLE DEL HISTORIAL ── */
+#historial-recursos-panel {
+    position: fixed;
+    bottom: auto;
+    right: 8px;
+    top: 100px; /* Por defecto desktop: debajo de los botones superiores */
+    width: 320px;
+    max-height: 400px;
+    background: var(--historial-bg);
+    border: 2px solid var(--historial-border);
+    border-radius: 6px;
+    box-shadow: var(--historial-shadow);
+    z-index: 400;
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-10px);
+    transition: all 0.2s ease;
+}
+
+#historial-recursos-panel[data-visible="true"] {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+/* ── HEADER DEL PANEL ── */
+.historial-panel-header {
+    flex-shrink: 0;
+    padding: 12px 14px;
+    background: var(--historial-header);
+    border-bottom: 2px solid var(--historial-border);
+    font-weight: 600;
+    color: var(--historial-accent);
+    font-size: 0.85rem;
+    border-radius: 4px 4px 0 0;
+    text-align: center;
+}
+
+/* ── TABLA DE HISTORIAL ── */
+#historial-recursos-tabla {
+    flex: 1;
+    overflow-y: auto;
+    font-size: 0.75rem;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+#historial-recursos-tabla thead {
+    position: sticky;
+    top: 0;
+    background: var(--historial-header);
+    z-index: 10;
+}
+
+.historial-encabezado {
+    color: var(--historial-accent);
+    font-weight: 600;
+    text-align: center;
+}
+
+.historial-encabezado th {
+    padding: 8px 4px;
+    border-bottom: 1px solid var(--historial-border);
+    text-align: center;
+}
+
+.historial-fila {
+    border-bottom: 1px solid rgba(61, 107, 138, 0.3);
+    color: var(--historial-text);
+}
+
+.historial-fila:hover {
+    background: rgba(61, 107, 138, 0.2);
+}
+
+.historial-fila-actual {
+    background: rgba(255, 215, 0, 0.1);
+    border-bottom: 1px solid var(--historial-border);
+    color: var(--historial-accent);
+    font-weight: 600;
+}
+
+.historial-fila-vacia {
+    color: #8a9fb5;
+    text-align: center;
+    padding: 20px !important;
+    font-style: italic;
+}
+
+.historial-fila td,
+.historial-fila-actual td {
+    padding: 6px 4px;
+    text-align: center;
+}
+
+.historial-turno {
+    font-weight: 600;
+    color: var(--historial-accent);
+}
+
+.historial-dinero {
+    color: #90ee90;
+}
+
+.historial-electricidad {
+    color: #ffb6c1;
+}
+
+.historial-agua {
+    color: #87ceeb;
+}
+
+.historial-comida {
+    color: #ffa500;
+}
+
+/* ── SCROLLBAR PERSONALIZADO ── */
+#historial-recursos-tabla::-webkit-scrollbar {
+    width: 6px;
+}
+
+#historial-recursos-tabla::-webkit-scrollbar-track {
+    background: rgba(61, 107, 138, 0.1);
+    border-radius: 3px;
+}
+
+#historial-recursos-tabla::-webkit-scrollbar-thumb {
+    background: var(--historial-border);
+    border-radius: 3px;
+}
+
+#historial-recursos-tabla::-webkit-scrollbar-thumb:hover {
+    background: var(--historial-accent);
+}
+
+/* ── RESPONSIVE: MOBILE PORTRAIT ── */
+@media (max-width: 767px) and (orientation: portrait) {
+    #btn-historial-recursos {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+
+    #historial-recursos-panel {
+        width: 280px;
+        max-height: 300px;
+        top: 8px; /* Esquina superior, no interfiere con widgets en bottom */
+        right: 8px;
+    }
+
+    .historial-encabezado th {
+        padding: 6px 2px;
+        font-size: 0.65rem;
+    }
+
+    .historial-fila td,
+    .historial-fila-actual td {
+        padding: 4px 2px;
+        font-size: 0.68rem;
+    }
+
+    .historial-panel-header {
+        font-size: 0.75rem;
+        padding: 10px 12px;
+    }
+}
+
+/* ── RESPONSIVE: MOBILE LANDSCAPE ── */
+@media (orientation: landscape) and (max-height: 500px) {
+    #btn-historial-recursos {
+        width: 38px;
+        height: 38px;
+        font-size: 0.95rem;
+    }
+
+    #historial-recursos-panel {
+        width: 280px;
+        max-height: 280px;
+        top: 8px; /* Esquina superior derecha */
+        right: 8px;
+    }
+
+    .historial-encabezado th {
+        padding: 5px 2px;
+        font-size: 0.60rem;
+    }
+
+    .historial-fila td,
+    .historial-fila-actual td {
+        padding: 3px 2px;
+        font-size: 0.62rem;
+    }
+
+    .historial-panel-header {
+        font-size: 0.70rem;
+        padding: 8px 10px;
+    }
+}
+
+/* ── RESPONSIVE: TABLET ── */
+@media (min-width: 768px) and (max-width: 1024px) {
+    #btn-historial-recursos {
+        width: 46px;
+        height: 46px;
+        font-size: 1.1rem;
+    }
+
+    #historial-recursos-panel {
+        width: 300px;
+        max-height: 350px;
+        top: 60px; /* Debajo de controles en esquina superior */
+        right: 8px;
+    }
+
+    .historial-encabezado th {
+        padding: 7px 3px;
+        font-size: 0.70rem;
+    }
+
+    .historial-fila td,
+    .historial-fila-actual td {
+        padding: 5px 3px;
+        font-size: 0.72rem;
+    }
+
+    .historial-panel-header {
+        font-size: 0.80rem;
+        padding: 11px 13px;
+    }
+}
+
+/* ── RESPONSIVE: DESKTOP ── */
+@media (min-width: 1025px) {
+    #btn-historial-recursos {
+        width: 48px;
+        height: 48px;
+        font-size: 1.25rem;
+    }
+
+    #historial-recursos-panel {
+        width: 340px;
+        max-height: 450px;
+        top: 110px; /* Debajo de controles */
+        right: 12px;
+    }
+
+    .historial-encabezado th {
+        padding: 9px 5px;
+        font-size: 0.75rem;
+    }
+
+    .historial-fila td,
+    .historial-fila-actual td {
+        padding: 7px 5px;
+        font-size: 0.78rem;
+    }
+
+    .historial-panel-header {
+        font-size: 0.90rem;
+        padding: 13px 15px;
+    }
+}

@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="../estilos/Hud.css">
     <link rel="stylesheet" href="../estilos/Modales.css">
     <link rel="stylesheet" href="../estilos/Widgets.css">
+    <link rel="stylesheet" href="../estilos/historialRecursos.css">
     <link rel="stylesheet" href="../estilos/recoleccionBurbujas.css">
     <link rel="stylesheet" href="../estilos/ciudadanos.css">
     <link rel="stylesheet" href="../estilos/ResponsiveBase.css">
@@ -602,6 +603,9 @@
 
     <!-- ===== WIDGETS CLIMA Y NOTICIAS ===== -->
     <div id="widgets-container">
+        <button class="widget-btn" id="btn-historial-recursos" title="Ver historial de recursos">
+            <span>📈</span>
+        </button>
         <button class="widget-btn" id="widget-clima-btn" title="Ver clima">
             <span class="widget-clima-icono" id="widget-clima-icono">🌤️</span>
             <span class="widget-clima-temp" id="widget-clima-temp">--°C</span>
@@ -618,6 +622,12 @@
         <div class="clima-infobox-body" id="clima-infobox-body">
             <div class="clima-loading">Cargando...</div>
         </div>
+    </div>
+
+    <!-- ===== PANEL HISTORIAL DE RECURSOS ===== -->
+    <div id="historial-recursos-panel" data-visible="false">
+        <div class="historial-panel-header">📈 HISTORIAL DE RECURSOS</div>
+        <table id="historial-recursos-tabla"></table>
     </div>
 
     <aside class="noticias-panel" id="noticias-panel" data-open="false">

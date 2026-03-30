@@ -23,6 +23,7 @@ import {
     manejarClickCeldaDemolicion,
     mostrarInfoEdificio,
     registrarEdificio,
+    buscarEdificioPorCoordenada,
     reconstruirMapaDelInitDelayado
 } from './gestorDemolicion.js';
  

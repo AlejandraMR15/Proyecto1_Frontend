@@ -351,6 +351,11 @@ import { historialRecursos } from './historialRecursos.js';
 
             // Limpiar config para que una recarga no re-cree la ciudad
             localStorage.removeItem(CLAVE_CONFIG_NUEVA);
+            
+            // Limpiar historial solo al crear nueva partida
+            if (typeof historialRecursos !== 'undefined') {
+                historialRecursos.limpiar();
+            }
 
         } else {
             // Acceso directo a index.html sin pasar por el menú
@@ -437,8 +442,6 @@ import { historialRecursos } from './historialRecursos.js';
         try {
             historialRecursos.inicializar();
             window.historialRecursos = historialRecursos;
-            // Limpiar el historial para nueva partida
-            historialRecursos.limpiar();
         } catch (err) {
             console.error('[HistorialRecursos] Error al inicializar:', err);
         }

@@ -60,7 +60,7 @@
     border: 2px solid var(--historial-border);
     border-radius: 8px;
     box-shadow: var(--historial-shadow);
-    z-index: 400;
+    z-index: 601;
     display: flex;
     flex-direction: column;
     opacity: 0;
@@ -94,11 +94,14 @@
 /* ── TABLA DE HISTORIAL ── */
 #historial-recursos-tabla {
     flex: 1;
-    overflow-y: auto;
+    overflow-y: scroll;
+    overflow-x: hidden;
     font-size: 0.78rem;
     border-collapse: collapse;
     width: 100%;
-    padding: 0 2px;
+    padding: 0;
+    min-height: 0;
+    display: block;
 }
 
 #historial-recursos-tabla thead {
@@ -107,6 +110,16 @@
     background: linear-gradient(90deg, #0a1218 0%, #0f1b28 100%);
     z-index: 10;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+#historial-recursos-tabla tbody {
+    display: block;
+}
+
+#historial-recursos-tabla tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
 }
 
 .historial-encabezado {
@@ -122,6 +135,26 @@
     border-bottom: 2px solid var(--historial-border);
     text-align: center;
     font-size: 0.68rem;
+}
+
+.historial-col-turno {
+    width: 15%;
+}
+
+.historial-col-dinero {
+    width: 28%;
+}
+
+.historial-col-electricidad {
+    width: 19%;
+}
+
+.historial-col-agua {
+    width: 19%;
+}
+
+.historial-col-comida {
+    width: 19%;
 }
 
 .historial-fila {
@@ -156,12 +189,14 @@
 .historial-fila-actual td {
     padding: 8px 5px;
     text-align: center;
+    display: table-cell;
 }
 
 .historial-turno {
     font-weight: 700;
     color: var(--historial-accent);
     min-width: 45px;
+    display: table-cell;
 }
 
 .historial-dinero {
@@ -186,23 +221,26 @@
 
 /* ── SCROLLBAR PERSONALIZADO ── */
 #historial-recursos-tabla::-webkit-scrollbar {
-    width: 8px;
+    width: 10px;
 }
 
 #historial-recursos-tabla::-webkit-scrollbar-track {
-    background: rgba(61, 107, 138, 0.15);
-    border-radius: 4px;
+    background: linear-gradient(180deg, rgba(61, 107, 138, 0.15), rgba(61, 107, 138, 0.08));
+    border-radius: 5px;
+    margin: 2px 0;
 }
 
 #historial-recursos-tabla::-webkit-scrollbar-thumb {
-    background: var(--historial-border);
-    border-radius: 4px;
-    border: 2px solid rgba(61, 107, 138, 0.15);
+    background: linear-gradient(180deg, var(--historial-electricidad), var(--historial-accent));
+    border-radius: 5px;
+    border: 2px solid rgba(61, 107, 138, 0.2);
+    min-height: 40px;
 }
 
 #historial-recursos-tabla::-webkit-scrollbar-thumb:hover {
-    background: var(--historial-accent);
-    border-color: rgba(255, 215, 0, 0.2);
+    background: linear-gradient(180deg, #ffb6c1, #ffe66d);
+    border-color: rgba(255, 215, 0, 0.4);
+    box-shadow: 0 0 6px rgba(255, 215, 0, 0.3);
 }
 
 /* ── RESPONSIVE: MOBILE PORTRAIT ── */

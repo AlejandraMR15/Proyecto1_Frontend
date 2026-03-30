@@ -16,6 +16,9 @@ class HistorialRecursos {
         // Máximo de registros guardados
         this.MAX_REGISTROS = 20;
         
+        // Clave de localStorage
+        this.STORAGE_KEY = 'historial-recursos-ciudad';
+        
         // Array de objetos {turno, dinero, electricidad, agua, comida, timestamp}
         this.registros = [];
         
@@ -27,7 +30,7 @@ class HistorialRecursos {
     }
 
     /**
-     * Inicializa los event listeners del panel de historial.
+     * Inicializa los event listeners del panel de historial y carga datos persistidos.
      * Debe llamarse una sola vez en DOMContentLoaded.
      */
     inicializar() {
@@ -39,6 +42,9 @@ class HistorialRecursos {
             console.warn('[HistorialRecursos] Elementos del DOM no encontrados');
             return;
         }
+
+        // Cargar historial desde localStorage
+        this._cargarDelStorage();
 
         // Click en botón para abrir/cerrar (usar stopPropagation para evitar cerrar inmediatamente)
         this.btnEl.addEventListener('click', (e) => {
@@ -90,6 +96,9 @@ class HistorialRecursos {
             this.registros.pop();
         }
 
+        // Guardar en localStorage
+        this._guardarAlStorage();
+
         // Actualizar tabla si el panel está abierto
         if (this.estaAbierto) {
             this._actualizarTabla();
@@ -135,41 +144,23 @@ class HistorialRecursos {
     _actualizarTabla() {
         if (!this.tablaEl) return;
 
-        // Limpiar tabla
-        this.tablaEl.innerHTML = '';
+        // Obtener o crear tbody (ya debe existir en el HTML)
+        let tbody = this.tablaEl.querySelector('tbody');
+        if (!tbody) {
+            console.warn('[HistorialRecursos] tbody no encontrado en tabla');
+            return;
+        }
+
+        // Limpiar tbody
+        tbody.innerHTML = '';
 
         if (this.registros.length === 0) {
             const fila = document.createElement('tr');
             fila.className = 'historial-fila-vacia';
             fila.innerHTML = '<td colspan="5">📊 Sin historial aún</td>';
-            this.tablaEl.appendChild(fila);
+            tbody.appendChild(fila);
             return;
         }
-
-        // Agregar encabezado solo si no existe
-        if (this.tablaEl.querySelector('thead') === null) {
-            const thead = document.createElement('thead');
-            thead.innerHTML = `
-                <tr class="historial-encabezado">
-                    <th style="width: 15%;">Turno</th>
-                    <th style="width: 28%;">💰 Dinero</th>
-                    <th style="width: 19%;">⚡ Elec.</th>
-                    <th style="width: 19%;">💧 Agua</th>
-                    <th style="width: 19%;">🍎 Comida</th>
-                </tr>
-            `;
-            this.tablaEl.appendChild(thead);
-        }
-
-        // Crear tbody si no existe
-        let tbody = this.tablaEl.querySelector('tbody');
-        if (!tbody) {
-            tbody = document.createElement('tbody');
-            this.tablaEl.appendChild(tbody);
-        }
-
-        // Limpiar tbody
-        tbody.innerHTML = '';
 
         // Agregar filas de registros
         this.registros.forEach((reg, idx) => {
@@ -201,6 +192,12 @@ class HistorialRecursos {
      */
     limpiar() {
         this.registros = [];
+        // Limpiar también del localStorage
+        try {
+            localStorage.removeItem(this.STORAGE_KEY);
+        } catch (err) {
+            console.warn('[HistorialRecursos] Error limpiando localStorage:', err);
+        }
         if (this.estaAbierto) {
             this._actualizarTabla();
         }
@@ -213,6 +210,40 @@ class HistorialRecursos {
      */
     obtenerUltimos(cantidad = 20) {
         return this.registros.slice(0, cantidad);
+    }
+
+    /**
+     * Guarda el historial en localStorage.
+     * @private
+     */
+    _guardarAlStorage() {
+        try {
+            const datos = JSON.stringify(this.registros);
+            localStorage.setItem(this.STORAGE_KEY, datos);
+        } catch (err) {
+            console.warn('[HistorialRecursos] Error guardando en localStorage:', err);
+        }
+    }
+
+    /**
+     * Carga el historial desde localStorage.
+     * @private
+     */
+    _cargarDelStorage() {
+        try {
+            const datos = localStorage.getItem(this.STORAGE_KEY);
+            if (datos) {
+                this.registros = JSON.parse(datos);
+                // Asegurarse de no exceder el máximo
+                if (this.registros.length > this.MAX_REGISTROS) {
+                    this.registros = this.registros.slice(0, this.MAX_REGISTROS);
+                    this._guardarAlStorage(); // Guardar versión limpia
+                }
+            }
+        } catch (err) {
+            console.warn('[HistorialRecursos] Error cargando desde localStorage:', err);
+            this.registros = [];
+        }
     }
 }
 

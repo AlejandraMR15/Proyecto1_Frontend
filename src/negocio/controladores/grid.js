@@ -17,7 +17,6 @@ import MovimientoCiudadanos from '../logica/MovimientoCiudadanos.js';
 import { historialRecursos } from './historialRecursos.js';
 import { crearControlCamara } from './cameraController.js';
 import { nombreEtiquetaPorCodigo } from './etiquetasMapa.js';
-import { getRuntimeCss } from './runtimeCss.js';
 
 (function () {
     "use strict";
@@ -43,14 +42,6 @@ import { getRuntimeCss } from './runtimeCss.js';
        TOOLTIP
     ============================================================ */
     const tooltip = document.getElementById('tooltip');
-    const runtimeCss = getRuntimeCss('grid-tooltip');
-
-    function actualizarPosicionTooltip(x, y) {
-        runtimeCss.setRule(
-            'tooltip-position',
-            `#tooltip.visible { left: ${x}px; top: ${y}px; }`
-        );
-    }
 
     /**
      * Muestra el tooltip en la posición del puntero.
@@ -59,8 +50,9 @@ import { getRuntimeCss } from './runtimeCss.js';
      */
     function showTooltip(e, text) {
         tooltip.textContent = text;
+        tooltip.style.setProperty('--tooltip-x', e.clientX + 'px');
+        tooltip.style.setProperty('--tooltip-y', e.clientY + 'px');
         tooltip.classList.add('visible');
-        actualizarPosicionTooltip(e.clientX + 14, e.clientY - 32);
     }
 
     /**
@@ -69,12 +61,6 @@ import { getRuntimeCss } from './runtimeCss.js';
     function hideTooltip() {
         tooltip.classList.remove('visible');
     }
-
-    document.addEventListener('mousemove', function (e) {
-        if (tooltip.classList.contains('visible')) {
-            actualizarPosicionTooltip(e.clientX + 14, e.clientY - 32);
-        }
-    });
 
     /* ============================================================
        INIT — Juego + Mapa + GridRenderer

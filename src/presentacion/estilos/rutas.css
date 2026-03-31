@@ -109,8 +109,9 @@ body.sidebar-cerrado #btn-calcular-ruta {
 /* ---- Toast de notificaciones del sistema de rutas ---- */
 #toast-ruta {
     position: fixed;
-    bottom: 188px;
-    left: 112px;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
     z-index: 9000;
 
     padding: 9px 18px;

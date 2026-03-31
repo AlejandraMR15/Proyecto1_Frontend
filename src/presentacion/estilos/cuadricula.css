@@ -65,9 +65,16 @@ html, body {
 #viewport {
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
-    overflow: hidden;
+    overflow: auto;
     cursor: grab;
     user-select: none;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+#viewport::-webkit-scrollbar {
+    width: 0;
+    height: 0;
 }
 
 #viewport.dragging {
@@ -86,11 +93,68 @@ html, body {
     will-change: transform;
 }
 
+#canvas-wrap.zoom-level-30 { transform: scale(0.30); }
+#canvas-wrap.zoom-level-35 { transform: scale(0.35); }
+#canvas-wrap.zoom-level-40 { transform: scale(0.40); }
+#canvas-wrap.zoom-level-45 { transform: scale(0.45); }
+#canvas-wrap.zoom-level-50 { transform: scale(0.50); }
+#canvas-wrap.zoom-level-55 { transform: scale(0.55); }
+#canvas-wrap.zoom-level-60 { transform: scale(0.60); }
+#canvas-wrap.zoom-level-65 { transform: scale(0.65); }
+#canvas-wrap.zoom-level-70 { transform: scale(0.70); }
+#canvas-wrap.zoom-level-75 { transform: scale(0.75); }
+#canvas-wrap.zoom-level-80 { transform: scale(0.80); }
+#canvas-wrap.zoom-level-85 { transform: scale(0.85); }
+#canvas-wrap.zoom-level-90 { transform: scale(0.90); }
+#canvas-wrap.zoom-level-95 { transform: scale(0.95); }
+#canvas-wrap.zoom-level-100 { transform: scale(1.00); }
+#canvas-wrap.zoom-level-105 { transform: scale(1.05); }
+#canvas-wrap.zoom-level-110 { transform: scale(1.10); }
+#canvas-wrap.zoom-level-115 { transform: scale(1.15); }
+#canvas-wrap.zoom-level-120 { transform: scale(1.20); }
+#canvas-wrap.zoom-level-125 { transform: scale(1.25); }
+#canvas-wrap.zoom-level-130 { transform: scale(1.30); }
+#canvas-wrap.zoom-level-135 { transform: scale(1.35); }
+#canvas-wrap.zoom-level-140 { transform: scale(1.40); }
+#canvas-wrap.zoom-level-145 { transform: scale(1.45); }
+#canvas-wrap.zoom-level-150 { transform: scale(1.50); }
+#canvas-wrap.zoom-level-155 { transform: scale(1.55); }
+#canvas-wrap.zoom-level-160 { transform: scale(1.60); }
+#canvas-wrap.zoom-level-165 { transform: scale(1.65); }
+#canvas-wrap.zoom-level-170 { transform: scale(1.70); }
+#canvas-wrap.zoom-level-175 { transform: scale(1.75); }
+#canvas-wrap.zoom-level-180 { transform: scale(1.80); }
+#canvas-wrap.zoom-level-185 { transform: scale(1.85); }
+#canvas-wrap.zoom-level-190 { transform: scale(1.90); }
+#canvas-wrap.zoom-level-195 { transform: scale(1.95); }
+#canvas-wrap.zoom-level-200 { transform: scale(2.00); }
+#canvas-wrap.zoom-level-205 { transform: scale(2.05); }
+#canvas-wrap.zoom-level-210 { transform: scale(2.10); }
+#canvas-wrap.zoom-level-215 { transform: scale(2.15); }
+#canvas-wrap.zoom-level-220 { transform: scale(2.20); }
+#canvas-wrap.zoom-level-225 { transform: scale(2.25); }
+#canvas-wrap.zoom-level-230 { transform: scale(2.30); }
+#canvas-wrap.zoom-level-235 { transform: scale(2.35); }
+#canvas-wrap.zoom-level-240 { transform: scale(2.40); }
+#canvas-wrap.zoom-level-245 { transform: scale(2.45); }
+#canvas-wrap.zoom-level-250 { transform: scale(2.50); }
+#canvas-wrap.zoom-level-255 { transform: scale(2.55); }
+#canvas-wrap.zoom-level-260 { transform: scale(2.60); }
+#canvas-wrap.zoom-level-265 { transform: scale(2.65); }
+#canvas-wrap.zoom-level-270 { transform: scale(2.70); }
+#canvas-wrap.zoom-level-275 { transform: scale(2.75); }
+#canvas-wrap.zoom-level-280 { transform: scale(2.80); }
+#canvas-wrap.zoom-level-285 { transform: scale(2.85); }
+#canvas-wrap.zoom-level-290 { transform: scale(2.90); }
+#canvas-wrap.zoom-level-295 { transform: scale(2.95); }
+#canvas-wrap.zoom-level-300 { transform: scale(3.00); }
+
 /* ---- ESCENA ISO ---- */
 #iso-scene {
     position: relative;
     display: inline-block;
-    padding: 120px 180px 200px 180px;
+    /* Margen amplio simétrico para mantener pan funcional incluso en zoom bajo */
+    padding: 620px 1600px 620px 1600px;
 }
 
 /* ---- GRID ---- */
@@ -162,6 +226,9 @@ html, body {
 /* ---- TOOLTIP ---- */
 #tooltip {
     position: fixed;
+    top: var(--tooltip-y, 14px);
+    left: var(--tooltip-x, 14px);
+    transform: translateY(-110%);
     background: #071018;
     border: 1px solid #2e7a94;
     color: #a8dff0;

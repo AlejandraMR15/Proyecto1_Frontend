@@ -24,7 +24,6 @@
 
 import Mapa from '../../modelos/Mapa.js';
 import { coloresPorEtiqueta, crearSVGCelda, esEdificio } from './gridRendererVisuals.js';
-import { getRuntimeCss } from './runtimeCss.js';
 
 export default class GridRenderer {
 
@@ -72,23 +71,8 @@ export default class GridRenderer {
         // Permite actualizaciones O(1) sin recorrer el DOM.
         this._cubos = new Map();
 
-        // Contenedor para las burbujas de recursos
-        this._burbujesEl = null;
-
         // Offset X guardado en tiempo de construcción para usar en animaciones
         this._offsetX = 0;
-
-        this._runtimeCss = getRuntimeCss('grid-renderer');
-        this._burbujaSeq = 0;
-
-        this._runtimeCss.setRule(
-            'svg-top-plano',
-            `.iso-cube-svg.iso-svg-plano { top: -${this.TD}px; }`
-        );
-        this._runtimeCss.setRule(
-            'svg-top-edificio',
-            `.iso-cube-svg.iso-svg-edificio { top: -${this.TH / 2}px; }`
-        );
     }
 
     /* ------------------------------------------------------------------ */
@@ -104,15 +88,6 @@ export default class GridRenderer {
         if (!this._gridEl) {
             throw new Error(`GridRenderer: no se encontró el elemento #${this.contenedorId}`);
         }
-
-        // Crear contenedor para las burbujas de recursos como overlay fijo en el body.
-        // Debe estar fuera del canvas-wrap para no verse afectado por overflow:hidden
-        // del viewport, y para que las coordenadas sean relativas a la pantalla.
-        const existente = document.getElementById('burbujas-recursos');
-        if (existente) existente.remove();
-        this._burbujesEl = document.createElement('div');
-        this._burbujesEl.id = 'burbujas-recursos';
-        document.body.appendChild(this._burbujesEl);
 
         // Aseguramos que Mapa tenga una matriz generada
         if (!Array.isArray(this.mapa.matriz) || this.mapa.matriz.length === 0) {
@@ -203,6 +178,7 @@ export default class GridRenderer {
     _construirGrid() {
         const cols = this.mapa.ancho;
         const rows = this.mapa.alto;
+        const tamanoCuadrado = Math.max(cols, rows);
 
         // Offset para que ningún cubo tenga x < 0
         const minX = this._gridToScreen(0, rows - 1).x;
@@ -213,11 +189,8 @@ export default class GridRenderer {
         const maxY = this._gridToScreen(cols - 1, rows - 1).y + this.TH + this.TD;
         this._gridWidthPx = maxX + this._offsetX;
         this._gridHeightPx = maxY;
-
-        this._runtimeCss.setRule(
-            'grid-size',
-            `#${this.contenedorId} { width: ${this._gridWidthPx}px; height: ${this._gridHeightPx}px; }`
-        );
+        this._gridEl.classList.remove(...Array.from(this._gridEl.classList).filter((c) => c.startsWith('iso-grid-size-')));
+        this._gridEl.classList.add(`iso-grid-size-${tamanoCuadrado}`);
 
         // Painter's Algorithm: renderizar de menor a mayor (col + row)
         const celdas = [];
@@ -229,7 +202,7 @@ export default class GridRenderer {
         celdas.sort((a, b) => (a.row + a.col) - (b.row + b.col));
 
         celdas.forEach(({ row, col }, idx) => {
-            const cubo = this._crearCubo(col, row, this._offsetX, idx);
+            const cubo = this._crearCubo(col, row, idx);
             this._gridEl.appendChild(cubo);
             this._cubos.set(`${col},${row}`, cubo);
         });
@@ -324,8 +297,7 @@ export default class GridRenderer {
      * Lee la etiqueta actual de Mapa para asignar los colores correctos.
      * @private
      */
-    _crearCubo(col, row, offsetX, idx) {
-        const { x, y } = this._gridToScreen(col, row);
+    _crearCubo(col, row, idx) {
         const etiqueta = this.mapa.matriz[row][col] ?? 'g';
 
         // Wrapper: posicionado en la cara INFERIOR (poly-bottom)
@@ -337,7 +309,7 @@ export default class GridRenderer {
         cubo.dataset.col = col;
         cubo.dataset.row = row;
         cubo.dataset.etiqueta = etiqueta;
-        cubo.classList.add(this._asegurarClasePosicionCubo(col, row, x + offsetX, y + this.TD, row + col));
+        cubo.classList.add(`iso-col-${col}`, `iso-row-${row}`);
 
         const colores = coloresPorEtiqueta(etiqueta);
         const svg = crearSVGCelda({
@@ -410,29 +382,6 @@ export default class GridRenderer {
         setTimeout(() => {
             cubo.classList.remove('iso-cube--cambio');
         }, 250);
-    }
-
-    _asegurarClasePosicionCubo(col, row, left, top, zIndex) {
-        const className = `iso-cube-pos-${col}-${row}`;
-        const ruleKey = `iso-cube-pos-${col}-${row}`;
-        this._runtimeCss.setRule(
-            ruleKey,
-            `.${className} { left: ${left}px; top: ${top}px; width: ${this.TW}px; height: ${this.TH}px; z-index: ${zIndex}; }`
-        );
-        return className;
-    }
-
-    _leerEscalaCanvas(canvasWrap) {
-        if (!canvasWrap) return 1;
-        const transform = window.getComputedStyle(canvasWrap).transform;
-        if (!transform || transform === 'none') return 1;
-        const match2d = transform.match(/^matrix\(([^)]+)\)$/);
-        if (!match2d) return 1;
-        const vals = match2d[1].split(',').map(v => parseFloat(v.trim()));
-        if (vals.length < 2) return 1;
-        const a = vals[0] || 1;
-        const b = vals[1] || 0;
-        return Math.sqrt((a * a) + (b * b));
     }
 
     /* ------------------------------------------------------------------ */
@@ -556,12 +505,6 @@ export default class GridRenderer {
      * @param {number} cantidad - Cantidad del recurso
      */
     mostrarBurbuja(col, row, tipo, cantidad) {
-        
-        if (!this._burbujesEl) {
-            console.error('[GridRenderer] ERROR: _burbujesEl no existe. El contenedor no fue inicializado.');
-            return;
-        }
-
         // Mapeo de tipos de recurso a emojis
         const iconos = {
             'dinero': '💵',
@@ -573,36 +516,15 @@ export default class GridRenderer {
 
         const icono = iconos[tipo] || '📦';
 
-        // Obtener posición en pantalla usando el cubo DOM real.
-        // Como el contenedor de burbujas es position:fixed en el body,
-        // necesitamos coordenadas de pantalla (getBoundingClientRect).
         const claveRef = `${col},${row}`;
         const cuboEl = this._cubos.get(claveRef);
-        let posX, posY;
-        if (cuboEl) {
-            const rect = cuboEl.getBoundingClientRect();
-            posX = rect.left + rect.width / 2;
-            posY = rect.top + rect.height / 2;
-        } else {
-            // Fallback: calcular con coordenadas isométricas + transform del canvas
-            const canvasWrap = document.getElementById('canvas-wrap');
-            const canvasRect = canvasWrap ? canvasWrap.getBoundingClientRect() : { left: 0, top: 0 };
-            const { x, y } = this._gridToScreen(col, row);
-            const scale = this._leerEscalaCanvas(canvasWrap);
-            posX = canvasRect.left + (x + this._offsetX + this.TW / 2) * scale;
-            posY = canvasRect.top + (y + this.TH / 2) * scale;
-        }
+        const contenedorBurbuja = cuboEl || this._gridEl;
+        if (!contenedorBurbuja) return;
 
         // Crear elemento de burbuja
         const burbuja = document.createElement('div');
         burbuja.className = 'burbuja-recurso';
         burbuja.dataset.tipo = tipo;
-        const bubbleClass = `burbuja-pos-${++this._burbujaSeq}`;
-        burbuja.classList.add(bubbleClass);
-        this._runtimeCss.setRule(
-            `burbuja-pos-${this._burbujaSeq}`,
-            `.${bubbleClass} { left: ${posX}px; top: ${posY}px; transform: translate(-50%, -50%); }`
-        );
 
         // Agregar cantidad si es > 1
         if (cantidad > 1) {
@@ -614,7 +536,7 @@ export default class GridRenderer {
 
         burbuja.appendChild(document.createTextNode(icono));
 
-        this._burbujesEl.appendChild(burbuja);
+        contenedorBurbuja.appendChild(burbuja);
 
         // Forzar reflow para que la animación inicial sea visible
         void burbuja.offsetHeight;

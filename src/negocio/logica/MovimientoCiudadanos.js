@@ -16,8 +16,6 @@
  *  movimiento.detener();                  // para el loop (p. ej. al pausar el juego)
  */
 
-import { getRuntimeCss } from '../controladores/runtimeCss.js';
-
 export default class MovimientoCiudadanos {
 
     /* ------------------------------------------------------------------ */
@@ -54,7 +52,6 @@ export default class MovimientoCiudadanos {
     this._gridEl = null;
     this._sprites = new Map();
     this._intervaloId = null;
-    this._runtimeCss = getRuntimeCss('movimiento-ciudadanos');
 }
 
     /* ------------------------------------------------------------------ */
@@ -219,40 +216,12 @@ export default class MovimientoCiudadanos {
      * @param {number}      row
      */
     _posicionarSprite(sprite, col, row) {
-        const TW     = this.renderer.TW;
-        const TH     = this.renderer.TH;
-        const STEP_X = this.renderer.STEP_X;
-        const STEP_Y = this.renderer.STEP_Y;
+        for (let i = 0; i < 30; i++) {
+            sprite.classList.remove(`cit-col-${i}`);
+            sprite.classList.remove(`cit-row-${i}`);
+        }
 
-        const screenX = (col - row) * STEP_X;
-        const screenY = (col + row) * STEP_Y;
-
-        const rows    = this.mapa.alto;
-        const minX    = (0 - (rows - 1)) * STEP_X;
-        const offsetX = -minX;
-
-        const TD = this.renderer.TD ?? 0;
-        const spriteSize = 10;
-
-        // Antes se usaba TD completo; eso puede dar efecto de hundimiento.
-        const roadYOffset = TD * this.roadYOffsetFactor;
-
-        const left = screenX + offsetX + (TW / 2) - (spriteSize / 2);
-        const top  = screenY + roadYOffset + (TH / 2) - (spriteSize / 2);
-        const z = col + row;
-        this._actualizarClasePosicionSprite(sprite, left, top, z);
-    }
-
-    _actualizarClasePosicionSprite(sprite, left, top, zIndex) {
-        if (!this._runtimeCss) return;
-        const rawId = String(sprite.dataset.id || 'sprite');
-        const safeId = rawId.replace(/[^a-zA-Z0-9_-]/g, '_');
-        const className = `citizen-pos-${safeId}`;
-        sprite.classList.add(className);
-        this._runtimeCss.setRule(
-            `citizen-pos-${safeId}`,
-            `.${className} { left: ${left}px; top: ${top}px; z-index: ${zIndex}; }`
-        );
+        sprite.classList.add(`cit-col-${col}`, `cit-row-${row}`);
     }
 
     /* ------------------------------------------------------------------ */

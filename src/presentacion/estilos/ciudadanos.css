@@ -1,6 +1,8 @@
 /* ---- CIUDADANOS ---- */
 .citizen-sprite {
     position: absolute;
+    left: calc(var(--grid-offset-x, 0px) + (var(--cit-col, 0) - var(--cit-row, 0)) * 32px + 27px);
+    top: calc((var(--cit-col, 0) + var(--cit-row, 0)) * 16px + 24px);
     width:  10px;
     height: 10px;
     border-radius: 50%;
@@ -13,6 +15,68 @@
     border: 1.5px solid #a89800;
     box-shadow: 0 0 4px rgba(240, 224, 64, 0.7);
 }
+
+.cit-col-0 { --cit-col: 0; }
+.cit-col-1 { --cit-col: 1; }
+.cit-col-2 { --cit-col: 2; }
+.cit-col-3 { --cit-col: 3; }
+.cit-col-4 { --cit-col: 4; }
+.cit-col-5 { --cit-col: 5; }
+.cit-col-6 { --cit-col: 6; }
+.cit-col-7 { --cit-col: 7; }
+.cit-col-8 { --cit-col: 8; }
+.cit-col-9 { --cit-col: 9; }
+.cit-col-10 { --cit-col: 10; }
+.cit-col-11 { --cit-col: 11; }
+.cit-col-12 { --cit-col: 12; }
+.cit-col-13 { --cit-col: 13; }
+.cit-col-14 { --cit-col: 14; }
+.cit-col-15 { --cit-col: 15; }
+.cit-col-16 { --cit-col: 16; }
+.cit-col-17 { --cit-col: 17; }
+.cit-col-18 { --cit-col: 18; }
+.cit-col-19 { --cit-col: 19; }
+.cit-col-20 { --cit-col: 20; }
+.cit-col-21 { --cit-col: 21; }
+.cit-col-22 { --cit-col: 22; }
+.cit-col-23 { --cit-col: 23; }
+.cit-col-24 { --cit-col: 24; }
+.cit-col-25 { --cit-col: 25; }
+.cit-col-26 { --cit-col: 26; }
+.cit-col-27 { --cit-col: 27; }
+.cit-col-28 { --cit-col: 28; }
+.cit-col-29 { --cit-col: 29; }
+
+.cit-row-0 { --cit-row: 0; }
+.cit-row-1 { --cit-row: 1; }
+.cit-row-2 { --cit-row: 2; }
+.cit-row-3 { --cit-row: 3; }
+.cit-row-4 { --cit-row: 4; }
+.cit-row-5 { --cit-row: 5; }
+.cit-row-6 { --cit-row: 6; }
+.cit-row-7 { --cit-row: 7; }
+.cit-row-8 { --cit-row: 8; }
+.cit-row-9 { --cit-row: 9; }
+.cit-row-10 { --cit-row: 10; }
+.cit-row-11 { --cit-row: 11; }
+.cit-row-12 { --cit-row: 12; }
+.cit-row-13 { --cit-row: 13; }
+.cit-row-14 { --cit-row: 14; }
+.cit-row-15 { --cit-row: 15; }
+.cit-row-16 { --cit-row: 16; }
+.cit-row-17 { --cit-row: 17; }
+.cit-row-18 { --cit-row: 18; }
+.cit-row-19 { --cit-row: 19; }
+.cit-row-20 { --cit-row: 20; }
+.cit-row-21 { --cit-row: 21; }
+.cit-row-22 { --cit-row: 22; }
+.cit-row-23 { --cit-row: 23; }
+.cit-row-24 { --cit-row: 24; }
+.cit-row-25 { --cit-row: 25; }
+.cit-row-26 { --cit-row: 26; }
+.cit-row-27 { --cit-row: 27; }
+.cit-row-28 { --cit-row: 28; }
+.cit-row-29 { --cit-row: 29; }
 
 .citizen-sprite.felicidad-critica {
     background: #e02020;

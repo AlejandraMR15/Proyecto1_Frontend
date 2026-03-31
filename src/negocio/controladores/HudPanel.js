@@ -17,10 +17,8 @@ import {
     actualizarDesgloseDOM,
     actualizarTooltipsRecursosDOM,
 } from './hudRenderUtils.js';
-import { getRuntimeCss } from './runtimeCss.js';
 
 export { fmt };
-const runtimeCss = getRuntimeCss('hud-panel');
 
 /* ================================================================
    ESTADO DEL TIMER — compartido con otros módulos
@@ -199,10 +197,11 @@ export function actualizarTimerDOM() {
     const pct = dur > 0 ? (act / dur) * 100 : 0;
 
     if (elBarraFill) {
-        runtimeCss.setRule(
-            'turno-barra-width',
-            `#turno-barra-fill { width: ${pct}%; }`
-        );
+        const nivel = Math.max(0, Math.min(100, Math.round(pct / 10) * 10));
+        for (let i = 0; i <= 100; i += 10) {
+            elBarraFill.classList.remove(`turno-pct-${i}`);
+        }
+        elBarraFill.classList.add(`turno-pct-${nivel}`);
     }
     if (elTiempoAct) elTiempoAct.textContent = act + 's';
     if (elTiempoTot) elTiempoTot.textContent = dur + 's';
@@ -305,20 +304,6 @@ export function observarSidebar() {
 
     function actualizarPosicionDesglose() {
         if (!panelDesglose || !perfil) return;
-
-        const esLandscape = window.matchMedia('(orientation: landscape) and (max-height: 500px)').matches;
-        
-        if (!esLandscape) {
-            runtimeCss.removeRule('hud-desglose-left-landscape');
-            return;
-        }
-
-        const rectPerfil = perfil.getBoundingClientRect();
-        const destinoIzq = Math.round(rectPerfil.right + 8); // 8px gap fijo para landscape
-        runtimeCss.setRule(
-            'hud-desglose-left-landscape',
-            `#hud-desglose { left: ${destinoIzq}px; }`
-        );
     }
 
     if (btnDesglose && panelDesglose) {

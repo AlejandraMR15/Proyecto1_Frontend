@@ -2,8 +2,6 @@ const ZOOM_MIN = 0.3;
 const ZOOM_MAX = 3.0;
 const ZOOM_STEP = 0.15;
 
-import { getRuntimeCss } from './runtimeCss.js';
-
 /**
  * Configura zoom, pan y gestos touch del viewport isometrico.
  * @param {{
@@ -15,13 +13,11 @@ import { getRuntimeCss } from './runtimeCss.js';
  */
 export function crearControlCamara(cfg) {
     const { viewport, canvasWrap, zoomLabel, getRenderer } = cfg;
-    const runtimeCss = getRuntimeCss('camera');
 
     let scale = 1.0;
-    let panX = 0;
-    let panY = 0;
     let isDragging = false;
-    let lastMouse = { x: 0, y: 0 };
+    let dragStartMouse = { x: 0, y: 0 };
+    let dragStartScroll = { x: 0, y: 0 };
 
     let lastTouches = null;
     let touchStartX = 0;
@@ -29,39 +25,47 @@ export function crearControlCamara(cfg) {
     let touchMoved = false;
     const TAP_UMBRAL = window.matchMedia('(min-width: 768px)').matches ? 14 : 8;
 
-    function applyTransform() {
-        const scene = document.getElementById('iso-scene');
-        if (scene) {
-            const sw = scene.offsetWidth * scale;
-            const sh = scene.offsetHeight * scale;
-            const vw = viewport.clientWidth;
-            const vh = viewport.clientHeight;
-            const marginX = sw * 0.5;
-            const marginY = sh * 0.5;
-            panX = Math.min(marginX, Math.max(vw - sw - marginX, panX));
-            panY = Math.min(marginY, Math.max(vh - sh - marginY, panY));
-        }
-        runtimeCss.setRule(
-            'canvas-wrap-transform',
-            `#canvas-wrap { transform: translate(${panX}px, ${panY}px) scale(${scale}); }`
-        );
+    function _normalizarScale(value) {
+        const clamped = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, value));
+        return Math.round(clamped * 20) / 20;
+    }
+
+    function _levelClassFromScale(value) {
+        const pct = Math.round(value * 100);
+        return `zoom-level-${pct}`;
+    }
+
+    function _setZoomClass(value) {
+        const normalized = _normalizarScale(value);
+        const prev = _levelClassFromScale(scale);
+        const next = _levelClassFromScale(normalized);
+        canvasWrap.classList.remove(prev);
+        canvasWrap.classList.add(next);
+        scale = normalized;
         if (zoomLabel) zoomLabel.textContent = Math.round(scale * 100) + '%';
+    }
+
+    function applyTransform() {
+        _setZoomClass(scale);
     }
 
     function centerView() {
         const scene = document.getElementById('iso-scene');
         if (!scene) return;
-        panX = (viewport.clientWidth - scene.offsetWidth * scale) / 2;
-        panY = (viewport.clientHeight - scene.offsetHeight * scale) / 2;
+        const targetX = Math.max(0, ((scene.offsetWidth * scale) - viewport.clientWidth) / 2);
+        const targetY = Math.max(0, ((scene.offsetHeight * scale) - viewport.clientHeight) / 2);
+        viewport.scrollLeft = targetX;
+        viewport.scrollTop = targetY;
     }
 
     function zoomAt(cx, cy, delta) {
-        const newScale = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, scale + delta));
+        const newScale = _normalizarScale(scale + delta);
         if (newScale === scale) return;
-        panX = cx - (cx - panX) * (newScale / scale);
-        panY = cy - (cy - panY) * (newScale / scale);
-        scale = newScale;
-        applyTransform();
+        const worldX = (viewport.scrollLeft + cx) / scale;
+        const worldY = (viewport.scrollTop + cy) / scale;
+        _setZoomClass(newScale);
+        viewport.scrollLeft = Math.max(0, (worldX * scale) - cx);
+        viewport.scrollTop = Math.max(0, (worldY * scale) - cy);
     }
 
     viewport.addEventListener('wheel', (e) => {
@@ -80,24 +84,24 @@ export function crearControlCamara(cfg) {
     });
 
     document.getElementById('btn-zoom-reset')?.addEventListener('click', () => {
-        scale = 1.0;
+        _setZoomClass(1.0);
         centerView();
-        applyTransform();
     });
 
     viewport.addEventListener('mousedown', (e) => {
         isDragging = true;
-        lastMouse = { x: e.clientX, y: e.clientY };
+        dragStartMouse = { x: e.clientX, y: e.clientY };
+        dragStartScroll = { x: viewport.scrollLeft, y: viewport.scrollTop };
         viewport.classList.add('dragging');
         e.preventDefault();
     });
 
     viewport.addEventListener('mousemove', (e) => {
         if (!isDragging) return;
-        panX += e.clientX - lastMouse.x;
-        panY += e.clientY - lastMouse.y;
-        lastMouse = { x: e.clientX, y: e.clientY };
-        applyTransform();
+        const dx = e.clientX - dragStartMouse.x;
+        const dy = e.clientY - dragStartMouse.y;
+        viewport.scrollLeft = dragStartScroll.x - dx;
+        viewport.scrollTop = dragStartScroll.y - dy;
     });
 
     document.addEventListener('mouseup', () => {
@@ -128,9 +132,8 @@ export function crearControlCamara(cfg) {
                     touchMoved = true;
                 }
             }
-            panX += dx;
-            panY += dy;
-            applyTransform();
+            viewport.scrollLeft -= dx;
+            viewport.scrollTop -= dy;
         } else if (e.touches.length === 2 && lastTouches?.length === 2) {
             const dist = (t) => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
             const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2;

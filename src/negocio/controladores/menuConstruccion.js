@@ -138,10 +138,11 @@ function mostrarNotificacion(mensaje, tipo = 'info') {
 
     notif.classList.toggle('notif-construccion--error', tipo === 'error');
     notif.textContent = mensaje;
-    notif.style.display = 'block';
-    notif.style.opacity = '1';
+    notif.classList.add('notif-construccion--visible');
     clearTimeout(notif._timeout);
-    notif._timeout = setTimeout(() => { notif.style.opacity = '0'; }, 2800);
+    notif._timeout = setTimeout(() => {
+        notif.classList.remove('notif-construccion--visible');
+    }, 2800);
 }
  
 /* ================================================================
@@ -155,11 +156,10 @@ function mostrarNotificacion(mensaje, tipo = 'info') {
  * @param {'crosshair'|'not-allowed'|''} cursor
  */
 function aplicarCursorModo(cursor) {
-    const vp = document.getElementById('viewport');
-    if (vp) vp.style.cursor = cursor;
-    const grid = document.getElementById('iso-grid');
-    if (grid) grid.style.cursor = cursor;
-    document.querySelectorAll('.iso-cube').forEach(el => el.style.cursor = cursor);
+    document.body.classList.remove('cursor-modo-construccion', 'cursor-modo-demolicion');
+    if (cursor === 'crosshair') {
+        document.body.classList.add('cursor-modo-construccion');
+    }
 }
 
 /* ================================================================

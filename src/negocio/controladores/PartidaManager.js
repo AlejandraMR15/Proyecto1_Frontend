@@ -15,6 +15,7 @@
 
 import StorageManager from '../../acceso_datos/StorageManager.js';
 import { timerEstado, detenerTimerTurno } from './HudPanel.js';
+import { leerPartidaDesdeArchivoJSON } from './ImportadorCiudad.js';
 
 export const storage = new StorageManager();
 
@@ -193,16 +194,8 @@ export function abrirModalImportar() {
  * @param {File} archivo
  */
 export function procesarArchivoImportacion(archivo) {
-    const reader = new FileReader();
-
-    reader.addEventListener('load', function (e) {
-        try {
-            const datos = JSON.parse(e.target.result);
-
-            if (!datos.cityName || !datos.map) {
-                throw new Error('El archivo no parece un JSON de ciudad válido.');
-            }
-
+    leerPartidaDesdeArchivoJSON(archivo)
+        .then((partida) => {
             const juego = window.juego;
 
             // Detener todo antes de reemplazar
@@ -210,21 +203,6 @@ export function procesarArchivoImportacion(archivo) {
             detenerTimerTurno();
             detenerAutosave();
             if (window.movimientoCiudadanos) window.movimientoCiudadanos.detener();
-
-            // Transformar al formato interno de StorageManager ('partida')
-            const partida = {
-                ciudad: {
-                    nombre:         datos.cityName,
-                    alcalde:        datos.mayor,
-                    recursos:       datos.resources || {},
-                    construcciones: datos.buildings || [],
-                    mapa:           datos.map,
-                    coordenadas:    datos.coordinates || null,
-                },
-                numeroTurno: datos.turn    || 0,
-                ciudadanos:  datos.citizens || [],
-                recoleccion: null,
-            };
 
             // Persistir y recargar limpio
             if (juego) {
@@ -238,8 +216,8 @@ export function procesarArchivoImportacion(archivo) {
 
             setModal(document.getElementById('modal-importar'), false);
             window.location.reload();
-
-        } catch (err) {
+        })
+        .catch((err) => {
             const aviso = document.getElementById('importar-aviso-error');
             const texto = document.getElementById('importar-error-texto');
             if (aviso && texto) {
@@ -247,19 +225,7 @@ export function procesarArchivoImportacion(archivo) {
                 aviso.dataset.visible = 'true';
             }
             console.error('[PartidaManager] Error al importar ciudad:', err);
-        }
-    });
-
-    reader.addEventListener('error', function () {
-        const aviso = document.getElementById('importar-aviso-error');
-        const texto = document.getElementById('importar-error-texto');
-        if (aviso && texto) {
-            texto.textContent = 'No se pudo leer el archivo.';
-            aviso.dataset.visible = 'true';
-        }
-    });
-
-    reader.readAsText(archivo);
+        });
 }
 
 /* ================================================================

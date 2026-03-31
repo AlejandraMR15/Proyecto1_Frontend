@@ -11,6 +11,17 @@
  * y las funciones `iniciarTimerTurno`, `detenerTimerTurno`, `onNuevoTurno`.
  */
 
+import {
+    fmt,
+    actualizarRecursoVisual,
+    actualizarDesgloseDOM,
+    actualizarTooltipsRecursosDOM,
+} from './hudRenderUtils.js';
+import { getRuntimeCss } from './runtimeCss.js';
+
+export { fmt };
+const runtimeCss = getRuntimeCss('hud-panel');
+
 /* ================================================================
    ESTADO DEL TIMER — compartido con otros módulos
 ================================================================ */
@@ -59,19 +70,20 @@ const elDsgBonifLista   = document.getElementById('dsg-bonif-lista');
 const elDsgPenalLista   = document.getElementById('dsg-penal-lista');
 const elDsgTotal        = document.getElementById('dsg-total');
 
-/* ================================================================
-   UTILIDADES
-================================================================ */
-
-/**
- * Formatea un número con separadores de miles (locale colombiano).
- * @param {number} n
- * @returns {string}
- */
-export function fmt(n) {
-    if (n === undefined || n === null) return '0';
-    return Math.round(n).toLocaleString('es-CO');
-}
+const refsDesglose = {
+    elDsgPoblacion,
+    elDsgFelicidad,
+    elDsgDinero,
+    elDsgEdificios,
+    elDsgElectricidad,
+    elDsgAgua,
+    elDsgSubtotal,
+    elDsgTotalBonif,
+    elDsgTotalPenal,
+    elDsgBonifLista,
+    elDsgPenalLista,
+    elDsgTotal,
+};
 
 /* ================================================================
    ACTUALIZAR HUD
@@ -95,9 +107,9 @@ export function actualizarHUD() {
     if (elScore)   elScore.textContent   = fmt(juego.puntaje || 0);
 
     // --- Recursos top-bar ---
-    _actualizarRecurso('hud-dinero',       elDinero,       '$' + fmt(recursos.dinero));
-    _actualizarRecurso('hud-electricidad', elElectricidad, fmt(recursos.electricidad) + ' u');
-    _actualizarRecurso('hud-agua',         elAgua,         fmt(recursos.agua) + ' u');
+    actualizarRecursoVisual('hud-dinero',       elDinero,       '$' + fmt(recursos.dinero));
+    actualizarRecursoVisual('hud-electricidad', elElectricidad, fmt(recursos.electricidad) + ' u');
+    actualizarRecursoVisual('hud-agua',         elAgua,         fmt(recursos.agua) + ' u');
 
     // --- Bienestar ---
     if (elComida)    elComida.textContent    = fmt(recursos.comida) + ' u';
@@ -128,70 +140,7 @@ export function actualizarHUD() {
  * @param {object} d - Objeto retornado por Puntuacion.obtenerDesglose()
  */
 function actualizarDesglose(d) {
-    if (!elDsgTotal) return;
-
-    const fmtPts = n => (n >= 0 ? '+' : '') + Math.round(n).toLocaleString('es-CO');
-
-    if (elDsgPoblacion)    elDsgPoblacion.textContent    = fmtPts(d.puntosPoblacion);
-    if (elDsgFelicidad)    elDsgFelicidad.textContent    = fmtPts(d.puntosFelicidad);
-    if (elDsgDinero)       elDsgDinero.textContent       = fmtPts(d.puntosDinero);
-    if (elDsgEdificios)    elDsgEdificios.textContent    = fmtPts(d.puntosEdificios);
-    if (elDsgElectricidad) elDsgElectricidad.textContent = fmtPts(d.puntosElectricidad);
-    if (elDsgAgua)         elDsgAgua.textContent         = fmtPts(d.puntosAgua);
-    if (elDsgSubtotal)     elDsgSubtotal.textContent     = fmtPts(d.subtotal);
-
-    if (elDsgTotalBonif) elDsgTotalBonif.textContent = '+' + d.totalBonificaciones.toLocaleString('es-CO');
-    if (elDsgTotalPenal) elDsgTotalPenal.textContent = '-' + d.totalPenalizaciones.toLocaleString('es-CO');
-
-    // Bonificaciones activas
-    if (elDsgBonifLista) {
-        const bonifs = [];
-        if (d.bonificaciones.empleadosTodos  > 0) bonifs.push('✓ +500 Todos empleados');
-        if (d.bonificaciones.felicidadAlta   > 0) bonifs.push('✓ +300 Felicidad > 80');
-        if (d.bonificaciones.recursosPositivos > 0) bonifs.push('✓ +200 Recursos positivos');
-        if (d.bonificaciones.poblacionGrande > 0) bonifs.push('✓ +1000 Más de 1.000 hab.');
-        elDsgBonifLista.innerHTML = bonifs.length
-            ? bonifs.map(t => `<div class="desglose-item-bonif">${t}</div>`).join('')
-            : '<div class="desglose-sin-items">Sin bonificaciones</div>';
-    }
-
-    // Penalizaciones activas
-    if (elDsgPenalLista) {
-        const penals = [];
-        if (d.penalizaciones.dineroNegativo       > 0) penals.push('✗ -500 Dinero negativo');
-        if (d.penalizaciones.electricidadNegativa > 0) penals.push('✗ -300 Sin electricidad');
-        if (d.penalizaciones.aguaNegativa         > 0) penals.push('✗ -300 Sin agua');
-        if (d.penalizaciones.felicidadBaja        > 0) penals.push('✗ -400 Felicidad < 40');
-        if (d.penalizaciones.desempleados         > 0) penals.push(`✗ -${d.penalizaciones.desempleados} Desempleados`);
-        elDsgPenalLista.innerHTML = penals.length
-            ? penals.map(t => `<div class="desglose-item-penal">${t}</div>`).join('')
-            : '<div class="desglose-sin-items">Sin penalizaciones</div>';
-    }
-
-    if (elDsgTotal) elDsgTotal.textContent = d.puntuacionFinal.toLocaleString('es-CO');
-}
-
-/**
- * Aplica clase 'negativo' y colores de dinero según el valor numérico.
- * @param {string} contenedorId
- * @param {HTMLElement} el
- * @param {string} texto
- */
-function _actualizarRecurso(contenedorId, el, texto) {
-    if (!el) return;
-    el.textContent = texto;
-    const contenedor = document.getElementById(contenedorId);
-    if (!contenedor) return;
-
-    const num = parseFloat(texto.replace(/[^0-9\-]/g, ''));
-    contenedor.classList.toggle('negativo', num < 0);
-
-    if (contenedorId === 'hud-dinero') {
-        el.classList.remove('dinero-verde', 'dinero-amarillo', 'dinero-rojo');
-        if (num >= 10000) el.classList.add('dinero-verde');
-        else if (num < 5000) el.classList.add('dinero-amarillo');
-        if (num < 1000) el.classList.add('dinero-rojo');
-    }
+    actualizarDesgloseDOM(d, refsDesglose);
 }
 
 /**
@@ -199,66 +148,7 @@ function _actualizarRecurso(contenedorId, el, texto) {
  * Lee los datos de window.estadisticasRecursos que se crea en Juego.ejecutarTurno()
  */
 export function actualizarTooltipsRecursos() {
-    // Inicializar con valores por defecto si no existen
-    if (!window.estadisticasRecursos) {
-        window.estadisticasRecursos = {
-            produccion: { dinero: 0, electricidad: 0, agua: 0, comida: 0 },
-            consumo: { dinero: 0, electricidad: 0, agua: 0, comida: 0 },
-            actual: { dinero: 0, electricidad: 0, agua: 0, comida: 0 }
-        };
-    }
-
-    const stats = window.estadisticasRecursos;
-    
-    // Configuración de recursos: [id-tooltip, tipo-recurso, sufijo]
-    const recursos = [
-        ['tooltip-dinero', 'dinero', ''],
-        ['tooltip-electricidad', 'electricidad', ' u'],
-        ['tooltip-agua', 'agua', ' u']
-    ];
-
-    recursos.forEach(([tooltipId, tipo, sufijo]) => {
-        const tooltip = document.getElementById(tooltipId);
-        if (!tooltip) {
-            console.warn(`[Tooltip] No se encontró elemento: #${tooltipId}`);
-            return;
-        }
-
-        let produccion = stats.produccion[tipo] || 0;
-        let consumo = stats.consumo[tipo] || 0;
-        
-        // Limitar agua a 2 decimales
-        if (tipo === 'agua') {
-            produccion = Math.round(produccion * 100) / 100;
-            consumo = Math.round(consumo * 100) / 100;
-        }
-        
-        const balance = produccion - consumo;
-
-        // Formatear valores
-        const prodText = produccion > 0 ? `+${produccion}` : `${produccion}`;
-        const consText = consumo > 0 ? `-${consumo}` : `${consumo}`;
-        const balText = balance > 0 ? `+${balance}` : `${balance}`;
-
-        // Actualizar el tooltip
-        const prodSpan = tooltip.querySelector('.tooltip-prod');
-        const consSpan = tooltip.querySelector('.tooltip-cons');
-        const balSpan = tooltip.querySelector('.tooltip-balance-val');
-
-        if (prodSpan) prodSpan.textContent = prodText + sufijo;
-        if (consSpan) consSpan.textContent = consText + sufijo;
-        if (balSpan) {
-            balSpan.textContent = balText + sufijo;
-            balSpan.classList.remove('tooltip-balance-pos', 'tooltip-balance-neg', 'tooltip-balance-neu');
-            if (balance > 0) {
-                balSpan.classList.add('tooltip-balance-pos');
-            } else if (balance < 0) {
-                balSpan.classList.add('tooltip-balance-neg');
-            } else {
-                balSpan.classList.add('tooltip-balance-neu');
-            }
-        }
-    });
+    actualizarTooltipsRecursosDOM();
 }
 
 /* ================================================================
@@ -308,7 +198,12 @@ export function actualizarTimerDOM() {
     const act = timerEstado.tiempoTranscurrido;
     const pct = dur > 0 ? (act / dur) * 100 : 0;
 
-    if (elBarraFill) elBarraFill.style.width = pct + '%';
+    if (elBarraFill) {
+        runtimeCss.setRule(
+            'turno-barra-width',
+            `#turno-barra-fill { width: ${pct}%; }`
+        );
+    }
     if (elTiempoAct) elTiempoAct.textContent = act + 's';
     if (elTiempoTot) elTiempoTot.textContent = dur + 's';
 }
@@ -414,13 +309,16 @@ export function observarSidebar() {
         const esLandscape = window.matchMedia('(orientation: landscape) and (max-height: 500px)').matches;
         
         if (!esLandscape) {
-            panelDesglose.style.left = '';
+            runtimeCss.removeRule('hud-desglose-left-landscape');
             return;
         }
 
         const rectPerfil = perfil.getBoundingClientRect();
         const destinoIzq = Math.round(rectPerfil.right + 8); // 8px gap fijo para landscape
-        panelDesglose.style.left = `${destinoIzq}px`;
+        runtimeCss.setRule(
+            'hud-desglose-left-landscape',
+            `#hud-desglose { left: ${destinoIzq}px; }`
+        );
     }
 
     if (btnDesglose && panelDesglose) {

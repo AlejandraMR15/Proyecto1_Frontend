@@ -16,6 +16,8 @@
  *  movimiento.detener();                  // para el loop (p. ej. al pausar el juego)
  */
 
+import { getRuntimeCss } from '../controladores/runtimeCss.js';
+
 export default class MovimientoCiudadanos {
 
     /* ------------------------------------------------------------------ */
@@ -52,6 +54,7 @@ export default class MovimientoCiudadanos {
     this._gridEl = null;
     this._sprites = new Map();
     this._intervaloId = null;
+    this._runtimeCss = getRuntimeCss('movimiento-ciudadanos');
 }
 
     /* ------------------------------------------------------------------ */
@@ -236,12 +239,20 @@ export default class MovimientoCiudadanos {
 
         const left = screenX + offsetX + (TW / 2) - (spriteSize / 2);
         const top  = screenY + roadYOffset + (TH / 2) - (spriteSize / 2);
+        const z = col + row;
+        this._actualizarClasePosicionSprite(sprite, left, top, z);
+    }
 
-        sprite.style.left = `${left}px`;
-        sprite.style.top  = `${top}px`;
-
-        // Mantiene prioridad visual por profundidad (col + row)
-        sprite.style.zIndex = (col + row).toString();
+    _actualizarClasePosicionSprite(sprite, left, top, zIndex) {
+        if (!this._runtimeCss) return;
+        const rawId = String(sprite.dataset.id || 'sprite');
+        const safeId = rawId.replace(/[^a-zA-Z0-9_-]/g, '_');
+        const className = `citizen-pos-${safeId}`;
+        sprite.classList.add(className);
+        this._runtimeCss.setRule(
+            `citizen-pos-${safeId}`,
+            `.${className} { left: ${left}px; top: ${top}px; z-index: ${zIndex}; }`
+        );
     }
 
     /* ------------------------------------------------------------------ */

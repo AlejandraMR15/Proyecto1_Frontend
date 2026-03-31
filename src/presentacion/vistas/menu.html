@@ -32,9 +32,16 @@
                 <button id="btn-nueva" class="btn-menu">
                     Nueva partida
                 </button>
+
+                <button id="btn-importar-ciudad" class="btn-menu">
+                    Cargar ciudad desde JSON
+                    <span class="btn-hint" id="hint-importar">Importa una ciudad exportada (.json)</span>
+                </button>
             </div>
         </div>
     </div>
+
+    <input type="file" id="input-importar-ciudad-menu" accept=".json,application/json" hidden />
 
     <!-- ======= PANTALLA DEL FORMULARIO DE NUEVA PARTIDA ======= -->
     <div id="pantalla-formulario" class="pantalla">

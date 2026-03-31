@@ -121,10 +121,11 @@ function mostrarNotificacionDemolicion(mensaje, tipo = 'info') {
 
     notif.classList.toggle('notif-construccion--error', tipo === 'error');
     notif.textContent = mensaje;
-    notif.style.display = 'block';
-    notif.style.opacity = '1';
+    notif.classList.add('notif-construccion--visible');
     clearTimeout(notif._timeout);
-    notif._timeout = setTimeout(() => { notif.style.opacity = '0'; }, 2800);
+    notif._timeout = setTimeout(() => {
+        notif.classList.remove('notif-construccion--visible');
+    }, 2800);
 }
 
 /* ================================================================
@@ -178,25 +179,25 @@ export function mostrarInfoEdificio(construccion, col, row) {
     document.getElementById('modal-info-tabla').innerHTML = filas;
     
     // Mostrar el modal
-    modal.style.display = 'block';
+    modal.classList.add('construct-modal--visible');
     
     // Cerrar al hacer click en la X
     const btnCerrar = document.getElementById('modal-cerrar');
     setSingleClickListener(btnCerrar, () => {
-        modal.style.display = 'none';
+        modal.classList.remove('construct-modal--visible');
     });
     
     // Botón de demoler
     const btnDemoler = document.getElementById('modal-info-demoler');
     setSingleClickListener(btnDemoler, () => {
-        modal.style.display = 'none';
+        modal.classList.remove('construct-modal--visible');
         mostrarConfirmacionDemolicion(construccion, col, row);
     });
 
     // Cerrar al hacer click fuera
     const cerrarAlClickFuera = (e) => {
         if (!modal.contains(e.target)) {
-            modal.style.display = 'none';
+            modal.classList.remove('construct-modal--visible');
         }
     };
     document.addEventListener('click', cerrarAlClickFuera, true);
@@ -236,11 +237,10 @@ export function desactivarModoDemolicion() {
  * Cambia el cursor visual para demolición
  */
 function aplicarCursorDemolicion(cursor) {
-    const vp = document.getElementById('viewport');
-    if (vp) vp.style.cursor = cursor;
-    const grid = document.getElementById('iso-grid');
-    if (grid) grid.style.cursor = cursor;
-    document.querySelectorAll('.iso-cube').forEach(el => el.style.cursor = cursor);
+    document.body.classList.remove('cursor-modo-construccion', 'cursor-modo-demolicion');
+    if (cursor === 'not-allowed') {
+        document.body.classList.add('cursor-modo-demolicion');
+    }
 }
 
 /* ================================================================
@@ -279,7 +279,7 @@ export function mostrarConfirmacionDemolicion(construccion, col, row) {
     document.getElementById('modal-demolicion-ciudadanos').innerHTML = mensajeCiudadanos;
 
     // Mostrar el modal
-    modal.style.display = 'block';
+    modal.classList.add('construct-modal--visible');
 
     // Usar onclick para evitar acumulación de listeners
     const btnCerrar = document.getElementById('modal-demolicion-cerrar');
@@ -287,20 +287,20 @@ export function mostrarConfirmacionDemolicion(construccion, col, row) {
     const btnConfirmar = document.getElementById('modal-demolicion-confirmar');
 
     setSingleClickListener(btnCerrar, () => {
-        modal.style.display = 'none';
+        modal.classList.remove('construct-modal--visible');
     });
     setSingleClickListener(btnCancelar, () => {
-        modal.style.display = 'none';
+        modal.classList.remove('construct-modal--visible');
     });
     setSingleClickListener(btnConfirmar, () => {
         ejecutarDemolicion(construccion, col, row);
-        modal.style.display = 'none';
+        modal.classList.remove('construct-modal--visible');
     });
 
     // Cerrar al hacer click fuera
     const cerrarAlClickFuera = (e) => {
         if (!modal.contains(e.target)) {
-            modal.style.display = 'none';
+            modal.classList.remove('construct-modal--visible');
         }
     };
     document.addEventListener('click', cerrarAlClickFuera, true);

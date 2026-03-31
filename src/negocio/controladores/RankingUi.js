@@ -139,13 +139,13 @@ export function renderizarRanking() {
     const entradas = rankingManager.obtenerTop(10);
 
     if (entradas.length === 0) {
-        if (tabla) tabla.style.display = 'none';
-        if (vacio) vacio.style.display = 'block';
+        if (tabla) tabla.hidden = true;
+        if (vacio) vacio.hidden = false;
         return;
     }
 
-    if (tabla) tabla.style.display = '';
-    if (vacio) vacio.style.display = 'none';
+    if (tabla) tabla.hidden = false;
+    if (vacio) vacio.hidden = true;
 
     const ciudadActual = window.juego?.ciudad?.nombre ?? null;
     _renderizarFilas(entradas, ciudadActual, tbody);
@@ -212,11 +212,11 @@ export function abrirRankingGameOver() {
     tbody.innerHTML = '';
 
     if (entradas.length === 0) {
-        if (tabla) tabla.style.display = 'none';
-        if (vacio) vacio.style.display = 'block';
+        if (tabla) tabla.hidden = true;
+        if (vacio) vacio.hidden = false;
     } else {
-        if (tabla) tabla.style.display = '';
-        if (vacio) vacio.style.display = 'none';
+        if (tabla) tabla.hidden = false;
+        if (vacio) vacio.hidden = true;
         const ciudadActual = window.juego?.ciudad?.nombre ?? null;
         _renderizarFilas(entradas, ciudadActual, tbody);
     }

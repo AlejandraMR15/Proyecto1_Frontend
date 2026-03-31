@@ -19,6 +19,7 @@
 
 import ApiRegion from '../../acceso_datos/API/ApiRegion.js';
 import MapImporter from '../../acceso_datos/MapImporter.js';
+import { leerPartidaDesdeArchivoJSON } from './ImportadorCiudad.js';
 
 /* ================================================================
    CONSTANTES
@@ -41,6 +42,9 @@ const pantallaFormulario = document.getElementById('pantalla-formulario');
 const btnContinuar  = document.getElementById('btn-continuar');
 const hintContinuar = document.getElementById('hint-continuar');
 const btnNueva      = document.getElementById('btn-nueva');
+const btnImportarCiudad  = document.getElementById('btn-importar-ciudad');
+const hintImportarCiudad = document.getElementById('hint-importar');
+const inputImportarCiudadMenu = document.getElementById('input-importar-ciudad-menu');
 const btnVolver     = document.getElementById('btn-volver');
 const btnCrear      = document.getElementById('btn-crear');
 
@@ -142,6 +146,32 @@ btnVolver.addEventListener('click', () => {
 btnContinuar.addEventListener('click', () => {
     localStorage.setItem(CLAVE_ACCION, 'continuar');
     window.location.href = RUTA_JUEGO;
+});
+
+btnImportarCiudad.addEventListener('click', () => {
+    inputImportarCiudadMenu.click();
+});
+
+inputImportarCiudadMenu.addEventListener('change', async (e) => {
+    const archivo = e.target.files[0];
+    if (!archivo) return;
+
+    try {
+        const partida = await leerPartidaDesdeArchivoJSON(archivo);
+
+        localStorage.setItem(CLAVE_PARTIDA, JSON.stringify(partida));
+        localStorage.removeItem(CLAVE_CONFIG_NUEVA);
+        localStorage.setItem(CLAVE_ACCION, 'continuar');
+
+        hintImportarCiudad.textContent = 'Archivo cargado. Iniciando ciudad...';
+        window.location.href = RUTA_JUEGO;
+
+    } catch (error) {
+        console.error('Error al importar ciudad desde JSON:', error);
+        hintImportarCiudad.textContent = `Error: ${error.message}`;
+    } finally {
+        inputImportarCiudadMenu.value = '';
+    }
 });
 
 /* ================================================================

@@ -15,6 +15,9 @@ import GridRenderer  from './GridRenderer.js';
 import Juego         from '../logica/Juego.js';
 import MovimientoCiudadanos from '../logica/MovimientoCiudadanos.js';
 import { historialRecursos } from './historialRecursos.js';
+import { crearControlCamara } from './cameraController.js';
+import { nombreEtiquetaPorCodigo } from './etiquetasMapa.js';
+import { getRuntimeCss } from './runtimeCss.js';
 
 (function () {
     "use strict";
@@ -25,210 +28,29 @@ import { historialRecursos } from './historialRecursos.js';
     const CLAVE_CONFIG_NUEVA = 'config-nueva-partida';
     const CLAVE_ACCION       = 'accion-inicio';
 
-    /* ============================================================
-       ZOOM + PAN
-    ============================================================ */
-    const ZOOM_MIN  = 0.3;
-    const ZOOM_MAX  = 3.0;
-    const ZOOM_STEP = 0.15;
-
-    let scale      = 1.0;
-    let panX       = 0;
-    let panY       = 0;
-    let isDragging = false;
-    let lastMouse  = { x: 0, y: 0 };
-
     const viewport   = document.getElementById('viewport');
     const canvasWrap = document.getElementById('canvas-wrap');
     const zoomLabel  = document.getElementById('zoom-label');
-
-    /**
-     * Aplica transformación CSS de pan y zoom al canvas,
-     * con límites para que la matriz siempre ocupa al menos 50% de la pantalla.
-     */
-    function applyTransform() {
-        const scene = document.getElementById('iso-scene');
-        if (scene) {
-            const sw = scene.offsetWidth  * scale;
-            const sh = scene.offsetHeight * scale;
-            const vw = viewport.clientWidth;
-            const vh = viewport.clientHeight;
-            // Margen holgado: la escena puede salir hasta el 50% de su tamaño
-            const marginX = sw * 0.5;
-            const marginY = sh * 0.5;
-            panX = Math.min(marginX,        Math.max(vw - sw - marginX, panX));
-            panY = Math.min(marginY,        Math.max(vh - sh - marginY, panY));
-        }
-        canvasWrap.style.transform =
-            `translate(${panX}px, ${panY}px) scale(${scale})`;
-        zoomLabel.textContent = Math.round(scale * 100) + '%';
-    }
-
-    /**
-     * Hace zoom centrado en un punto del viewport.
-     * @param {number} cx
-     * @param {number} cy
-     * @param {number} delta
-     */
-    function zoomAt(cx, cy, delta) {
-        const newScale = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, scale + delta));
-        if (newScale === scale) return;
-        panX = cx - (cx - panX) * (newScale / scale);
-        panY = cy - (cy - panY) * (newScale / scale);
-        scale = newScale;
-        applyTransform();
-    }
-
-    viewport.addEventListener('wheel', function (e) {
-        e.preventDefault();
-        const rect  = viewport.getBoundingClientRect();
-        const delta = e.deltaY < 0 ? ZOOM_STEP : -ZOOM_STEP;
-        zoomAt(e.clientX - rect.left, e.clientY - rect.top, delta);
-    }, { passive: false });
-
-    document.getElementById('btn-zoom-in').addEventListener('click', function () {
-        zoomAt(viewport.clientWidth / 2, viewport.clientHeight / 2, ZOOM_STEP);
-    });
-    document.getElementById('btn-zoom-out').addEventListener('click', function () {
-        zoomAt(viewport.clientWidth / 2, viewport.clientHeight / 2, -ZOOM_STEP);
-    });
-    document.getElementById('btn-zoom-reset').addEventListener('click', function () {
-        scale = 1.0;
-        centerView();
-        applyTransform();
-    });
-
-    /* ============================================================
-       PAN
-    ============================================================ */
-    viewport.addEventListener('mousedown', function (e) {
-        isDragging = true;
-        lastMouse  = { x: e.clientX, y: e.clientY };
-        viewport.classList.add('dragging');
-        e.preventDefault();
-    });
-
-    viewport.addEventListener('mousemove', function (e) {
-        if (!isDragging) return;
-        panX += e.clientX - lastMouse.x;
-        panY += e.clientY - lastMouse.y;
-        lastMouse = { x: e.clientX, y: e.clientY };
-        applyTransform();
-    });
-
-    document.addEventListener('mouseup', function () {
-        if (isDragging) {
-            isDragging = false;
-            viewport.classList.remove('dragging');
-        }
-    });
-
-    /* Touch — pan, zoom y tap sobre celdas */
-    let lastTouches  = null;
-    let touchStartX  = 0;
-    let touchStartY  = 0;
-    let touchMoved   = false;
-
-    // En tablet hay más micro-movimiento al tocar, usamos umbral más alto
-    const TAP_UMBRAL = window.matchMedia('(min-width: 768px)').matches ? 14 : 8;
-
-    viewport.addEventListener('touchstart', function (e) {
-        lastTouches = e.touches;
-        touchMoved  = false;
-        if (e.touches.length === 1) {
-            touchStartX = e.touches[0].clientX;
-            touchStartY = e.touches[0].clientY;
-        }
-        if (e.touches.length > 1) {
-            e.preventDefault();
-        }
-    }, { passive: false });
-
-    viewport.addEventListener('touchmove', function (e) {
-        e.preventDefault();
-        if (e.touches.length === 1 && lastTouches?.length === 1) {
-            const dx = e.touches[0].clientX - lastTouches[0].clientX;
-            const dy = e.touches[0].clientY - lastTouches[0].clientY;
-            if (!touchMoved) {
-                const totalDx = e.touches[0].clientX - touchStartX;
-                const totalDy = e.touches[0].clientY - touchStartY;
-                if (Math.abs(totalDx) > TAP_UMBRAL || Math.abs(totalDy) > TAP_UMBRAL) {
-                    touchMoved = true;
-                }
-            }
-            panX += dx;
-            panY += dy;
-            applyTransform();
-        } else if (e.touches.length === 2 && lastTouches?.length === 2) {
-            const dist = (t) => Math.hypot(
-                t[0].clientX - t[1].clientX,
-                t[0].clientY - t[1].clientY
-            );
-            const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-            const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-            const rect = viewport.getBoundingClientRect();
-            zoomAt(cx - rect.left, cy - rect.top,
-                   (dist(e.touches) - dist(lastTouches)) * 0.005);
-            touchMoved = true;
-        }
-        lastTouches = e.touches;
-    }, { passive: false });
-
-    viewport.addEventListener('touchend', function (e) {
-        if (!touchMoved && e.changedTouches.length === 1) {
-            const t  = e.changedTouches[0];
-
-            // Buscar el iso-cube correcto usando elementFromPoint
-            // Puede que el punto caiga sobre un elemento hijo (svg, img) — subimos al padre .iso-cube
-            let el = document.elementFromPoint(t.clientX, t.clientY);
-            while (el && el !== document.body) {
-                if (el.classList && el.classList.contains('iso-cube')) break;
-                if (el.tagName === 'BUTTON') break;
-                if (el.classList && el.classList.contains('build-item')) break;
-                el = el.parentElement;
-            }
-
-            if (el && el !== document.body) {
-                e.preventDefault();
-
-                if (el.classList.contains('iso-cube')) {
-                    // Para iso-cube: disparar click sintético con clientX/Y del touch
-                    // _onClick verifica _mouseDownX/_mouseDownY — los seteamos primero
-                    // via mousedown sintético para que pase la verificación de drag
-                    const renderer = window.gridRenderer;
-                    if (renderer && renderer._getMouseDown) {
-                        // Sobreescribir temporalmente _getMouseDown para que devuelva
-                        // exactamente el punto del touch (distancia = 0, no es drag)
-                        const _origGetMouseDown = renderer._getMouseDown;
-                        renderer._getMouseDown = () => ({ x: t.clientX, y: t.clientY });
-                        el.dispatchEvent(new MouseEvent('click', {
-                            bubbles: true, cancelable: true,
-                            clientX: t.clientX, clientY: t.clientY, view: window,
-                        }));
-                        renderer._getMouseDown = _origGetMouseDown;
-                    } else {
-                        el.dispatchEvent(new MouseEvent('click', {
-                            bubbles: true, cancelable: true,
-                            clientX: t.clientX, clientY: t.clientY, view: window,
-                        }));
-                    }
-                } else {
-                    // Para botones y build-items: click normal
-                    el.dispatchEvent(new MouseEvent('click', {
-                        bubbles: true, cancelable: true,
-                        clientX: t.clientX, clientY: t.clientY, view: window,
-                    }));
-                }
-            }
-        }
-        lastTouches = e.touches;
-        touchMoved  = false;
+    let rendererRef = null;
+    const { applyTransform, centerView, estaArrastrando } = crearControlCamara({
+        viewport,
+        canvasWrap,
+        zoomLabel,
+        getRenderer: () => rendererRef,
     });
 
     /* ============================================================
        TOOLTIP
     ============================================================ */
     const tooltip = document.getElementById('tooltip');
+    const runtimeCss = getRuntimeCss('grid-tooltip');
+
+    function actualizarPosicionTooltip(x, y) {
+        runtimeCss.setRule(
+            'tooltip-position',
+            `#tooltip.visible { left: ${x}px; top: ${y}px; }`
+        );
+    }
 
     /**
      * Muestra el tooltip en la posición del puntero.
@@ -238,8 +60,7 @@ import { historialRecursos } from './historialRecursos.js';
     function showTooltip(e, text) {
         tooltip.textContent = text;
         tooltip.classList.add('visible');
-        tooltip.style.left = (e.clientX + 14) + 'px';
-        tooltip.style.top  = (e.clientY - 32) + 'px';
+        actualizarPosicionTooltip(e.clientX + 14, e.clientY - 32);
     }
 
     /**
@@ -251,22 +72,9 @@ import { historialRecursos } from './historialRecursos.js';
 
     document.addEventListener('mousemove', function (e) {
         if (tooltip.classList.contains('visible')) {
-            tooltip.style.left = (e.clientX + 14) + 'px';
-            tooltip.style.top  = (e.clientY - 32) + 'px';
+            actualizarPosicionTooltip(e.clientX + 14, e.clientY - 32);
         }
     });
-
-    /* ============================================================
-       CENTRAR VISTA
-    ============================================================ */
-    /**
-     * Centra la escena isométrica dentro del viewport.
-     */
-    function centerView() {
-        const scene = document.getElementById('iso-scene');
-        panX = (viewport.clientWidth  - scene.offsetWidth  * scale) / 2;
-        panY = (viewport.clientHeight - scene.offsetHeight * scale) / 2;
-    }
 
     /* ============================================================
        INIT — Juego + Mapa + GridRenderer
@@ -386,6 +194,8 @@ import { historialRecursos } from './historialRecursos.js';
             }
         });
 
+        rendererRef = renderer;
+
         renderer.inicializar();
 
         /* ----------------------------------------------------------
@@ -394,9 +204,9 @@ import { historialRecursos } from './historialRecursos.js';
         const gridEl = document.getElementById('iso-grid');
 
         gridEl.addEventListener('celda-enter', function (e) {
-            if (isDragging) return;
+            if (estaArrastrando()) return;
             const { col, row, etiqueta, originalEvent } = e.detail;
-            showTooltip(originalEvent, `(${col}, ${row}) — ${_nombreEtiqueta(etiqueta)}`);
+            showTooltip(originalEvent, `(${col}, ${row}) — ${nombreEtiquetaPorCodigo(etiqueta)}`);
         });
 
         gridEl.addEventListener('celda-leave', hideTooltip);
@@ -460,33 +270,5 @@ import { historialRecursos } from './historialRecursos.js';
                 : 'Sin ciudad activa.'
         );
     });
-
-    /* ============================================================
-       Utilidad: nombre legible por etiqueta
-    ============================================================ */
-    /**
-     * Traduce una etiqueta de celda a nombre legible.
-     * @param {string} etiqueta
-     * @returns {string}
-     */
-    function _nombreEtiqueta(etiqueta) {
-        const nombres = {
-            'g':  'Terreno vacío',
-            'r':  'Vía',
-            'P1': 'Parque',
-            'R1': 'Residencial Básico',
-            'R2': 'Residencial Avanzado',
-            'C1': 'Comercio Básico',
-            'C2': 'Comercio Avanzado',
-            'I1': 'Industrial Básico',
-            'I2': 'Industrial Avanzado',
-            'S1': 'Servicio Básico',
-            'S2': 'Servicio Medio',
-            'S3': 'Servicio Avanzado',
-            'U1': 'Planta de Utilidad Básica',
-            'U2': 'Planta de Utilidad Avanzada',
-        };
-        return nombres[etiqueta] ?? etiqueta;
-    }
 
 })();

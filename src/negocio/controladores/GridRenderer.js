@@ -23,6 +23,8 @@
  */
 
 import Mapa from '../../modelos/Mapa.js';
+import { coloresPorEtiqueta, crearSVGCelda, esEdificio } from './gridRendererVisuals.js';
+import { getRuntimeCss } from './runtimeCss.js';
 
 export default class GridRenderer {
 
@@ -75,6 +77,18 @@ export default class GridRenderer {
 
         // Offset X guardado en tiempo de construcción para usar en animaciones
         this._offsetX = 0;
+
+        this._runtimeCss = getRuntimeCss('grid-renderer');
+        this._burbujaSeq = 0;
+
+        this._runtimeCss.setRule(
+            'svg-top-plano',
+            `.iso-cube-svg.iso-svg-plano { top: -${this.TD}px; }`
+        );
+        this._runtimeCss.setRule(
+            'svg-top-edificio',
+            `.iso-cube-svg.iso-svg-edificio { top: -${this.TH / 2}px; }`
+        );
     }
 
     /* ------------------------------------------------------------------ */
@@ -197,8 +211,13 @@ export default class GridRenderer {
         // Dimensiones totales del contenedor
         const maxX = this._gridToScreen(cols - 1, 0).x + this.TW;
         const maxY = this._gridToScreen(cols - 1, rows - 1).y + this.TH + this.TD;
-        this._gridEl.style.width  = (maxX + this._offsetX) + 'px';
-        this._gridEl.style.height = maxY + 'px';
+        this._gridWidthPx = maxX + this._offsetX;
+        this._gridHeightPx = maxY;
+
+        this._runtimeCss.setRule(
+            'grid-size',
+            `#${this.contenedorId} { width: ${this._gridWidthPx}px; height: ${this._gridHeightPx}px; }`
+        );
 
         // Painter's Algorithm: renderizar de menor a mayor (col + row)
         const celdas = [];
@@ -267,8 +286,8 @@ export default class GridRenderer {
             `${bc.x},${bc.y + depth}`
         ].join(' ');
 
-        const svgW = parseInt(this._gridEl.style.width)  || 2000;
-        const svgH = parseInt(this._gridEl.style.height) + depth + 20;
+        const svgW = this._gridWidthPx || 2000;
+        const svgH = (this._gridHeightPx || 0) + depth + 20;
 
         const ns  = 'http://www.w3.org/2000/svg';
         const svg = document.createElementNS(ns, 'svg');
@@ -318,17 +337,19 @@ export default class GridRenderer {
         cubo.dataset.col = col;
         cubo.dataset.row = row;
         cubo.dataset.etiqueta = etiqueta;
-        cubo.style.left   = (x + offsetX) + 'px';
-        cubo.style.top    = (y + this.TD) + 'px';
-        cubo.style.width  = this.TW + 'px';
-        cubo.style.height = this.TH + 'px';
-        cubo.style.zIndex = row + col;
+        cubo.classList.add(this._asegurarClasePosicionCubo(col, row, x + offsetX, y + this.TD, row + col));
 
-        const colores = this._coloresPorEtiqueta(etiqueta);
-        const svg = this._crearSVGCubo(colores.top, colores.left, colores.right, etiqueta);
-        svg.style.top = this._esEdificio(etiqueta)
-            ? (-this.TH / 2) + 'px'
-            : (-this.TD) + 'px';
+        const colores = coloresPorEtiqueta(etiqueta);
+        const svg = crearSVGCelda({
+            TW: this.TW,
+            TH: this.TH,
+            TD: this.TD,
+            colorTop: colores.top,
+            colorLeft: colores.left,
+            colorRight: colores.right,
+            etiqueta,
+        });
+        svg.classList.add(esEdificio(etiqueta) ? 'iso-svg-edificio' : 'iso-svg-plano');
         cubo.appendChild(svg);
 
         // Eventos directamente en el cubo — el bounding box ya coincide con poly-bottom
@@ -359,15 +380,21 @@ export default class GridRenderer {
         const etiqueta = this.mapa.matriz[row][col] ?? 'g';
         cubo.dataset.etiqueta = etiqueta;
 
-        const colores = this._coloresPorEtiqueta(etiqueta);
+        const colores = coloresPorEtiqueta(etiqueta);
 
         // Limpiar contenido anterior (ya no usamos imágenes)
         cubo.innerHTML = '';
 
-        const svg = this._crearSVGCubo(colores.top, colores.left, colores.right, etiqueta);
-        svg.style.top = this._esEdificio(etiqueta)
-            ? (-this.TH / 2) + 'px'
-            : (-this.TD) + 'px';
+        const svg = crearSVGCelda({
+            TW: this.TW,
+            TH: this.TH,
+            TD: this.TD,
+            colorTop: colores.top,
+            colorLeft: colores.left,
+            colorRight: colores.right,
+            etiqueta,
+        });
+        svg.classList.add(esEdificio(etiqueta) ? 'iso-svg-edificio' : 'iso-svg-plano');
         cubo.appendChild(svg);
 
         // Efecto visual breve para indicar el cambio
@@ -379,189 +406,33 @@ export default class GridRenderer {
      * @private
      */
     _animarCambio(cubo) {
-        cubo.style.filter = 'brightness(2) drop-shadow(0 0 6px rgba(255,255,200,0.9))';
-        setTimeout(() => { cubo.style.filter = ''; }, 250);
+        cubo.classList.add('iso-cube--cambio');
+        setTimeout(() => {
+            cubo.classList.remove('iso-cube--cambio');
+        }, 250);
     }
 
-    /* ------------------------------------------------------------------ */
-    /*  Paleta de colores por etiqueta                                       */
-    /* ------------------------------------------------------------------ */
-
-    /**
-     * Devuelve los colores de cara para una etiqueta dada.
-     * Con el nuevo sistema visual:
-     *  - 'top'   → color de la cara inferior visible (poly-bottom) y referencia para detectar terreno
-     *  - 'left'  → color de cara lateral izquierda (solo borde, fill transparente)
-     *  - 'right' → color de cara lateral derecha   (solo borde, fill transparente)
-     *
-     * Para terreno 'g': top debe ser '#7ecfe6' para que _crearSVGCubo
-     * lo detecte y use verde pasto (#6bbf3e) como color de la cara inferior.
-     * Para el resto: top es el color de la cara inferior del edificio/vía.
-     *
-     * @private
-     * @param {string} etiqueta
-     * @returns {{ top: string, left: string, right: string }}
-     */
-    _coloresPorEtiqueta(etiqueta) {
-        const paletas = {
-            // Terreno vacío — marcador especial para usar verde pasto
-            'g':  { top: '#7ecfe6', left: '#4baec8', right: '#2d8aaa' },
-
-            // Vías — gris
-            'r':  { top: '#909090', left: '#686868', right: '#484848' },
-
-            // Parque — verde oscuro
-            'P1': { top: '#2e8b2e', left: '#1e6b1e', right: '#104e10' },
-
-            // Casas — beige
-            'R1': { top: '#f5e6c8', left: '#d4be98', right: '#b09870' },
-
-            // Apartamentos — marrón claro
-            'R2': { top: '#c8956a', left: '#a87040', right: '#845020' },
-
-            // Tienda — rosado
-            'C1': { top: '#f4a0b8', left: '#d87090', right: '#b84870' },
-
-            // Centro comercial — naranja
-            'C2': { top: '#ff8c00', left: '#cc6a00', right: '#994800' },
-
-            // Fábrica — negro claro (gris oscuro)
-            'I1': { top: '#505050', left: '#383838', right: '#202020' },
-
-            // Granja — café tierra
-            'I2': { top: '#8b5e3c', left: '#6b4020', right: '#4a2808' },
-
-            // Estación de policía — azul oscuro
-            'S1': { top: '#1a3a7a', left: '#102860', right: '#081840' },
-
-            // Estación de bomberos — roja
-            'S2': { top: '#e02020', left: '#b00808', right: '#800000' },
-
-            // Hospital — blanco
-            'S3': { top: '#f0f0f0', left: '#d0d0d0', right: '#b0b0b0' },
-
-            // Planta eléctrica — amarillo
-            'U1': { top: '#f5e020', left: '#c8b000', right: '#9a8000' },
-
-            // Planta de agua — azul claro
-            'U2': { top: '#40a8e0', left: '#2080c0', right: '#0858a0' },
-        };
-
-        return paletas[etiqueta] ?? paletas['g'];
+    _asegurarClasePosicionCubo(col, row, left, top, zIndex) {
+        const className = `iso-cube-pos-${col}-${row}`;
+        const ruleKey = `iso-cube-pos-${col}-${row}`;
+        this._runtimeCss.setRule(
+            ruleKey,
+            `.${className} { left: ${left}px; top: ${top}px; width: ${this.TW}px; height: ${this.TH}px; z-index: ${zIndex}; }`
+        );
+        return className;
     }
 
-    /* ------------------------------------------------------------------ */
-    /*  SVG del cubo                                                         */
-    /* ------------------------------------------------------------------ */
-
-    /**
-     * Indica si una etiqueta es un edificio con volumen (no terreno, vía ni parque).
-     * @private
-     */
-    _esEdificio(etiqueta) {
-        return !['g', 'r', 'P1'].includes(etiqueta);
-    }
-
-    /**
-     * Construye el SVG con las tres caras del cubo isométrico.
-     * - Para terreno/vía/parque: solo cara inferior visible (plana).
-     * - Para edificios: cubo completo con volumen (top + laterales + bottom).
-     * @private
-     */
-    _crearSVGCubo(colorTop, colorLeft, colorRight, etiqueta = 'g') {
-        return this._esEdificio(etiqueta)
-            ? this._crearSVGEdificio(colorTop, colorLeft, colorRight)
-            : this._crearSVGPlano(colorTop, colorLeft, colorRight);
-    }
-
-    /**
-     * SVG plano: solo la cara inferior visible (terreno, vías, parques).
-     * @private
-     */
-    _crearSVGPlano(colorTop, colorLeft, colorRight) {
-        const W  = this.TW;
-        const H  = this.TH;
-        const D  = this.TD;
-
-        // Diamante inferior: A2, G, F, E
-        const A2 = [W / 2, D          ];
-        const E  = [0,     H / 2 + D  ];
-        const F  = [W / 2, H + D      ];
-        const G  = [W,     H / 2 + D  ];
-
-        const pts = (arr) => arr.map(p => p.join(',')).join(' ');
-
-        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-        svg.setAttribute('width',   W);
-        svg.setAttribute('height',  H + D);
-        svg.setAttribute('viewBox', `0 0 ${W} ${H + D}`);
-        svg.style.overflow = 'visible';
-        svg.style.display  = 'block';
-
-        const esTerreno   = (colorTop === '#7ecfe6');
-        const colorBottom = esTerreno ? '#6bbf3e' : colorTop;
-        const strokeB     = esTerreno ? '#4a8c22' : _darken(colorTop);
-
-        const p = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
-        p.setAttribute('points',       pts([A2, G, F, E]));
-        p.setAttribute('fill',         colorBottom);
-        p.setAttribute('fill-opacity', '1');
-        p.setAttribute('stroke',       strokeB);
-        p.setAttribute('stroke-width', '0.6');
-        p.setAttribute('stroke-opacity', '0.5');
-        p.setAttribute('stroke-linejoin', 'round');
-        p.classList.add('poly-bottom');
-        svg.appendChild(p);
-
-        return svg;
-    }
-
-    /**
-     * SVG edificio: cubo isométrico perfecto con volumen.
-     * Solo las tres caras visibles: top, left, right.
-     * @private
-     */
-    _crearSVGEdificio(colorTop, colorLeft, colorRight) {
-        const W  = this.TW;
-        const H  = this.TH;
-        const EH = this.TH / 2;  // mitad de altura — 16px
-
-        const At = [W / 2, 0          ];
-        const Bt = [W,     H / 2      ];
-        const Ct = [W / 2, H          ];
-        const Dt = [0,     H / 2      ];
-        const Bb = [W,     H / 2 + EH ];
-        const Cb = [W / 2, H     + EH ];
-        const Db = [0,     H / 2 + EH ];
-
-        const pts = (arr) => arr.map(p => p.join(',')).join(' ');
-
-        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-        svg.setAttribute('width',   W);
-        svg.setAttribute('height',  H + EH);
-        svg.setAttribute('viewBox', `0 0 ${W} ${H + EH}`);
-        svg.style.overflow = 'visible';
-        svg.style.display  = 'block';
-
-        const stroke = _darken(colorRight);
-
-        const mkPoly = (points, fill, cls) => {
-            const p = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
-            p.setAttribute('points',          pts(points));
-            p.setAttribute('fill',            fill);
-            p.setAttribute('stroke',          stroke);
-            p.setAttribute('stroke-width',    '1');
-            p.setAttribute('stroke-linejoin', 'round');
-            p.classList.add(cls);
-            return p;
-        };
-
-        // Orden Painter: laterales primero, cara superior encima
-        svg.appendChild(mkPoly([Dt, Ct, Cb, Db], colorLeft,  'poly-left' ));
-        svg.appendChild(mkPoly([Ct, Bt, Bb, Cb], colorRight, 'poly-right'));
-        svg.appendChild(mkPoly([At, Bt, Ct, Dt], colorTop,   'poly-top'  ));
-
-        return svg;
+    _leerEscalaCanvas(canvasWrap) {
+        if (!canvasWrap) return 1;
+        const transform = window.getComputedStyle(canvasWrap).transform;
+        if (!transform || transform === 'none') return 1;
+        const match2d = transform.match(/^matrix\(([^)]+)\)$/);
+        if (!match2d) return 1;
+        const vals = match2d[1].split(',').map(v => parseFloat(v.trim()));
+        if (vals.length < 2) return 1;
+        const a = vals[0] || 1;
+        const b = vals[1] || 0;
+        return Math.sqrt((a * a) + (b * b));
     }
 
     /* ------------------------------------------------------------------ */
@@ -717,7 +588,7 @@ export default class GridRenderer {
             const canvasWrap = document.getElementById('canvas-wrap');
             const canvasRect = canvasWrap ? canvasWrap.getBoundingClientRect() : { left: 0, top: 0 };
             const { x, y } = this._gridToScreen(col, row);
-            const scale = canvasWrap ? parseFloat(canvasWrap.style.transform?.match(/scale\(([^)]+)\)/)?.[1] || '1') : 1;
+            const scale = this._leerEscalaCanvas(canvasWrap);
             posX = canvasRect.left + (x + this._offsetX + this.TW / 2) * scale;
             posY = canvasRect.top + (y + this.TH / 2) * scale;
         }
@@ -726,9 +597,12 @@ export default class GridRenderer {
         const burbuja = document.createElement('div');
         burbuja.className = 'burbuja-recurso';
         burbuja.dataset.tipo = tipo;
-        burbuja.style.left = posX + 'px';
-        burbuja.style.top = posY + 'px';
-        burbuja.style.transform = 'translate(-50%, -50%)';
+        const bubbleClass = `burbuja-pos-${++this._burbujaSeq}`;
+        burbuja.classList.add(bubbleClass);
+        this._runtimeCss.setRule(
+            `burbuja-pos-${this._burbujaSeq}`,
+            `.${bubbleClass} { left: ${posX}px; top: ${posY}px; transform: translate(-50%, -50%); }`
+        );
 
         // Agregar cantidad si es > 1
         if (cantidad > 1) {
@@ -749,9 +623,7 @@ export default class GridRenderer {
         // inicial (opacity:1) ya esté pintado antes de iniciar la transición
         requestAnimationFrame(() => {
             requestAnimationFrame(() => {
-                burbuja.style.transition = 'opacity 1.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 1.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-                burbuja.style.opacity = '0';
-                burbuja.style.transform = 'translate(-50%, calc(-50% - 120px)) scale(0.8)';
+                burbuja.classList.add('burbuja-recurso--animando');
             });
         });
 
@@ -760,20 +632,4 @@ export default class GridRenderer {
             burbuja.remove();
         }, 1800);
     }
-}
-
-/**
- * Oscurece un color hex aproximadamente un 35% para usarlo como borde.
- * @param {string} hex  Color en formato #rrggbb
- * @returns {string}    Color oscurecido en formato #rrggbb
- */
-function _darken(hex) {
-    const r = parseInt(hex.slice(1, 3), 16);
-    const g = parseInt(hex.slice(3, 5), 16);
-    const b = parseInt(hex.slice(5, 7), 16);
-    const factor = 0.55;
-    const rr = Math.round(r * factor).toString(16).padStart(2, '0');
-    const gg = Math.round(g * factor).toString(16).padStart(2, '0');
-    const bb = Math.round(b * factor).toString(16).padStart(2, '0');
-    return `#${rr}${gg}${bb}`;
 }

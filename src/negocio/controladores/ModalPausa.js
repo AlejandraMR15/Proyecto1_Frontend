@@ -92,7 +92,7 @@ export function togglePausa() {
         const titulo = modalPausa?.querySelector('.modal-titulo');
         if (titulo) titulo.textContent = '🔴 GAME OVER';
         const btnReanudar = document.getElementById('btn-reanudar');
-        if (btnReanudar) btnReanudar.style.display = 'none';
+        if (btnReanudar) btnReanudar.hidden = true;
         setModal(modalPausa, true);
     }
 }
@@ -114,7 +114,7 @@ export function reanudarJuego() {
     const titulo = modalPausa?.querySelector('.modal-titulo');
     if (titulo) titulo.textContent = '⏸ JUEGO PAUSADO';
     const btnReanudar = document.getElementById('btn-reanudar');
-    if (btnReanudar) btnReanudar.style.display = '';
+    if (btnReanudar) btnReanudar.hidden = false;
 
     setModal(modalPausa, false);
 }

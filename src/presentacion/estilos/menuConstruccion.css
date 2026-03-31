@@ -401,7 +401,7 @@ body {
 }
 
 #notif-construccion {
-  display: none;
+  display: block;
   position: fixed;
   bottom: 80px;
   left: 50%;
@@ -415,8 +415,15 @@ body {
   z-index: 9999;
   pointer-events: none;
   transition: opacity 0.3s;
+  opacity: 0;
+  visibility: hidden;
   white-space: nowrap;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+}
+
+#notif-construccion.notif-construccion--visible {
+  opacity: 1;
+  visibility: visible;
 }
 
 #notif-construccion.notif-construccion--error {
@@ -582,4 +589,8 @@ body {
         min-height: 36px !important;
         padding: 4px 8px !important;
     }
+}
+
+.construct-modal.construct-modal--visible {
+  display: block;
 }

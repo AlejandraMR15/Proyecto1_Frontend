@@ -33,6 +33,12 @@
     opacity: 1;
 }
 
+.burbuja-recurso--animando {
+    transition: opacity 1.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 1.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    opacity: 0;
+    transform: translate(-50%, calc(-50% - 120px)) scale(0.8);
+}
+
 /* Variantes de color por tipo de recurso */
 .burbuja-recurso[data-tipo="dinero"] {
     background: #FFD700;
@@ -106,6 +112,11 @@
     left: 0;
 }
 
+.iso-cube-svg {
+    overflow: visible;
+    display: block;
+}
+
 /* Hover: solo poly-bottom baja a 50% opacidad */
 .iso-cube.hovered .poly-bottom {
     fill-opacity: 0.5;
@@ -136,4 +147,20 @@
 .iso-cube.selected {
     filter: drop-shadow(0 0 8px rgba(240, 208, 64, 0.9));
     z-index: 9999 !important;
+}
+
+.iso-cube--cambio {
+    filter: brightness(2) drop-shadow(0 0 6px rgba(255,255,200,0.9));
+}
+
+body.cursor-modo-construccion #viewport,
+body.cursor-modo-construccion #iso-grid,
+body.cursor-modo-construccion .iso-cube {
+    cursor: crosshair !important;
+}
+
+body.cursor-modo-demolicion #viewport,
+body.cursor-modo-demolicion #iso-grid,
+body.cursor-modo-demolicion .iso-cube {
+    cursor: not-allowed !important;
 }

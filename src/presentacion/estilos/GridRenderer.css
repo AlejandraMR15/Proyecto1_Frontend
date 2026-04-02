@@ -3,6 +3,77 @@
    isométrica y burbujas de recursos
    ======================================== */
 
+/* ---- PALETAS DE COLORES ISOMÉTRICOS POR ETIQUETA ---- */
+.iso-colors-g .poly-top { fill: #7ecfe6; }
+.iso-colors-g .poly-left { fill: #4baec8; }
+.iso-colors-g .poly-right { fill: #2d8aaa; }
+.iso-colors-g .poly-bottom { fill: #6bbf3e; stroke: #4a8c22; }
+
+.iso-colors-r .poly-top { fill: #909090; }
+.iso-colors-r .poly-left { fill: #686868; }
+.iso-colors-r .poly-right { fill: #484848; }
+.iso-colors-r .poly-bottom { fill: #909090; stroke: #4a4a4a; }
+
+.iso-colors-P1 .poly-top { fill: #2e8b2e; }
+.iso-colors-P1 .poly-left { fill: #1e6b1e; }
+.iso-colors-P1 .poly-right { fill: #104e10; }
+.iso-colors-P1 .poly-bottom { fill: #2e8b2e; stroke: #1a5a1a; }
+
+.iso-colors-R1 .poly-top { fill: #f5e6c8; }
+.iso-colors-R1 .poly-left { fill: #d4be98; }
+.iso-colors-R1 .poly-right { fill: #b09870; }
+.iso-colors-R1 .poly-bottom { fill: #f5e6c8; stroke: #8b7a5c; }
+
+.iso-colors-R2 .poly-top { fill: #c8956a; }
+.iso-colors-R2 .poly-left { fill: #a87040; }
+.iso-colors-R2 .poly-right { fill: #845020; }
+.iso-colors-R2 .poly-bottom { fill: #c8956a; stroke: #633a20; }
+
+.iso-colors-C1 .poly-top { fill: #f4a0b8; }
+.iso-colors-C1 .poly-left { fill: #d87090; }
+.iso-colors-C1 .poly-right { fill: #b84870; }
+.iso-colors-C1 .poly-bottom { fill: #f4a0b8; stroke: #8a2850; }
+
+.iso-colors-C2 .poly-top { fill: #ff8c00; }
+.iso-colors-C2 .poly-left { fill: #cc6a00; }
+.iso-colors-C2 .poly-right { fill: #994800; }
+.iso-colors-C2 .poly-bottom { fill: #ff8c00; stroke: #663800; }
+
+.iso-colors-I1 .poly-top { fill: #505050; }
+.iso-colors-I1 .poly-left { fill: #383838; }
+.iso-colors-I1 .poly-right { fill: #202020; }
+.iso-colors-I1 .poly-bottom { fill: #505050; stroke: #1a1a1a; }
+
+.iso-colors-I2 .poly-top { fill: #8b5e3c; }
+.iso-colors-I2 .poly-left { fill: #6b4020; }
+.iso-colors-I2 .poly-right { fill: #4a2808; }
+.iso-colors-I2 .poly-bottom { fill: #8b5e3c; stroke: #2a1606; }
+
+.iso-colors-S1 .poly-top { fill: #1a3a7a; }
+.iso-colors-S1 .poly-left { fill: #102860; }
+.iso-colors-S1 .poly-right { fill: #081840; }
+.iso-colors-S1 .poly-bottom { fill: #1a3a7a; stroke: #040e20; }
+
+.iso-colors-S2 .poly-top { fill: #e02020; }
+.iso-colors-S2 .poly-left { fill: #b00808; }
+.iso-colors-S2 .poly-right { fill: #800000; }
+.iso-colors-S2 .poly-bottom { fill: #e02020; stroke: #440000; }
+
+.iso-colors-S3 .poly-top { fill: #f0f0f0; }
+.iso-colors-S3 .poly-left { fill: #d0d0d0; }
+.iso-colors-S3 .poly-right { fill: #b0b0b0; }
+.iso-colors-S3 .poly-bottom { fill: #f0f0f0; stroke: #666666; }
+
+.iso-colors-U1 .poly-top { fill: #f5e020; }
+.iso-colors-U1 .poly-left { fill: #c8b000; }
+.iso-colors-U1 .poly-right { fill: #9a8000; }
+.iso-colors-U1 .poly-bottom { fill: #f5e020; stroke: #664a00; }
+
+.iso-colors-U2 .poly-top { fill: #40a8e0; }
+.iso-colors-U2 .poly-left { fill: #2080c0; }
+.iso-colors-U2 .poly-right { fill: #0858a0; }
+.iso-colors-U2 .poly-bottom { fill: #40a8e0; stroke: #042f68; }
+
 /* ---- BURBUJA INDIVIDUAL DE RECURSO ---- */
 .burbuja-recurso {
     position: absolute;

@@ -23,7 +23,7 @@
  */
 
 import Mapa from '../../modelos/Mapa.js';
-import { coloresPorEtiqueta, crearSVGCelda, esEdificio } from './gridRendererVisuals.js';
+import { crearSVGCelda, esEdificio } from './gridRendererVisuals.js';
 
 export default class GridRenderer {
 
@@ -311,14 +311,10 @@ export default class GridRenderer {
         cubo.dataset.etiqueta = etiqueta;
         cubo.classList.add(`iso-col-${col}`, `iso-row-${row}`);
 
-        const colores = coloresPorEtiqueta(etiqueta);
         const svg = crearSVGCelda({
             TW: this.TW,
             TH: this.TH,
             TD: this.TD,
-            colorTop: colores.top,
-            colorLeft: colores.left,
-            colorRight: colores.right,
             etiqueta,
         });
         svg.classList.add(esEdificio(etiqueta) ? 'iso-svg-edificio' : 'iso-svg-plano');

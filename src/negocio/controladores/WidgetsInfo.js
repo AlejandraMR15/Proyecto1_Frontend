@@ -273,7 +273,7 @@ const clima = (function () {
   /** Rellena el cuerpo del info-box con todas las filas de datos */
   function renderizarInfobox(datos) {
     if (!infoboxBody) return;
- 
+
     const icono     = obtenerIconoClima(datos.condicionClimatica);
     const temp      = datos.temperatura !== null ? Math.round(datos.temperatura) + '°C' : '--';
     const condicion = capitalizar(traducirCondicionClimatica(datos.condicionClimatica)) || '--';
@@ -281,29 +281,43 @@ const clima = (function () {
     const viento    = datos.velocidadViento !== null
       ? datos.velocidadViento.toFixed(1) + ' m/s'
       : '--';
- 
-    infoboxBody.innerHTML = `
-      <div class="clima-fila">
-        <span class="clima-fila-label">CIUDAD</span>
-        <span class="clima-fila-valor">${(ciudadConsulta || '--').toUpperCase()}</span>
-      </div>
-      <div class="clima-fila">
-        <span class="clima-fila-label">CONDICIÓN</span>
-        <span class="clima-fila-valor">${icono} ${condicion}</span>
-      </div>
-      <div class="clima-fila">
-        <span class="clima-fila-label">TEMPERATURA</span>
-        <span class="clima-fila-valor destacado">${temp}</span>
-      </div>
-      <div class="clima-fila">
-        <span class="clima-fila-label">HUMEDAD</span>
-        <span class="clima-fila-valor">${humedad}</span>
-      </div>
-      <div class="clima-fila">
-        <span class="clima-fila-label">VIENTO</span>
-        <span class="clima-fila-valor">${viento}</span>
-      </div>
-    `;
+
+    infoboxBody.innerHTML = '';
+
+    const template = document.getElementById('template-clima-fila');
+    if (!template) return;
+
+    // Crear fila: CIUDAD
+    const fila1 = template.content.cloneNode(true);
+    fila1.querySelector('.clima-fila-label').textContent = 'CIUDAD';
+    fila1.querySelector('.clima-fila-valor').textContent = (ciudadConsulta || '--').toUpperCase();
+    infoboxBody.appendChild(fila1);
+
+    // Crear fila: CONDICIÓN
+    const fila2 = template.content.cloneNode(true);
+    fila2.querySelector('.clima-fila-label').textContent = 'CONDICIÓN';
+    fila2.querySelector('.clima-fila-valor').textContent = icono + ' ' + condicion;
+    infoboxBody.appendChild(fila2);
+
+    // Crear fila: TEMPERATURA
+    const fila3 = template.content.cloneNode(true);
+    fila3.querySelector('.clima-fila-label').textContent = 'TEMPERATURA';
+    const valorTemp = fila3.querySelector('.clima-fila-valor');
+    valorTemp.textContent = temp;
+    valorTemp.classList.add('destacado');
+    infoboxBody.appendChild(fila3);
+
+    // Crear fila: HUMEDAD
+    const fila4 = template.content.cloneNode(true);
+    fila4.querySelector('.clima-fila-label').textContent = 'HUMEDAD';
+    fila4.querySelector('.clima-fila-valor').textContent = humedad;
+    infoboxBody.appendChild(fila4);
+
+    // Crear fila: VIENTO
+    const fila5 = template.content.cloneNode(true);
+    fila5.querySelector('.clima-fila-label').textContent = 'VIENTO';
+    fila5.querySelector('.clima-fila-valor').textContent = viento;
+    infoboxBody.appendChild(fila5);
   }
  
   /** Muestra un mensaje de error en el info-box y en el botón */
@@ -412,28 +426,40 @@ const noticias = (function () {
       return;
     }
  
-    bodyEl.innerHTML = lista.map(function (noticia) {
-      const imgHtml = noticia.imagenUrl
-        ? `<img class="noticia-img" src="${noticia.imagenUrl}" alt="" loading="lazy">`
-        : '';
- 
-      const descHtml = noticia.descripcionBreve
-        ? `<p class="noticia-desc">${noticia.descripcionBreve}</p>`
-        : '';
- 
-      const href = noticia.enlaceNoticia || '#';
- 
-      return `
-        <a class="noticia-item" href="${href}" target="_blank" rel="noopener noreferrer">
-          ${imgHtml}
-          <p class="noticia-titulo">${noticia.titulo}</p>
-          ${descHtml}
-          <span class="noticia-leer">▶ LEER MÁS</span>
-        </a>
-      `;
-    }).join('');
+    const template = document.getElementById('template-noticia-item');
+    if (!template) return;
+
+    bodyEl.innerHTML = '';
+
+    lista.forEach(function (noticia) {
+      const clone = template.content.cloneNode(true);
+      const link = clone.querySelector('a');
+      const titulo = clone.querySelector('.noticia-titulo');
+      const desc = clone.querySelector('.noticia-desc');
+
+      if (link) link.href = noticia.enlaceNoticia || '#';
+      if (titulo) titulo.textContent = noticia.titulo;
+      if (desc) {
+        if (noticia.descripcionBreve) {
+          desc.textContent = noticia.descripcionBreve;
+          desc.style.display = 'block';
+        }
+      }
+
+      // Si hay imagen, agregarla dinámicamente al inicio
+      if (noticia.imagenUrl) {
+        const img = document.createElement('img');
+        img.className = 'noticia-img';
+        img.src = noticia.imagenUrl;
+        img.alt = '';
+        img.loading = 'lazy';
+        clone.querySelector('a').insertBefore(img, clone.querySelector('a').firstChild);
+      }
+
+      bodyEl.appendChild(clone);
+    });
   }
- 
+
   /** Muestra un mensaje de error en el panel */
   function renderizarError() {
     if (bodyEl) {

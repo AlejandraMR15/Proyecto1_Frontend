@@ -117,18 +117,6 @@ function generarId() {
     return 'edif-' + Date.now() + '-' + Math.floor(Math.random() * 10000);
 }
 
-/**
- * Vincula un listener click reemplazando el anterior en el mismo elemento.
- * Evita acumulación de handlers cuando un modal se abre varias veces.
- */
-function setSingleClickListener(elemento, handler) {
-    if (!elemento) return;
-    if (elemento._singleClickHandler) {
-        elemento.removeEventListener('click', elemento._singleClickHandler);
-    }
-    elemento._singleClickHandler = handler;
-    elemento.addEventListener('click', handler);
-}
 /* ================================================================
    NOTIFICACIÓN en pantalla (sin alert)
 ================================================================ */

@@ -189,144 +189,16 @@ export default class Ciudad {
     }
 
     /**
-     * Ejecuta un ciclo de turno completo:
-     * 1. Primero las plantas de utilidad producen recursos.
-     * 2. Luego otros edificios producen recursos.
-     * 3. Finalmente todos los edificios aplican sus consumos.
-     * @param {Ciudadano[]} [ciudadanos=[]]  - Array con todos los ciudadanos de la ciudad.
+     * Construye parámetros de consulta para el endpoint de noticias.
+     * @returns {{q:string, language:string, pageSize:number, apiKey:string}}
      */
-    procesarTurno(ciudadanos = []) {
-        const produccionPendiente = {
-            dinero: 0,
-            electricidad: 0,
-            agua: 0,
-            felicidad: this.obtenerValorServicios(),
-            comida: 0,
-        };
-
-        // Guardar producción total de plantas (FASE 1)
-        let produccionPlantasElectricidad = 0;
-        let produccionPlantasAgua = 0;
-
-        // ===== FASE 1: PRODUCCIÓN de plantas de utilidad =====
-        const plantas = this.construcciones.filter(c => c instanceof PlantasDeUtilidad);
-        for (const planta of plantas) {
-            const produccion = planta.procesarProduccion(this.recursos);
-            this._acumularProduccionPendiente(produccionPendiente, produccion);
-            
-            // Guardar producción de plantas para retornar después
-            if (produccion?.electricidad) produccionPlantasElectricidad += produccion.electricidad;
-            if (produccion?.agua) produccionPlantasAgua += produccion.agua;
-            
-            // Mostrar burbuja visual si produjo algo
-            this._mostrarBurbujaProduccion(planta, produccion);
-        }
-
-        // Aplicar producción de plantas inmediatamente (la planta de agua la necesita)
-        if (produccionPendiente.electricidad > 0) {
-            this.recursos.actualizarElectricidad(produccionPendiente.electricidad);
-            console.log('Electricidad producida:', produccionPendiente.electricidad, '→ Total:', this.recursos.electricidad);
-        }
-        if (produccionPendiente.agua > 0) {
-            this.recursos.actualizarAgua(produccionPendiente.agua);
-            console.log('Agua producida:', produccionPendiente.agua, '→ Total:', this.recursos.agua);
-        }
-
-        // Reset para siguiente fase
-        produccionPendiente.dinero = 0;
-        produccionPendiente.electricidad = 0;
-        produccionPendiente.agua = 0;
-        produccionPendiente.comida = 0;
-
-        // ===== FASE 2: PRODUCCIÓN de otros edificios =====
-        const otrosEdificios = this.construcciones.filter(c => !(c instanceof PlantasDeUtilidad));
-        for (const edificio of otrosEdificios) {
-            if (typeof edificio.procesarProduccion === 'function') {
-                const produccion = edificio.procesarProduccion(this.recursos);
-                this._acumularProduccionPendiente(produccionPendiente, produccion);
-                
-                // Mostrar burbuja visual si produjo algo
-                this._mostrarBurbujaProduccion(edificio, produccion);
-            }
-        }
-
-        // Aplicar producción de otros edificios
-        if (produccionPendiente.dinero > 0) {
-            this.recursos.dinero += produccionPendiente.dinero;
-            console.log('Dinero producido:', produccionPendiente.dinero, '→ Total:', this.recursos.dinero);
-        }
-        if (produccionPendiente.comida > 0) {
-            this.recursos.actualizarComida(produccionPendiente.comida);
-            console.log('Comida producida:', produccionPendiente.comida, '→ Total:', this.recursos.comida);
-        }
-
-        // ===== FASE 3: CONSUMOS de todos los edificios =====
-        for (const edificio of this.construcciones) {
-            if (typeof edificio.procesarConsumo === 'function') {
-                edificio.procesarConsumo(this.recursos);
-            }
-        }
-
+    crearParametrosConsulta() {
         return {
-            dinero: produccionPendiente.dinero,
-            electricidad: produccionPlantasElectricidad,
-            agua: produccionPlantasAgua,
-            felicidad: produccionPendiente.felicidad,
+            q: this.paisConsulta,
+            language: 'es',
+            pageSize: ApiNoticias.CANTIDAD_NOTICIAS,
+            apiKey: this.apiKey
         };
-    }
-
-    /**
-     * Acumula los recursos producidos en el turno para recolección por burbujas.
-     * @private
-     * @param {object} acumulado
-     * @param {object|null|undefined} produccion
-     */
-    _acumularProduccionPendiente(acumulado, produccion) {
-        if (!produccion || typeof produccion !== 'object') return;
-
-        for (const tipo of ['dinero', 'electricidad', 'agua', 'comida']) {
-            const valor = Number(produccion[tipo]);
-            if (Number.isFinite(valor) && valor > 0) {
-                acumulado[tipo] += valor;
-            }
-        }
-    }
-
-    /**
-     * Muestra una burbuja visual para cada tipo de recurso producido.
-     * @private
-     * @param {object} edificio - El edificio que produjo
-     * @param {object} produccion - Objeto con dinero, electricidad, agua, comida
-     */
-    _mostrarBurbujaProduccion(edificio, produccion) {  
-        if (!window.gridRenderer) {
-            console.warn('[Ciudad._mostrarBurbujaProduccion] window.gridRenderer no existe');
-            return;
-        }
-        if (edificio._coordX === undefined || edificio._coordY === undefined) {
-            console.warn('[Ciudad._mostrarBurbujaProduccion] Coordenadas no definidas', { 
-                coordX: edificio._coordX, 
-                coordY: edificio._coordY 
-            });
-            return;
-        }
-
-        const col = edificio._coordX;
-        const row = edificio._coordY;
-
-        // Mapeo de tipos a nombres para mostrarBurbuja
-        if (produccion.dinero > 0) {
-            window.gridRenderer.mostrarBurbuja(col, row, 'dinero', produccion.dinero);
-        }
-        if (produccion.electricidad > 0) {
-            window.gridRenderer.mostrarBurbuja(col, row, 'electricidad', produccion.electricidad);
-        }
-        if (produccion.agua > 0) {
-            window.gridRenderer.mostrarBurbuja(col, row, 'agua', produccion.agua);
-        }
-        if (produccion.comida > 0) {
-            window.gridRenderer.mostrarBurbuja(col, row, 'produccion', produccion.comida);
-        }
     }
 
     /**

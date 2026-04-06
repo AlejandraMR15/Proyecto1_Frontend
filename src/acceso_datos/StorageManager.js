@@ -45,27 +45,4 @@ export default class StorageManager {
     limpiarTodo() {
         localStorage.clear();
     }
-
-    /**
-     * Exporta el contenido de una clave como archivo JSON descargable.
-     * @param {string} clave
-     * @param {string} [nombreArchivo="datos.json"]
-     */
-    exportarJSON(clave, nombreArchivo = "datos.json") {
-        const datos = this.cargar(clave);
-        if (!datos) {
-            console.warn("No hay datos para exportar.");
-            return;
-        }
-        const json = JSON.stringify(datos, null, 2);
-        const blob = new Blob([json], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
-        const enlace = document.createElement("a");
-        enlace.href = url;
-        enlace.download = nombreArchivo;
-        document.body.appendChild(enlace);
-        enlace.click();
-        document.body.removeChild(enlace);
-        URL.revokeObjectURL(url);
-    }
 }

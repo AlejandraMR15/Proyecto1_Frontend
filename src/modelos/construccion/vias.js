@@ -16,10 +16,6 @@ export default class Vias extends Construccion {
      * Retorna true para indicar que esta celda es transitable.
      * Usado al construir la matriz del mapa para el sistema de rutas.
      */
-    /**
-     * Retorna true para indicar que esta celda es transitable.
-     * Usado al construir la matriz del mapa para el sistema de rutas.
-     */
     esTransitable() {
         return true;
     }

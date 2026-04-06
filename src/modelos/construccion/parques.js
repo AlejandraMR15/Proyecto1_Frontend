@@ -22,7 +22,7 @@ export default class Parques extends Construccion {
             nombre: 'Parque',
             costo: this.costo,
             costoMantenimiento: this.costoMantenimiento,
-            felicidadAportada: `😊 ${this.felicidad} puntos`
+            felicidadAportada: `${this.felicidad} puntos`
         };
     }
 

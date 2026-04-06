@@ -2,11 +2,14 @@ import ApiExternos from './ApiExternos.js';
 
 export default class ApiDijkstra extends ApiExternos {
     /**
+     * @param {string} [baseUrl] URL del servidor de rutas. Si no se proporciona, usa window.location.hostname:5000
      * @param {Array<Array<number>>} [ruta=[]]
      */
-    constructor(ruta = []) {
-        const ipServidor = window.location.hostname;
-        const baseUrl = `http://${ipServidor}:5000`;
+    constructor(baseUrl = null, ruta = []) {
+        if (!baseUrl) {
+            const ipServidor = window.location.hostname;
+            baseUrl = `http://${ipServidor}:5000`;
+        }
         console.log('ApiDijkstra conectando a:', baseUrl);
         super(baseUrl);
         this.ruta = ruta;

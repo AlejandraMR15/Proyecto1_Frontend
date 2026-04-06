@@ -90,16 +90,6 @@ export default class Industrial extends Edificio {
     }
 
     /**
-     * Aplica la producción al objeto Recursos.
-     * Si faltan agua o electricidad se reduce la producción al 50%.
-     * @deprecated Usar procesarProduccion() en su lugar
-     * @param {Recursos} recursos
-     */
-    producirRecursos(recursos) {
-        return this.procesarProduccion(recursos);
-    }
-
-    /**
      * Procesa consumos del turno: mantenimiento, electricidad, agua y comida por empleados actuales.
      * @param {import('../../recursos.js').default} recursos
      */

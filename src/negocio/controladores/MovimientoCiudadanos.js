@@ -27,7 +27,7 @@ export default class MovimientoCiudadanos {
      *   Instancia del modelo lógico — fuente de verdad de la matriz.
      * @param {import('./GridRenderer.js').default}              renderer
      *   Renderer activo — se usa para leer TW, TH, TD y el offset del grid.
-     * @param {import('./GestorCiudadanos.js').default}          gestorCiudadanos
+     * @param {import('../logica/GestorCiudadanos.js').default}          gestorCiudadanos
      *   Gestor con la lista viva de ciudadanos.
      * @param {object}  [opciones]
      * @param {string}  [opciones.contenedorId='iso-grid']  id del div que contiene el grid.

@@ -6,16 +6,20 @@
  *  - Autosave cada 30 segundos
  *  - Exportar ciudad a JSON descargable (HU-021)
  *  - Importar ciudad desde archivo JSON (HU-021)
+ *  - Finalizar partida: registra en ranking, limpia localStorage y vuelve al menú
+ *  - Ir al menú desde Game Over sin guardar
+ *  - Detectar si la partida cargada estaba en game_over
  *
  * Depende de:
  *  - timerEstado  (HudPanel.js) — para persistir duración del turno
  *  - detenerTimerTurno / detenerAutosave (propios o importados)
  *  - StorageManager (acceso_datos)
+ *  - actualizarOAgregarEnRanking (RankingUI.js)
  */
 
 import StorageManager from '../../acceso_datos/StorageManager.js';
 import { timerEstado, detenerTimerTurno } from './HudPanel.js';
-import { leerPartidaDesdeArchivoJSON } from './ImportadorCiudad.js';
+import { actualizarOAgregarEnRanking } from './RankingUi.js';
 
 export const storage = new StorageManager();
 
@@ -194,8 +198,16 @@ export function abrirModalImportar() {
  * @param {File} archivo
  */
 export function procesarArchivoImportacion(archivo) {
-    leerPartidaDesdeArchivoJSON(archivo)
-        .then((partida) => {
+    const reader = new FileReader();
+
+    reader.addEventListener('load', function (e) {
+        try {
+            const datos = JSON.parse(e.target.result);
+
+            if (!datos.cityName || !datos.map) {
+                throw new Error('El archivo no parece un JSON de ciudad válido.');
+            }
+
             const juego = window.juego;
 
             // Detener todo antes de reemplazar
@@ -203,6 +215,21 @@ export function procesarArchivoImportacion(archivo) {
             detenerTimerTurno();
             detenerAutosave();
             if (window.movimientoCiudadanos) window.movimientoCiudadanos.detener();
+
+            // Transformar al formato interno de StorageManager ('partida')
+            const partida = {
+                ciudad: {
+                    nombre:         datos.cityName,
+                    alcalde:        datos.mayor,
+                    recursos:       datos.resources || {},
+                    construcciones: datos.buildings || [],
+                    mapa:           datos.map,
+                    coordenadas:    datos.coordinates || null,
+                },
+                numeroTurno: datos.turn    || 0,
+                ciudadanos:  datos.citizens || [],
+                recoleccion: null,
+            };
 
             // Persistir y recargar limpio
             if (juego) {
@@ -216,8 +243,8 @@ export function procesarArchivoImportacion(archivo) {
 
             setModal(document.getElementById('modal-importar'), false);
             window.location.reload();
-        })
-        .catch((err) => {
+
+        } catch (err) {
             const aviso = document.getElementById('importar-aviso-error');
             const texto = document.getElementById('importar-error-texto');
             if (aviso && texto) {
@@ -225,7 +252,112 @@ export function procesarArchivoImportacion(archivo) {
                 aviso.dataset.visible = 'true';
             }
             console.error('[PartidaManager] Error al importar ciudad:', err);
-        });
+        }
+    });
+
+    reader.addEventListener('error', function () {
+        const aviso = document.getElementById('importar-aviso-error');
+        const texto = document.getElementById('importar-error-texto');
+        if (aviso && texto) {
+            texto.textContent = 'No se pudo leer el archivo.';
+            aviso.dataset.visible = 'true';
+        }
+    });
+
+    reader.readAsText(archivo);
+}
+
+/* ================================================================
+   MOSTRAR MODAL GAME OVER
+================================================================ */
+
+/**
+ * Muestra el modal de GAME OVER con la razón, número de turno y puntuación.
+ *
+ * @param {string} razon - Razón del game over
+ * @param {number} numeroTurno - Número del turno en que terminó
+ * @param {number} puntaje - Puntuación final
+ */
+export function mostrarModalGameOver(razon, numeroTurno, puntaje) {
+    const modalGameOver = document.getElementById('modal-game-over');
+    if (!modalGameOver) return;
+
+    // Actualizar contenido del modal
+    const elRazon = document.getElementById('modal-game-over-razon');
+    const elTurno = document.getElementById('modal-game-over-turno');
+    const elScore = document.getElementById('modal-game-over-score');
+
+    if (elRazon) {
+        const razones = {
+            'Sin dinero': '💰 Te has quedado sin dinero',
+            'Sin electricidad': '⚡ Te has quedado sin electricidad',
+            'Sin agua': '💧 Te has quedado sin agua'
+        };
+        elRazon.textContent = razones[razon] || razon;
+    }
+    if (elTurno) elTurno.textContent = numeroTurno;
+    if (elScore) elScore.textContent = puntaje || 0;
+
+    // Mostrar modal
+    modalGameOver.dataset.visible = 'true';
+}
+
+/* ================================================================
+   FINALIZAR PARTIDA
+================================================================ */
+
+/**
+ * Finaliza la partida: registra en ranking, limpia localStorage y vuelve al menú.
+ */
+export function finalizarPartida() {
+    const juego = window.juego;
+    if (juego) {
+        juego.pausarJuego();
+        actualizarOAgregarEnRanking();
+        juego.guardarPartida();
+    }
+    detenerTimerTurno();
+    detenerAutosave();
+    storage.eliminar('partida');
+    storage.eliminar('config-turno');
+    storage.eliminar('estado-juego');
+    window.location.href = '../vistas/menu.html';
+}
+
+/**
+ * Limpia localStorage y redirige al menú sin guardar.
+ * Usado desde la pantalla de Game Over.
+ */
+export function irAlMenuDesdeGameOver() {
+    detenerTimerTurno();
+    detenerAutosave();
+    storage.eliminar('partida');
+    storage.eliminar('config-turno');
+    storage.eliminar('estado-juego');
+    window.location.href = '../vistas/menu.html';
+}
+
+/* ================================================================
+   GAME OVER AL CARGAR
+================================================================ */
+
+/**
+ * Detecta si la partida guardada estaba en game_over y muestra el modal.
+ * Devuelve true si estaba en game_over (para que Hud.js no arranque el timer).
+ * @returns {boolean}
+ */
+export function detectarGameOverAlCargar() {
+    const juego = window.juego;
+    const estadoPersistido = juego.StorageManager.cargar('estado-juego');
+    if (estadoPersistido && estadoPersistido.esGameOver) {
+        juego.EstadoDeJuego.cambiarEstado('game_over');
+        setTimeout(() => {
+            if (window.movimientoCiudadanos) window.movimientoCiudadanos.detener();
+            mostrarModalGameOver(estadoPersistido.razon || 'Desconocida', estadoPersistido.numeroTurno || 0, estadoPersistido.puntaje || 0);
+        }, 300);
+        return true;
+    }
+    return false;
 }
 
 /* ================================================================
@@ -264,4 +396,17 @@ export function registrarEventosPartida() {
             if (archivo) procesarArchivoImportacion(archivo);
             e.target.value = '';
         });
+
+    // Modal finalizar
+    document.getElementById('btn-finalizar-confirmar')
+        ?.addEventListener('click', finalizarPartida);
+    document.getElementById('btn-finalizar-cancelar')
+        ?.addEventListener('click', () => {
+            setModal(document.getElementById('modal-finalizar'), false);
+            setModal(document.getElementById('modal-pausa'), true);
+        });
+
+    // Modal game over → nueva partida
+    document.getElementById('btn-game-over-nueva-partida')
+        ?.addEventListener('click', irAlMenuDesdeGameOver);
 }

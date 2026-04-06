@@ -13,7 +13,7 @@
 import Mapa         from '../../modelos/Mapa.js';
 import GridRenderer  from './GridRenderer.js';
 import Juego         from '../logica/Juego.js';
-import MovimientoCiudadanos from '../logica/MovimientoCiudadanos.js';
+import MovimientoCiudadanos from './MovimientoCiudadanos.js';
 import { historialRecursos } from './historialRecursos.js';
 import { crearControlCamara } from './cameraController.js';
 import { nombreEtiquetaPorCodigo } from './etiquetasMapa.js';

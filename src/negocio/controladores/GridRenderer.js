@@ -348,8 +348,6 @@ export default class GridRenderer {
         const etiqueta = this.mapa.matriz[row][col] ?? 'g';
         cubo.dataset.etiqueta = etiqueta;
 
-        const colores = coloresPorEtiqueta(etiqueta);
-
         // Limpiar contenido anterior (ya no usamos imágenes)
         cubo.innerHTML = '';
 
@@ -357,9 +355,6 @@ export default class GridRenderer {
             TW: this.TW,
             TH: this.TH,
             TD: this.TD,
-            colorTop: colores.top,
-            colorLeft: colores.left,
-            colorRight: colores.right,
             etiqueta,
         });
         svg.classList.add(esEdificio(etiqueta) ? 'iso-svg-edificio' : 'iso-svg-plano');

@@ -29,6 +29,8 @@ import {
     iniciarAutosave,
     detenerAutosave,
     registrarEventosPartida,
+    detectarGameOverAlCargar,
+    irAlMenuDesdeGameOver,
 } from './PartidaManager.js';
 
 import {
@@ -37,9 +39,7 @@ import {
 } from './RankingUi.js';
 
 import {
-    detectarGameOverAlCargar,
     registrarEventosModales,
-    irAlMenuDesdeGameOver,
 } from './ModalPausa.js';
 
 import { registrarAtajos } from './AtajosManager.js';

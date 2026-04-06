@@ -10,6 +10,10 @@ function crearPendientesVacios() {
 }
 
 export default class RecoleccionBurbujas {
+    /**
+     * @param {object} juego - Instancia del juego
+     * @param {HTMLElement|null} [toastEl=null] - Elemento del DOM para mostrar notificaciones
+     */
     constructor(juego) {
         this.juego = juego;
         this.pendientes = crearPendientesVacios();
@@ -19,7 +23,6 @@ export default class RecoleccionBurbujas {
         this._toastEl = null;
         this._toastTimeout = null;
 
-        this._inicializarInterfaz();
         this._emitirPendientes();
     }
 
@@ -76,13 +79,6 @@ export default class RecoleccionBurbujas {
         this._emitirPendientes();
     }
 
-    _inicializarInterfaz() {
-        this._toastEl = document.getElementById('recoleccion-burbujas-toast');
-        if (!this._toastEl) {
-            console.warn('[RecoleccionBurbujas] No se encontro #recoleccion-burbujas-toast en index.html');
-        }
-    }
-
     _emitirPendientes() {
         document.dispatchEvent(new CustomEvent('recoleccion-burbujas:pendientes-actualizados', {
             detail: {
@@ -92,5 +88,3 @@ export default class RecoleccionBurbujas {
         }));
     }
 }
-
-window.recolectorBurbujas = window.recolectorBurbujas || null;

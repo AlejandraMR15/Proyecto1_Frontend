@@ -1,20 +1,11 @@
 import ApiExternos from './ApiExternos.js';
+import Clima from '../../modelos/api/Clima.js';
 import { OPENWEATHER_KEY } from '../../../keys.js';
 
 export default class ApiClima extends ApiExternos {
-    /**
-     * @param {number} [temperatura=0]
-     * @param {string} [condicionClimatica='']
-     * @param {number} [humedad=0]
-     * @param {number} [velocidadViento=0]
-     */
-    constructor(temperatura = 0, condicionClimatica = '', humedad = 0, velocidadViento = 0) {
+    constructor() {
         super('https://api.openweathermap.org');
         this.apiKey = this.leerApiKey();
-        this.temperatura = temperatura;
-        this.condicionClimatica = condicionClimatica;
-        this.humedad = humedad;
-        this.velocidadViento = velocidadViento;
     }
 
     /**
@@ -31,15 +22,15 @@ export default class ApiClima extends ApiExternos {
     /**
      * Obtiene coordenadas por ciudad y luego consulta el clima actual.
      * @param {string} [nombreCiudad='']
-     * @returns {Promise<{temperatura:number|null, condicionClimatica:string, humedad:number|null, velocidadViento:number|null}>}
+     * @returns {Promise<Clima>}
      */
     async obtenerInformacion(nombreCiudad = '') {
         const coordenadasCiudad = await this.obtenerCoordenadasPorCiudad(nombreCiudad);
         const datosClima = await this.obtenerDatosClima(coordenadasCiudad.latitud, coordenadasCiudad.longitud);
         const climaFormateado = this.formatearRespuestaClima(datosClima);
+        const climaObjeto = this.crearObjetoClima(climaFormateado);
 
-        this.actualizarEstadoClimatico(climaFormateado);
-        return climaFormateado;
+        return climaObjeto;
     }
 
     /**
@@ -105,17 +96,6 @@ export default class ApiClima extends ApiExternos {
     }
 
     /**
-     * Actualiza el estado interno de clima.
-     * @param {{temperatura:number|null, condicionClimatica:string, humedad:number|null, velocidadViento:number|null}} climaFormateado
-     */
-    actualizarEstadoClimatico(climaFormateado) {
-        this.temperatura = climaFormateado.temperatura;
-        this.condicionClimatica = climaFormateado.condicionClimatica;
-        this.humedad = climaFormateado.humedad;
-        this.velocidadViento = climaFormateado.velocidadViento;
-    }
-
-    /**
      * Extrae únicamente los campos requeridos del payload de OpenWeather.
      * @param {any} datosClima
      * @returns {{temperatura:number|null, condicionClimatica:string, humedad:number|null, velocidadViento:number|null}}
@@ -127,5 +107,19 @@ export default class ApiClima extends ApiExternos {
             humedad: datosClima?.main?.humidity ?? null,
             velocidadViento: datosClima?.wind?.speed ?? null
         };
+    }
+
+    /**
+     * Crea una instancia de Clima a partir de datos formateados.
+     * @param {{temperatura:number|null, condicionClimatica:string, humedad:number|null, velocidadViento:number|null}} datosFormateados
+     * @returns {Clima}
+     */
+    crearObjetoClima(datosFormateados) {
+        return new Clima(
+            datosFormateados.temperatura ?? 0,
+            datosFormateados.condicionClimatica,
+            datosFormateados.humedad ?? 0,
+            datosFormateados.velocidadViento ?? 0
+        );
     }
 }

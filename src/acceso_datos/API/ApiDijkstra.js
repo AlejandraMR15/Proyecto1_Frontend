@@ -1,36 +1,41 @@
 import ApiExternos from './ApiExternos.js';
+import Ruta from '../../modelos/api/Ruta.js';
 
 export default class ApiDijkstra extends ApiExternos {
     /**
-     * @param {Array<Array<number>>} [ruta=[]]
+     * @param {string} [baseUrl] URL del servidor de rutas. Si no se proporciona, usa window.location.hostname:5000
      */
-    constructor(ruta = []) {
-        const ipServidor = window.location.hostname;
-        const baseUrl = `http://${ipServidor}:5000`;
+    constructor(baseUrl = null) {
+        if (!baseUrl) {
+            const ipServidor = window.location.hostname;
+            baseUrl = `http://${ipServidor}:5000`;
+        }
         console.log('ApiDijkstra conectando a:', baseUrl);
         super(baseUrl);
-        this.ruta = ruta;
     }
 
     /**
      * Solicita al microservicio el cálculo de ruta más corta.
      * @param {{map:Array<Array<number>>, start:[number,number], end:[number,number]}} [datosMapa={}]
-     * @returns {Promise<any>}
+     * @returns {Promise<Ruta>}
      */
     async calcularRuta(datosMapa = {}) {
         this.validarDatosRuta(datosMapa);
 
         const endpoint = this.obtenerEndpointCalculoRuta();
         const opcionesPeticion = this.crearOpcionesPost(datosMapa);
+        
+        let respuesta;
         try {
-            const respuesta = await fetch(`${this.baseUrl}${endpoint}`, opcionesPeticion);
-            const resultado = await this.procesarRespuestaJson(respuesta);
-
-            this.ruta = resultado?.route ?? [];
-            return resultado;
+            respuesta = await fetch(`${this.baseUrl}${endpoint}`, opcionesPeticion);
         } catch (error) {
-            throw new Error('No se pudo conectar al microservicio de rutas. Verifica que este ejecutandose en http://127.0.0.1:5000');
+            throw new Error('No fue posible conectar con el servidor de cálculo de rutas. Asegúrate de que el microservicio esté ejecutándose.');
         }
+
+        // Procesar respuesta del servidor (puede lanzar errores específicos del servidor)
+        const resultado = await this.procesarRespuestaJson(respuesta);
+        const rutaObjeto = this.crearObjetoRuta(resultado?.route ?? []);
+        return rutaObjeto;
     }
 
     /**
@@ -91,10 +96,19 @@ export default class ApiDijkstra extends ApiExternos {
         const datosRespuesta = await respuesta.json();
 
         if (!respuesta.ok) {
-            const mensajeError = datosRespuesta?.error || 'Error al calcular la ruta';
-            throw new Error(mensajeError);
+            // En lugar de lanzar error, devolver ruta vacía para que GestorRutas maneje el mensaje
+            return { route: [] };
         }
 
         return datosRespuesta;
+    }
+
+    /**
+     * Crea una instancia de Ruta a partir de coordenadas.
+     * @param {Array<Array<number>>} [coordenadas=[]]
+     * @returns {Ruta}
+     */
+    crearObjetoRuta(coordenadas = []) {
+        return new Ruta(coordenadas);
     }
 }

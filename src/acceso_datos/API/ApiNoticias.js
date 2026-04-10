@@ -1,19 +1,21 @@
 import ApiExternos from './ApiExternos.js';
+import Noticia from '../../modelos/api/Noticia.js';
 import { NEWS_KEY } from '../../../keys.js';
 
 export default class ApiNoticias extends ApiExternos {
     static CANTIDAD_NOTICIAS = 5;
+    static PAIS_DEFECTO = 'Colombia';
 
     /**
-     * @param {Array<object>} [ultimasNoticias=[]]
+     * @param {string} [paisConsulta='Colombia']
      */
-    constructor(ultimasNoticias = []) {
-        // allorigins.win es un proxy CORS público gratuito.
+    constructor(paisConsulta = ApiNoticias.PAIS_DEFECTO) {
+        // api.codetabs.com es un proxy CORS público gratuito más estable que allorigins.
         // NewsAPI bloquea peticiones directas desde el navegador (plan gratuito),
         // pero sí permite peticiones desde servidores. El proxy actúa de intermediario.
-        super('https://api.allorigins.win');
+        super('https://api.codetabs.com/v1/proxy');
         this.apiKey = this.leerApiKey();
-        this.ultimasNoticias = ultimasNoticias; 
+        this.paisConsulta = paisConsulta;
     }
 
     /**
@@ -28,56 +30,47 @@ export default class ApiNoticias extends ApiExternos {
     }
 
     /**
-     * Consulta noticias y retorna solo los campos necesarios para la UI.
-     * @param {string} [pais='co']
-     * @returns {Promise<{pais:string, cantidad:number, noticias:Array<object>}>}
+     * Consulta noticias y retorna objetos Noticia.
+     * @returns {Promise<{pais:string, cantidad:number, noticias:Array<Noticia>}>}
      */
-    async obtenerInformacion(pais = 'co') {
-        const datosNoticias = await this.obtenerDatosNoticias(pais);
+    async obtenerInformacion() {
+        const datosNoticias = await this.obtenerDatosNoticias();
         const noticiasFormateadas = this.formatearNoticias(datosNoticias?.articles ?? []);
-
-        this.actualizarEstadoNoticias(noticiasFormateadas);
+        const noticiasObjetos = this.crearObjetosNoticia(noticiasFormateadas);
 
         return {
-            pais,
-            cantidad: noticiasFormateadas.length,
-            noticias: noticiasFormateadas
+            pais: this.paisConsulta,
+            cantidad: noticiasObjetos.length,
+            noticias: noticiasObjetos
         };
     }
 
     /**
      * Consulta el endpoint de noticias con los parámetros definidos.
-     * @param {string} pais
      * @returns {Promise<any>}
      */
-    async obtenerDatosNoticias(pais) {
-        // Construye la URL completa de NewsAPI y la envuelve en el proxy allorigins.
-        // allorigins recibe la URL destino como query param "url" y devuelve
-        // { contents: "<json como string>", status: { ... } }
-        const parametros = this.crearParametrosConsulta(pais);
+    async obtenerDatosNoticias() {
+        // Construye la URL completa de NewsAPI y la envuelve en el proxy api.codetabs.com.
+        // codetabs recibe la URL destino como query param "quest" y devuelve el JSON directamente.
+        const parametros = this.crearParametrosConsulta();
         const queryString = new URLSearchParams(parametros).toString();
         const urlNewsApi = `https://newsapi.org/v2/everything?${queryString}`;
  
-        // allorigins envuelve la respuesta en { contents: "..." }
-        const urlProxy = `/get?url=${encodeURIComponent(urlNewsApi)}`;
+        // codetabs usa "quest" y devuelve JSON directamente
+        const urlProxy = `?quest=${encodeURIComponent(urlNewsApi)}`;
         const respuestaProxy = await this.realizarPeticion(urlProxy);
  
-        // contents viene como string JSON, hay que parsearlo
-        try {
-            return JSON.parse(respuestaProxy.contents);
-        } catch {
-            throw new Error('No se pudo parsear la respuesta del proxy de noticias.');
-        }
+        // codetabs devuelve directamente el JSON de NewsAPI
+        return respuestaProxy;
     }
 
     /**
      * Construye parámetros de consulta para el endpoint de noticias.
-     * @param {string} pais
      * @returns {{q:string, language:string, pageSize:number, apiKey:string}}
      */
     crearParametrosConsulta() {
         return {
-            q: 'Colombia',
+            q: this.paisConsulta,
             language: 'es',
             pageSize: ApiNoticias.CANTIDAD_NOTICIAS,
             apiKey: this.apiKey
@@ -99,10 +92,18 @@ export default class ApiNoticias extends ApiExternos {
     }
 
     /**
-     * Actualiza el estado interno con las noticias más recientes.
+     * Convierte objetos planos de noticias a instancias de Noticia.
      * @param {Array<object>} [noticiasFormateadas=[]]
+     * @returns {Array<Noticia>}
      */
-    actualizarEstadoNoticias(noticiasFormateadas = []) {
-        this.ultimasNoticias = noticiasFormateadas;
+    crearObjetosNoticia(noticiasFormateadas = []) {
+        return noticiasFormateadas.map((noticia) =>
+            new Noticia(
+                noticia?.titulo ?? '',
+                noticia?.descripcionBreve ?? '',
+                noticia?.imagenUrl || null,
+                noticia?.enlaceNoticia ?? ''
+            )
+        );
     }
 }

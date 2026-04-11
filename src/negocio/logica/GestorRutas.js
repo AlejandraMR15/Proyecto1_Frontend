@@ -39,7 +39,7 @@ export async function calcularRuta(origen, destino, mapa) {
     };
 
     const resultado = await apiDijkstra.calcularRuta(payload);
-    const ruta = resultado?.route ?? [];
+    const ruta = resultado?.coordenadas ?? [];
 
     if (ruta.length === 0) {
         throw new Error('No existe ruta entre los puntos seleccionados');

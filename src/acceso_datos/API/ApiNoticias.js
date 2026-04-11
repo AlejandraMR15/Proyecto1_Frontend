@@ -1,4 +1,5 @@
 import ApiExternos from './ApiExternos.js';
+import Noticia from '../../modelos/api/Noticia.js';
 import { NEWS_KEY } from '../../../keys.js';
 
 export default class ApiNoticias extends ApiExternos {
@@ -6,16 +7,14 @@ export default class ApiNoticias extends ApiExternos {
     static PAIS_DEFECTO = 'Colombia';
 
     /**
-     * @param {Array<object>} [ultimasNoticias=[]]
      * @param {string} [paisConsulta='Colombia']
      */
-    constructor(ultimasNoticias = [], paisConsulta = ApiNoticias.PAIS_DEFECTO) {
+    constructor(paisConsulta = ApiNoticias.PAIS_DEFECTO) {
         // api.codetabs.com es un proxy CORS público gratuito más estable que allorigins.
         // NewsAPI bloquea peticiones directas desde el navegador (plan gratuito),
         // pero sí permite peticiones desde servidores. El proxy actúa de intermediario.
         super('https://api.codetabs.com/v1/proxy');
         this.apiKey = this.leerApiKey();
-        this.ultimasNoticias = ultimasNoticias;
         this.paisConsulta = paisConsulta;
     }
 
@@ -31,19 +30,18 @@ export default class ApiNoticias extends ApiExternos {
     }
 
     /**
-     * Consulta noticias y retorna solo los campos necesarios para la UI.
-     * @returns {Promise<{pais:string, cantidad:number, noticias:Array<object>}>}
+     * Consulta noticias y retorna objetos Noticia.
+     * @returns {Promise<{pais:string, cantidad:number, noticias:Array<Noticia>}>}
      */
     async obtenerInformacion() {
         const datosNoticias = await this.obtenerDatosNoticias();
         const noticiasFormateadas = this.formatearNoticias(datosNoticias?.articles ?? []);
-
-        this.actualizarEstadoNoticias(noticiasFormateadas);
+        const noticiasObjetos = this.crearObjetosNoticia(noticiasFormateadas);
 
         return {
             pais: this.paisConsulta,
-            cantidad: noticiasFormateadas.length,
-            noticias: noticiasFormateadas
+            cantidad: noticiasObjetos.length,
+            noticias: noticiasObjetos
         };
     }
 
@@ -94,10 +92,18 @@ export default class ApiNoticias extends ApiExternos {
     }
 
     /**
-     * Actualiza el estado interno con las noticias más recientes.
+     * Convierte objetos planos de noticias a instancias de Noticia.
      * @param {Array<object>} [noticiasFormateadas=[]]
+     * @returns {Array<Noticia>}
      */
-    actualizarEstadoNoticias(noticiasFormateadas = []) {
-        this.ultimasNoticias = noticiasFormateadas;
+    crearObjetosNoticia(noticiasFormateadas = []) {
+        return noticiasFormateadas.map((noticia) =>
+            new Noticia(
+                noticia?.titulo ?? '',
+                noticia?.descripcionBreve ?? '',
+                noticia?.imagenUrl || null,
+                noticia?.enlaceNoticia ?? ''
+            )
+        );
     }
 }

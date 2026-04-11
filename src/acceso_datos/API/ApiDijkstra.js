@@ -1,24 +1,23 @@
 import ApiExternos from './ApiExternos.js';
+import Ruta from '../../modelos/api/Ruta.js';
 
 export default class ApiDijkstra extends ApiExternos {
     /**
      * @param {string} [baseUrl] URL del servidor de rutas. Si no se proporciona, usa window.location.hostname:5000
-     * @param {Array<Array<number>>} [ruta=[]]
      */
-    constructor(baseUrl = null, ruta = []) {
+    constructor(baseUrl = null) {
         if (!baseUrl) {
             const ipServidor = window.location.hostname;
             baseUrl = `http://${ipServidor}:5000`;
         }
         console.log('ApiDijkstra conectando a:', baseUrl);
         super(baseUrl);
-        this.ruta = ruta;
     }
 
     /**
      * Solicita al microservicio el cálculo de ruta más corta.
      * @param {{map:Array<Array<number>>, start:[number,number], end:[number,number]}} [datosMapa={}]
-     * @returns {Promise<any>}
+     * @returns {Promise<Ruta>}
      */
     async calcularRuta(datosMapa = {}) {
         this.validarDatosRuta(datosMapa);
@@ -35,8 +34,8 @@ export default class ApiDijkstra extends ApiExternos {
 
         // Procesar respuesta del servidor (puede lanzar errores específicos del servidor)
         const resultado = await this.procesarRespuestaJson(respuesta);
-        this.ruta = resultado?.route ?? [];
-        return resultado;
+        const rutaObjeto = this.crearObjetoRuta(resultado?.route ?? []);
+        return rutaObjeto;
     }
 
     /**
@@ -102,5 +101,14 @@ export default class ApiDijkstra extends ApiExternos {
         }
 
         return datosRespuesta;
+    }
+
+    /**
+     * Crea una instancia de Ruta a partir de coordenadas.
+     * @param {Array<Array<number>>} [coordenadas=[]]
+     * @returns {Ruta}
+     */
+    crearObjetoRuta(coordenadas = []) {
+        return new Ruta(coordenadas);
     }
 }

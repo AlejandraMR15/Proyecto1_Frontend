@@ -1,4 +1,5 @@
 import ApiExternos from './ApiExternos.js';
+import CiudadRegion from '../../modelos/api/CiudadRegion.js';
 
 export default class ApiRegion extends ApiExternos {
     /**
@@ -11,10 +12,11 @@ export default class ApiRegion extends ApiExternos {
     /**
      * Obtiene el listado de ciudades y el detalle de una ciudad por nombre.
      * @param {string} [nombreCiudad='']
-     * @returns {Promise<{ciudadBuscada:string, idCiudad:string|null, ciudades:Array<object>, detalleCiudad:object|null, mensaje?:string}>}
+     * @returns {Promise<{ciudadBuscada:string, idCiudad:string|null, ciudades:Array<CiudadRegion>, detalleCiudad:object|null, mensaje?:string}>}
      */
     async obtenerInformacion(nombreCiudad = '') {
-        const ciudades = await this.obtenerTodasLasCiudades();
+        const ciudadesRaw = await this.obtenerTodasLasCiudades();
+        const ciudades = this.crearObjetosCiudad(ciudadesRaw);
         const idCiudad = this.obtenerIdCiudadPorNombre(ciudades, nombreCiudad);
 
         if (!idCiudad) {
@@ -39,11 +41,12 @@ export default class ApiRegion extends ApiExternos {
 
     /**
      * Obtiene todas las ciudades disponibles desde la API.
-     * @returns {Promise<Array<object>>}
+     * @returns {Promise<Array<CiudadRegion>>}
      */
     async obtenerTodasLasCiudades() {
         const endpointCiudades = '/api/v1/City/';
-        return super.obtenerInformacion(endpointCiudades);
+        const ciudadesRaw = await super.obtenerInformacion(endpointCiudades);
+        return this.crearObjetosCiudad(ciudadesRaw);
     }
 
     /**
@@ -84,5 +87,16 @@ export default class ApiRegion extends ApiExternos {
      */
     normalizarTexto(texto = '') {
         return String(texto).trim().toLowerCase();
+    }
+
+    /**
+     * Convierte objetos planos de ciudades a instancias de CiudadRegion.
+     * @param {Array<object>} [ciudadesRaw=[]]
+     * @returns {Array<CiudadRegion>}
+     */
+    crearObjetosCiudad(ciudadesRaw = []) {
+        return ciudadesRaw.map((ciudad) =>
+            new CiudadRegion(ciudad?.id ?? '', ciudad?.name ?? '')
+        );
     }
 }

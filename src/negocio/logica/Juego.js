@@ -1,9 +1,11 @@
 import SistemaTurnos from "./SistemaTurnos.js";
 import { EstadoDeJuego, ESTADOS } from "./EstadoDeJuego.js";
 import GestorCiudadano from "./GestorCiudadanos.js";
+import LogicaDeTurnos from "./LogicaDeTurnos.js";
 import Ciudad from "../../modelos/ciudad.js";
 import Puntuacion from "./Puntuacion.js";
 import StorageManager from "../../acceso_datos/StorageManager.js";
+import CiudadMapper from "../../acceso_datos/CiudadMapper.js";
 import Ciudadano from "../../modelos/Ciudadano.js";
 import RecoleccionBurbujas from "./RecoleccionBurbujas.js";
 import Mapa from "../../modelos/Mapa.js";
@@ -27,6 +29,7 @@ export default class Juego {
         this.StorageManager = new StorageManager();
         this.EstadoDeJuego = new EstadoDeJuego();
         this.gestorCiudadanos = new GestorCiudadano();
+        this.logicaDeTurnos = new LogicaDeTurnos();
         this.recolectorBurbujas = new RecoleccionBurbujas(this);
         this.numeroTurno = 0;
         this.desglosePuntaje = null;
@@ -234,7 +237,7 @@ export default class Juego {
                 }
             }
             : null;
-        const produccionPendiente = this.ciudad.procesarTurno(this.gestorCiudadanos.ciudadanos, onVisualizarProduccion);
+        const produccionPendiente = this.logicaDeTurnos.procesarTurno(this.ciudad, this.gestorCiudadanos.ciudadanos, onVisualizarProduccion);
         this.recolectorBurbujas.registrarProduccionLote(produccionPendiente);
 
         // 2. Procesar recursos y guardar estadísticas para el HUD
@@ -323,7 +326,7 @@ export default class Juego {
 
     /** Carga una Ciudad serializada y la asigna. */
     cargarCiudad(json) {
-        this.ciudad = Ciudad.fromJSON(json);
+        this.ciudad = CiudadMapper.fromJSON(json);
         actualizarOAgregarEnRanking();
         return this.ciudad;
     }
@@ -355,7 +358,7 @@ export default class Juego {
             console.error("No hay partida guardada");
             return;
         }
-        this.ciudad = Ciudad.fromJSON(data.ciudad);
+        this.ciudad = CiudadMapper.fromJSON(data.ciudad);
         this.gestorCiudadanos.ciudad = this.ciudad;
         this.numeroTurno = data.numeroTurno;
         const edificiosPorId = this.ciudad.crearIndiceConstruccionesPorId();

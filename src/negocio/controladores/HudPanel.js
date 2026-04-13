@@ -31,6 +31,8 @@ export const timerEstado = {
     intervalo:          null,
     rafId:              null,
     inicioTurnoMs:      0,
+    inicioPausaMs:      0,
+    estabaPausado:      false,
 };
 
 /* ================================================================
@@ -169,6 +171,8 @@ export function iniciarTimerTurno() {
         timerEstado.tiempoTranscurrido = timerEstado.duracionTurno;
     }
     timerEstado.inicioTurnoMs = Date.now() - (timerEstado.tiempoTranscurrido * 1000);
+    timerEstado.inicioPausaMs = 0;
+    timerEstado.estabaPausado = false;
     actualizarTimerDOM(timerEstado.tiempoTranscurrido);
 
     const tickVisual = () => {
@@ -177,7 +181,30 @@ export function iniciarTimerTurno() {
             return;
         }
 
-        if (window.juego.EstadoDeJuego.estaJugando()) {
+        const estadoJuego = window.juego.EstadoDeJuego;
+        const estaJugando = estadoJuego.estaJugando();
+        const estaEnPausa = estadoJuego.estaEnPausa();
+
+        if (!estaJugando) {
+            // Solo trackear pausa cuando el estado es realmente PAUSA.
+            if (estaEnPausa && !timerEstado.estabaPausado) {
+                timerEstado.inicioPausaMs = Date.now();
+                timerEstado.estabaPausado = true;
+            }
+        } else {
+            if (timerEstado.estabaPausado && timerEstado.inicioPausaMs > 0) {
+                const pausaMs = Math.max(0, Date.now() - timerEstado.inicioPausaMs);
+                timerEstado.inicioTurnoMs += pausaMs;
+                timerEstado.inicioPausaMs = 0;
+                timerEstado.estabaPausado = false;
+            }
+
+            // Defensa ante desajustes: evita que el inicio quede en el futuro
+            // y congele la barra en 0 durante casi un turno completo.
+            if (timerEstado.inicioTurnoMs > Date.now()) {
+                timerEstado.inicioTurnoMs = Date.now() - (timerEstado.tiempoTranscurrido * 1000);
+            }
+
             const elapsedSegundos = (Date.now() - timerEstado.inicioTurnoMs) / 1000;
             const elapsedClamped = Math.max(0, Math.min(timerEstado.duracionTurno, elapsedSegundos));
             timerEstado.tiempoTranscurrido = Math.floor(elapsedClamped);
@@ -244,6 +271,8 @@ export function onNuevoTurno() {
  */
 export function onInicioTurnoReal(numeroTurno) {
     timerEstado.inicioTurnoMs = Date.now();
+    timerEstado.inicioPausaMs = 0;
+    timerEstado.estabaPausado = false;
     timerEstado.tiempoTranscurrido = 0;
     if (elTurnoNum) elTurnoNum.textContent = numeroTurno;
     actualizarTimerDOM(0);

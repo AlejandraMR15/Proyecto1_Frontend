@@ -1,26 +1,19 @@
 /**
  * CIUDAD VIRTUAL — historialRecursos.js
  *
- * Gestiona el historial de los últimos 20 turnos mostrando recursos:
- * dinero, electricidad, agua y comida.
+ * Controlador de UI para el historial de recursos.
  *
  * Responsabilidades:
- *  - Registrar el estado de recursos al final de cada turno
- *  - Mantener un historial máximo de 20 entradas
  *  - Mostrar/ocultar el panel desplegable
- *  - Actualizar la UI del historial en tiempo real
+ *  - Renderizar tabla del historial
+ *  - Delegar persistencia y negocio a HistorialRecursosLogica
  */
+
+import HistorialRecursosLogica from '../logica/HistorialRecursosLogica.js';
 
 class HistorialRecursos {
     constructor() {
-        // Máximo de registros guardados
-        this.MAX_REGISTROS = 20;
-        
-        // Clave de localStorage
-        this.STORAGE_KEY = 'historial-recursos-ciudad';
-        
-        // Array de objetos {turno, dinero, electricidad, agua, comida, timestamp}
-        this.registros = [];
+        this.logica = new HistorialRecursosLogica();
         
         // Elementos del DOM
         this.panelEl = null;
@@ -44,7 +37,7 @@ class HistorialRecursos {
         }
 
         // Cargar historial desde localStorage
-        this._cargarDelStorage();
+        this.logica.cargarDelStorage();
 
         // Click en botón para abrir/cerrar (usar stopPropagation para evitar cerrar inmediatamente)
         this.btnEl.addEventListener('click', (e) => {
@@ -79,25 +72,7 @@ class HistorialRecursos {
      * @param {number} comida
      */
     registrarRecursos(numeroTurno, dinero, electricidad, agua, comida) {
-        const registro = {
-            turno: numeroTurno,
-            dinero: Math.floor(dinero),
-            electricidad: Math.floor(electricidad),
-            agua: Math.floor(agua),
-            comida: Math.floor(comida),
-            timestamp: new Date().toLocaleTimeString('es-CO')
-        };
-
-        // Agregar al inicio (último turno primero)
-        this.registros.unshift(registro);
-
-        // Mantener máximo de 20 registros
-        if (this.registros.length > this.MAX_REGISTROS) {
-            this.registros.pop();
-        }
-
-        // Guardar en localStorage
-        this._guardarAlStorage();
+        this.logica.registrarRecursos(numeroTurno, dinero, electricidad, agua, comida);
 
         // Actualizar tabla si el panel está abierto
         if (this.estaAbierto) {
@@ -154,7 +129,9 @@ class HistorialRecursos {
         // Limpiar tbody
         tbody.innerHTML = '';
 
-        if (this.registros.length === 0) {
+        const registros = this.logica.registros;
+
+        if (registros.length === 0) {
             const fila = document.createElement('tr');
             fila.className = 'historial-fila-vacia';
             fila.innerHTML = '<td colspan="5">📊 Sin historial aún</td>';
@@ -163,7 +140,7 @@ class HistorialRecursos {
         }
 
         // Agregar filas de registros
-        this.registros.forEach((reg, idx) => {
+        registros.forEach((reg, idx) => {
             const fila = document.createElement('tr');
             fila.className = idx === 0 ? 'historial-fila-actual' : 'historial-fila';
             
@@ -191,13 +168,7 @@ class HistorialRecursos {
      * Limpia el historial completamente (útil para nueva partida).
      */
     limpiar() {
-        this.registros = [];
-        // Limpiar también del localStorage
-        try {
-            localStorage.removeItem(this.STORAGE_KEY);
-        } catch (err) {
-            console.warn('[HistorialRecursos] Error limpiando localStorage:', err);
-        }
+        this.logica.limpiar();
         if (this.estaAbierto) {
             this._actualizarTabla();
         }
@@ -209,45 +180,19 @@ class HistorialRecursos {
      * @returns {Array}
      */
     obtenerUltimos(cantidad = 20) {
-        return this.registros.slice(0, cantidad);
-    }
-
-    /**
-     * Guarda el historial en localStorage.
-     * @private
-     */
-    _guardarAlStorage() {
-        try {
-            const datos = JSON.stringify(this.registros);
-            localStorage.setItem(this.STORAGE_KEY, datos);
-        } catch (err) {
-            console.warn('[HistorialRecursos] Error guardando en localStorage:', err);
-        }
-    }
-
-    /**
-     * Carga el historial desde localStorage.
-     * @private
-     */
-    _cargarDelStorage() {
-        try {
-            const datos = localStorage.getItem(this.STORAGE_KEY);
-            if (datos) {
-                this.registros = JSON.parse(datos);
-                // Asegurarse de no exceder el máximo
-                if (this.registros.length > this.MAX_REGISTROS) {
-                    this.registros = this.registros.slice(0, this.MAX_REGISTROS);
-                    this._guardarAlStorage(); // Guardar versión limpia
-                }
-            }
-        } catch (err) {
-            console.warn('[HistorialRecursos] Error cargando desde localStorage:', err);
-            this.registros = [];
-        }
+        return this.logica.obtenerUltimos(cantidad);
     }
 }
 
 // Singleton global
 export const historialRecursos = new HistorialRecursos();
+
+/**
+ * Reinicia el historial de recursos de la partida activa.
+ * Punto unico para transiciones de partida (nueva/importada).
+ */
+export function reiniciarHistorialRecursos() {
+    historialRecursos.limpiar();
+}
 
 export default HistorialRecursos;

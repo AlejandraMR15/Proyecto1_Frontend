@@ -1,7 +1,7 @@
 /**
  * CIUDAD VIRTUAL — ImportadorCiudad.js
  *
- * Funciones compartidas para importar una ciudad/partida desde JSON.
+ * Acceso a datos para importar una ciudad/partida desde JSON.
  * Soporta:
  *  - Formato exportado de ciudad (cityName, map, buildings, etc.)
  *  - Formato interno de partida (ciudad, numeroTurno, ciudadanos, etc.)
@@ -35,12 +35,11 @@ export async function leerPartidaDesdeArchivoJSON(archivo) {
  * @returns {Promise<string>}
  */
 function leerArchivoComoTexto(archivo) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.addEventListener('load', (evento) => resolve(evento.target.result));
-        reader.addEventListener('error', () => reject(new Error('No se pudo leer el archivo JSON.')));
-        reader.readAsText(archivo);
-    });
+    return archivo
+        .text()
+        .catch(() => {
+            throw new Error('No se pudo leer el archivo JSON.');
+        });
 }
 
 /**

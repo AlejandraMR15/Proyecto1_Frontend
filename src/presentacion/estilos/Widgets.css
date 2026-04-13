@@ -329,6 +329,10 @@
   margin-bottom: 6px;
 }
 
+.noticia-desc-oculta {
+  display: none;
+}
+
 /* Badge "Leer más" */
 .noticia-leer {
   font-size: 9px;

@@ -15,6 +15,7 @@
  
 import ApiClima from '../../acceso_datos/API/ApiClima.js';
 import ApiNoticias from '../../acceso_datos/API/ApiNoticias.js';
+import StorageManager from '../../acceso_datos/StorageManager.js';
  
 /* ================================================================
    CONSTANTES
@@ -23,6 +24,7 @@ import ApiNoticias from '../../acceso_datos/API/ApiNoticias.js';
 /** Claves de localStorage usadas por menú y juego */
 const CLAVE_PARTIDA = 'partida';
 const CLAVE_CONFIG_NUEVA = 'config-nueva-partida';
+const storageManager = new StorageManager();
  
 /** País por defecto para la consulta de noticias */
 const PAIS_NOTICIAS = 'co';
@@ -144,8 +146,7 @@ function traducirCondicionClimatica(condicion = '') {
  */
 function leerJSONLocalStorage(clave) {
   try {
-    const raw = localStorage.getItem(clave);
-    return raw ? JSON.parse(raw) : null;
+    return storageManager.cargar(clave);
   } catch {
     return null;
   }

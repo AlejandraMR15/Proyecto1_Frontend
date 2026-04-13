@@ -54,11 +54,11 @@ export default class PlantasDeUtilidad extends Edificio {
      * @returns {object}
      */
     getInformacion() {
-        const tipoTexto = this.tipoDeUtilidad === 'electrica' ? '⚡ Electricidad' : '💧 Agua';
+        const tipoTexto = this.tipoDeUtilidad === 'electrica' ? 'electricidad' : 'agua';
         return {
             ...super.getInformacion(),
             tipoDeUtilidad: tipoTexto,
-            produccionPorTurno: `${this.produccionPorTurno} ${tipoTexto.split(' ')[1].toLowerCase()}`,
+            produccionPorTurno: `${this.produccionPorTurno} ${tipoTexto}`,
             consumoComida: this.consumoComida
         };
     }

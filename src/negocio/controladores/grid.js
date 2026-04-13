@@ -14,9 +14,10 @@ import Mapa         from '../../modelos/Mapa.js';
 import GridRenderer  from './GridRenderer.js';
 import Juego         from '../logica/Juego.js';
 import MovimientoCiudadanos from './MovimientoCiudadanos.js';
-import { historialRecursos } from './historialRecursos.js';
+import { historialRecursos, reiniciarHistorialRecursos } from './historialRecursos.js';
 import { crearControlCamara } from './cameraController.js';
 import { nombreEtiquetaPorCodigo } from './etiquetasMapa.js';
+import StorageManager from '../../acceso_datos/StorageManager.js';
 
 (function () {
     "use strict";
@@ -26,6 +27,7 @@ import { nombreEtiquetaPorCodigo } from './etiquetasMapa.js';
     ============================================================ */
     const CLAVE_CONFIG_NUEVA = 'config-nueva-partida';
     const CLAVE_ACCION       = 'accion-inicio';
+    const storageManager = new StorageManager();
 
     const viewport   = document.getElementById('viewport');
     const canvasWrap = document.getElementById('canvas-wrap');
@@ -74,8 +76,8 @@ import { nombreEtiquetaPorCodigo } from './etiquetasMapa.js';
         let   mapa   = null;
         let   tamano = 15;
 
-        const accion    = localStorage.getItem(CLAVE_ACCION);
-        const configRaw = localStorage.getItem(CLAVE_CONFIG_NUEVA);
+        const accion = storageManager.cargar(CLAVE_ACCION);
+        const config = storageManager.cargar(CLAVE_CONFIG_NUEVA);
 
         if (accion === 'continuar') {
             // --- CONTINUAR PARTIDA ---
@@ -96,13 +98,10 @@ import { nombreEtiquetaPorCodigo } from './etiquetasMapa.js';
             }
 
             // Limpiar la clave de acción para que próximas recargas no re-carguen
-            localStorage.removeItem(CLAVE_ACCION);
+            storageManager.eliminar(CLAVE_ACCION);
 
-        } else if (configRaw) {
+        } else if (config) {
             // --- NUEVA PARTIDA ---
-            let config = {};
-            try { config = JSON.parse(configRaw); } catch { config = {}; }
-
             tamano = (config.ancho >= 15 && config.ancho <= 30) ? config.ancho : 15;
 
             // crearCiudad() inicializa ciudad.mapa con el tamaño correcto
@@ -128,7 +127,7 @@ import { nombreEtiquetaPorCodigo } from './etiquetasMapa.js';
                 // Poblar las construcciones a partir de la matriz
                 juego.ciudad.poblarConstruccionesDesdeMatriz(config.matrizJSON);
                 // Calcular recursos iniciales basándose en los edificios cargados
-                juego.ciudad.calcularRecursosIniciales();
+                juego.logicaDeTurnos.calcularRecursosIniciales(juego.ciudad);
             } else {
                 // Modo normal: generar matriz vacía
                 mapa.generarMatriz();
@@ -144,17 +143,15 @@ import { nombreEtiquetaPorCodigo } from './etiquetasMapa.js';
             juego.StorageManager.guardar('config-turno', { duracionTurno: durSegundos });
 
             // Limpiar config para que una recarga no re-cree la ciudad
-            localStorage.removeItem(CLAVE_CONFIG_NUEVA);
+            storageManager.eliminar(CLAVE_CONFIG_NUEVA);
             
             // Limpiar historial solo al crear nueva partida
-            if (typeof historialRecursos !== 'undefined') {
-                historialRecursos.limpiar();
-            }
+            reiniciarHistorialRecursos();
 
         } else {
             // Acceso directo a index.html sin pasar por el menú
             // Cargar partida si existe, si no mapa vacío de emergencia
-            const hayPartida = localStorage.getItem('partida') !== null;
+            const hayPartida = storageManager.cargar('partida') !== null;
             if (hayPartida) {
                 juego.cargarPartida();
                 mapa   = juego.ciudad?.mapa ?? new Mapa(15, 15);

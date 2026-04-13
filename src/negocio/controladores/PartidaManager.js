@@ -18,8 +18,10 @@
  */
 
 import StorageManager from '../../acceso_datos/StorageManager.js';
+import { leerPartidaDesdeArchivoJSON } from '../../acceso_datos/ImportadorCiudad.js';
 import { timerEstado, detenerTimerTurno } from './HudPanel.js';
 import { actualizarOAgregarEnRanking } from './RankingUi.js';
+import { reiniciarHistorialRecursos } from './historialRecursos.js';
 
 export const storage = new StorageManager();
 
@@ -197,74 +199,40 @@ export function abrirModalImportar() {
  * La partida actual se PIERDE (el usuario fue advertido en el modal).
  * @param {File} archivo
  */
-export function procesarArchivoImportacion(archivo) {
-    const reader = new FileReader();
+export async function procesarArchivoImportacion(archivo) {
+    try {
+        const partida = await leerPartidaDesdeArchivoJSON(archivo);
+        const juego = window.juego;
 
-    reader.addEventListener('load', function (e) {
-        try {
-            const datos = JSON.parse(e.target.result);
+        // Detener todo antes de reemplazar
+        if (juego) juego.SistemaDeTurnos.detener();
+        detenerTimerTurno();
+        detenerAutosave();
+        if (window.movimientoCiudadanos) window.movimientoCiudadanos.detener();
 
-            if (!datos.cityName || !datos.map) {
-                throw new Error('El archivo no parece un JSON de ciudad válido.');
-            }
-
-            const juego = window.juego;
-
-            // Detener todo antes de reemplazar
-            if (juego) juego.SistemaDeTurnos.detener();
-            detenerTimerTurno();
-            detenerAutosave();
-            if (window.movimientoCiudadanos) window.movimientoCiudadanos.detener();
-
-            // Transformar al formato interno de StorageManager ('partida')
-            const partida = {
-                ciudad: {
-                    nombre:         datos.cityName,
-                    alcalde:        datos.mayor,
-                    recursos:       datos.resources || {},
-                    construcciones: datos.buildings || [],
-                    mapa:           datos.map,
-                    coordenadas:    datos.coordinates || null,
-                },
-                numeroTurno: datos.turn    || 0,
-                ciudadanos:  datos.citizens || [],
-                recoleccion: null,
-            };
-
-            // Persistir y recargar limpio
-            if (juego) {
-                juego.StorageManager.guardar('partida', partida);
-                juego.StorageManager.guardar('config-turno', {
-                    duracionTurno: timerEstado.duracionTurno,
-                });
-                juego.StorageManager.eliminar('estado-juego');
-            }
-            localStorage.setItem('accion-inicio', 'continuar');
-
-            setModal(document.getElementById('modal-importar'), false);
-            window.location.reload();
-
-        } catch (err) {
-            const aviso = document.getElementById('importar-aviso-error');
-            const texto = document.getElementById('importar-error-texto');
-            if (aviso && texto) {
-                texto.textContent = 'Error: ' + err.message;
-                aviso.dataset.visible = 'true';
-            }
-            console.error('[PartidaManager] Error al importar ciudad:', err);
+        // Persistir y recargar limpio
+        if (juego) {
+            juego.StorageManager.guardar('partida', partida);
+            juego.StorageManager.guardar('config-turno', {
+                duracionTurno: timerEstado.duracionTurno,
+            });
+            juego.StorageManager.eliminar('estado-juego');
         }
-    });
+        reiniciarHistorialRecursos();
+        storage.guardar('accion-inicio', 'continuar');
 
-    reader.addEventListener('error', function () {
+        setModal(document.getElementById('modal-importar'), false);
+        window.location.reload();
+
+    } catch (err) {
         const aviso = document.getElementById('importar-aviso-error');
         const texto = document.getElementById('importar-error-texto');
         if (aviso && texto) {
-            texto.textContent = 'No se pudo leer el archivo.';
+            texto.textContent = 'Error: ' + err.message;
             aviso.dataset.visible = 'true';
         }
-    });
-
-    reader.readAsText(archivo);
+        console.error('[PartidaManager] Error al importar ciudad:', err);
+    }
 }
 
 /* ================================================================

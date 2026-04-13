@@ -21,7 +21,8 @@ export default class Mapa {
     constructor(ancho = 15, alto = 15, matriz = []) {
         this.ancho = ancho;
         this.alto = alto;
-        this.matriz = matriz;
+        this.matriz = [];
+        this.generarMatriz(matriz);
     }
 
     /**

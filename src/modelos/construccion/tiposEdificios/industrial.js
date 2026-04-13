@@ -119,14 +119,14 @@ export default class Industrial extends Edificio {
      * @returns {object}
      */
     getInformacion() {
-        const tipoTexto = this.tipoDeProduccion === 'fabrica' ? '💰 Dinero' : '🍎 Comida';
+        const tipoTexto = this.tipoDeProduccion === 'fabrica' ? 'dinero' : 'comida';
         const consumoComidaActual = this.empleados.length * this.consumoComidaPorEmpleado;
         return {
             ...super.getInformacion(),
             empleo: this.empleo,
             empleadosActuales: this.empleados.length,
             tipoDeProduccion: tipoTexto,
-            produccionPorTurno: `${this.produccion} ${tipoTexto.split(' ')[1].toLowerCase()}`,
+            produccionPorTurno: `${this.produccion} ${tipoTexto}`,
             consumoComida: consumoComidaActual,
             consumoComidaPorEmpleado: this.consumoComidaPorEmpleado
         };

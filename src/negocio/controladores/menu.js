@@ -32,7 +32,9 @@ import {
 } from './FormularioValidator.js';
 import { 
     leerPartidaDesdeArchivoJSON 
-} from './ImportadorCiudad.js';
+} from '../../acceso_datos/ImportadorCiudad.js';
+import { reiniciarHistorialRecursos } from './historialRecursos.js';
+import StorageManager from '../../acceso_datos/StorageManager.js';
 
 /* ================================================================
    CONSTANTES
@@ -41,6 +43,7 @@ const CLAVE_PARTIDA        = 'partida';          // usada por StorageManager / J
 const CLAVE_CONFIG_NUEVA   = 'config-nueva-partida';
 const CLAVE_ACCION         = 'accion-inicio';
 const RUTA_JUEGO           = './index.html';     // relativa desde presentacion/vistas/
+const storageManager       = new StorageManager();
 
 /* ================================================================
    REFERENCIAS AL DOM
@@ -67,7 +70,7 @@ const btnCrear      = document.getElementById('btn-crear');
  */
 function hayPartidaGuardada() {
     try {
-        return localStorage.getItem(CLAVE_PARTIDA) !== null;
+        return storageManager.cargar(CLAVE_PARTIDA) !== null;
     } catch {
         return false;
     }
@@ -133,7 +136,7 @@ btnVolver.addEventListener('click', () => {
  * Continúa una partida guardada.
  */
 btnContinuar.addEventListener('click', () => {
-    localStorage.setItem(CLAVE_ACCION, 'continuar');
+    storageManager.guardar(CLAVE_ACCION, 'continuar');
     window.location.href = RUTA_JUEGO;
 });
 
@@ -179,8 +182,8 @@ btnCrear.addEventListener('click', () => {
     }
 
     // Limpiar posible acción anterior y guardar la nueva configuración
-    localStorage.removeItem(CLAVE_ACCION);
-    localStorage.setItem(CLAVE_CONFIG_NUEVA, JSON.stringify(config));
+    storageManager.eliminar(CLAVE_ACCION);
+    storageManager.guardar(CLAVE_CONFIG_NUEVA, config);
 
     // Redirigir al juego
     window.location.href = RUTA_JUEGO;
@@ -203,9 +206,10 @@ inputImportarCiudadMenu.addEventListener('change', async (e) => {
     try {
         const partida = await leerPartidaDesdeArchivoJSON(archivo);
 
-        localStorage.setItem(CLAVE_PARTIDA, JSON.stringify(partida));
-        localStorage.removeItem(CLAVE_CONFIG_NUEVA);
-        localStorage.setItem(CLAVE_ACCION, 'continuar');
+        storageManager.guardar(CLAVE_PARTIDA, partida);
+        storageManager.eliminar(CLAVE_CONFIG_NUEVA);
+        reiniciarHistorialRecursos();
+        storageManager.guardar(CLAVE_ACCION, 'continuar');
 
         hintImportarCiudad.textContent = 'Archivo cargado. Iniciando ciudad...';
         window.location.href = RUTA_JUEGO;

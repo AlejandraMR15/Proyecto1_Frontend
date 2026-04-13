@@ -12,7 +12,10 @@ export default class SistemaTurnos {
         this.estado = false;
         this.duracion = duracion;
         this.intervalo = null;
+        this.timeoutInicial = null;
         this.callback = null;
+        this.inicioTramoMs = 0;
+        this.restanteMs = duracion;
     }
 
     /**
@@ -20,16 +23,42 @@ export default class SistemaTurnos {
      * @param {function} callback - Función a ejecutar en cada turno.
      */
     iniciar(callback) {
-        if (this.intervalo !== null) {
+        if (this.intervalo !== null || this.timeoutInicial !== null) {
             return;
         }
+        if (callback) {
+            this.callback = callback;
+        }
+        if (!this.callback) return;
+
         this.estado = true;
-        this.callback = callback;
-        this.intervalo = setInterval(() => {
+
+        const primerDelay =
+            Number.isFinite(this.restanteMs) && this.restanteMs > 0
+                ? this.restanteMs
+                : this.duracion;
+
+        this.inicioTramoMs = Date.now();
+        this.timeoutInicial = setTimeout(() => {
+            this.timeoutInicial = null;
+            if (!this.estado) return;
+
             if (this.callback) {
                 this.callback();
             }
-        }, this.duracion);
+
+            if (!this.estado) return;
+
+            this.restanteMs = this.duracion;
+            this.inicioTramoMs = Date.now();
+            this.intervalo = setInterval(() => {
+                if (this.callback) {
+                    this.callback();
+                }
+                this.inicioTramoMs = Date.now();
+                this.restanteMs = this.duracion;
+            }, this.duracion);
+        }, primerDelay);
 
     }
 
@@ -37,10 +66,28 @@ export default class SistemaTurnos {
      * Detiene el sistema de turnos.
      */
     detener() {
+        const ahora = Date.now();
+
+        if (this.timeoutInicial !== null) {
+            const transcurrido = Math.max(0, ahora - this.inicioTramoMs);
+            const restante = this.restanteMs - transcurrido;
+            this.restanteMs = Math.max(0, restante);
+            clearTimeout(this.timeoutInicial);
+            this.timeoutInicial = null;
+        }
+
         if (this.intervalo !== null) {
+            const transcurrido = Math.max(0, ahora - this.inicioTramoMs);
+            const restante = this.duracion - transcurrido;
+            this.restanteMs = Math.max(0, restante);
             clearInterval(this.intervalo);
             this.intervalo = null;
         }
+
+        if (this.restanteMs <= 0) {
+            this.restanteMs = this.duracion;
+        }
+
         this.estado = false;
     }
 
@@ -50,6 +97,7 @@ export default class SistemaTurnos {
      */
     cambiarDuracion(nuevaDuracion) {
         this.duracion = nuevaDuracion;
+        this.restanteMs = nuevaDuracion;
         if (this.estado) {
             this.detener();
             this.iniciar(this.callback);

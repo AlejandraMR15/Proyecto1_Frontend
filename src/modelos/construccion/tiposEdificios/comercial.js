@@ -121,7 +121,7 @@ export default class Comercial extends Edificio {
             ...super.getInformacion(),
             empleo: this.empleo,
             empleadosActuales: this.empleados.length,
-            produccionPorTurno: `💰 ${this.ingresoPorTurno} dinero`,
+            produccionPorTurno: `${this.ingresoPorTurno} dinero`,
             consumoComida: consumoComidaActual,
             consumoComidaPorEmpleado: this.consumoComidaPorEmpleado,
             tieneEmpleoDisponible: this.tieneEmpleoDisponible()

@@ -98,15 +98,6 @@ export default class Residencial extends Edificio {
     }
 
     /**
-     * Procesa un turno completo (solo consumo para residencial).
-     * @deprecated Ya no se usa, usar procesarConsumo() directamente
-     * @param {import('../../recursos.js').default} recursos
-     */
-    procesarTurno(recursos) {
-        this.procesarConsumo(recursos);
-    }
-
-    /**
      * Devuelve información residencial del edificio.
      * @returns {object}
      */

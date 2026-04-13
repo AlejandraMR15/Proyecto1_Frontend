@@ -6,15 +6,10 @@
  *  - Registrar eventos de los modales (pausa, config, finalizar, game over)
  *
  * Depende de:
- *  - timerEstado, actualizarTimerDOM (HudPanel.js)
  *  - GestorConfiguracion (GestorConfiguracion.js) — gestión del modal de config
- *  - PartidaManager (PartidaManager.js) — finalización de partida y game over
  */
 
-import { timerEstado, actualizarTimerDOM, detenerTimerTurno } from './HudPanel.js';
-import { detenerAutosave } from './PartidaManager.js';
 import { abrirConfig, registrarEventosConfig } from './GestorConfiguracion.js';
-import { finalizarPartida, irAlMenuDesdeGameOver, detectarGameOverAlCargar } from './PartidaManager.js';
 
 
 /* ================================================================
@@ -23,7 +18,6 @@ import { finalizarPartida, irAlMenuDesdeGameOver, detectarGameOverAlCargar } fro
 
 const btnPausa       = document.getElementById('btn-pausa');
 const modalPausa     = document.getElementById('modal-pausa');
-const modalConfig    = document.getElementById('modal-config');
 const modalFinalizar = document.getElementById('modal-finalizar');
 
 /* ================================================================
@@ -106,16 +100,7 @@ export function reanudarJuego() {
 ================================================================ */
 
 // abrirConfig() — importado de GestorConfiguracion.js
-// guardarConfig() — importado de GestorConfiguracion.js
 // registrarEventosConfig() — importado de GestorConfiguracion.js
-
-/* ================================================================
-   FINALIZAR PARTIDA — DELEGADAS A PartidaManager.js
-================================================================ */
-
-// finalizarPartida() — importado de PartidaManager.js
-// irAlMenuDesdeGameOver() — importado de PartidaManager.js
-// detectarGameOverAlCargar() — importado de PartidaManager.js
 
 /* ================================================================
    REGISTRAR EVENTOS DE BOTONES

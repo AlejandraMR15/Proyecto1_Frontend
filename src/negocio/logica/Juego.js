@@ -206,6 +206,9 @@ export default class Juego {
         if (!this.EstadoDeJuego.estaJugando()) return;
         
         this.numeroTurno++;
+        if (typeof window !== 'undefined' && typeof window.onInicioTurnoReal === 'function') {
+            window.onInicioTurnoReal(this.numeroTurno);
+        }
         console.log("Turno:", this.numeroTurno);
         
         if (!this.ciudad) return;
@@ -247,6 +250,17 @@ export default class Juego {
         // 5. Recalcular y mostrar puntuación
         this.recalcularPuntaje();
         console.log("Puntaje:", this.puntaje);
+
+        // 6. Registrar estado actual de recursos en historial
+        if (typeof window !== 'undefined' && window.historialRecursos) {
+            window.historialRecursos.registrarRecursos(
+                this.numeroTurno,
+                this.ciudad.recursos.dinero,
+                this.ciudad.recursos.electricidad,
+                this.ciudad.recursos.agua,
+                this.ciudad.recursos.comida
+            );
+        }
     }
 
     /**

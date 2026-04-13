@@ -24,11 +24,13 @@ export { fmt };
    ESTADO DEL TIMER — compartido con otros módulos
 ================================================================ */
 
-/** @type {{ tiempoTranscurrido: number, duracionTurno: number, intervalo: ReturnType<typeof setInterval>|null }} */
+/** @type {{ tiempoTranscurrido: number, duracionTurno: number, intervalo: ReturnType<typeof setInterval>|null, rafId: number|null, inicioTurnoMs: number }} */
 export const timerEstado = {
     tiempoTranscurrido: 0,   // segundos transcurridos en el turno actual
     duracionTurno:      10,  // duración total de cada turno en segundos
     intervalo:          null,
+    rafId:              null,
+    inicioTurnoMs:      0,
 };
 
 /* ================================================================
@@ -160,21 +162,40 @@ export function actualizarTooltipsRecursos() {
  */
 export function iniciarTimerTurno() {
     detenerTimerTurno();
-    // Solo resetear a 1 si no hay un valor restaurado desde localStorage
+    // Solo resetear a 0 si no hay un valor restaurado desde localStorage
     if (!timerEstado.tiempoTranscurrido || timerEstado.tiempoTranscurrido <= 0) {
-        timerEstado.tiempoTranscurrido = 1;
+        timerEstado.tiempoTranscurrido = 0;
+    } else if (timerEstado.tiempoTranscurrido > timerEstado.duracionTurno) {
+        timerEstado.tiempoTranscurrido = timerEstado.duracionTurno;
     }
-    actualizarTimerDOM();
+    timerEstado.inicioTurnoMs = Date.now() - (timerEstado.tiempoTranscurrido * 1000);
+    actualizarTimerDOM(timerEstado.tiempoTranscurrido);
+
+    const tickVisual = () => {
+        if (!window.juego) {
+            timerEstado.rafId = requestAnimationFrame(tickVisual);
+            return;
+        }
+
+        if (window.juego.EstadoDeJuego.estaJugando()) {
+            const elapsedSegundos = (Date.now() - timerEstado.inicioTurnoMs) / 1000;
+            const elapsedClamped = Math.max(0, Math.min(timerEstado.duracionTurno, elapsedSegundos));
+            timerEstado.tiempoTranscurrido = Math.floor(elapsedClamped);
+            actualizarTimerDOM(elapsedClamped);
+        }
+
+        timerEstado.rafId = requestAnimationFrame(tickVisual);
+    };
+
+    timerEstado.rafId = requestAnimationFrame(tickVisual);
 
     timerEstado.intervalo = setInterval(() => {
         if (!window.juego) return;
         if (!window.juego.EstadoDeJuego.estaJugando()) return;
 
-        timerEstado.tiempoTranscurrido++;
-        if (timerEstado.tiempoTranscurrido > timerEstado.duracionTurno) {
-            timerEstado.tiempoTranscurrido = 1;
-        }
-        actualizarTimerDOM();
+        // Mantener persistencia en segundos enteros para guardar/cargar partida.
+        const elapsedSegundos = (Date.now() - timerEstado.inicioTurnoMs) / 1000;
+        timerEstado.tiempoTranscurrido = Math.floor(Math.max(0, Math.min(timerEstado.duracionTurno, elapsedSegundos)));
     }, 1000);
 }
 
@@ -186,24 +207,24 @@ export function detenerTimerTurno() {
         clearInterval(timerEstado.intervalo);
         timerEstado.intervalo = null;
     }
+    if (timerEstado.rafId !== null) {
+        cancelAnimationFrame(timerEstado.rafId);
+        timerEstado.rafId = null;
+    }
 }
 
 /**
  * Actualiza los elementos DOM del timer (barra + textos).
  */
-export function actualizarTimerDOM() {
+export function actualizarTimerDOM(progresoSegundos = timerEstado.tiempoTranscurrido) {
     const dur = timerEstado.duracionTurno;
-    const act = timerEstado.tiempoTranscurrido;
+    const act = Math.max(0, Math.min(dur, progresoSegundos));
     const pct = dur > 0 ? (act / dur) * 100 : 0;
 
     if (elBarraFill) {
-        const nivel = Math.max(0, Math.min(100, Math.round(pct / 10) * 10));
-        for (let i = 0; i <= 100; i += 10) {
-            elBarraFill.classList.remove(`turno-pct-${i}`);
-        }
-        elBarraFill.classList.add(`turno-pct-${nivel}`);
+        elBarraFill.style.width = `${pct}%`;
     }
-    if (elTiempoAct) elTiempoAct.textContent = act + 's';
+    if (elTiempoAct) elTiempoAct.textContent = Math.floor(act) + 's';
     if (elTiempoTot) elTiempoTot.textContent = dur + 's';
 }
 
@@ -212,10 +233,20 @@ export function actualizarTimerDOM() {
  * Reinicia el contador visual y refresca el HUD.
  */
 export function onNuevoTurno() {
-    timerEstado.tiempoTranscurrido = 1;
-    actualizarTimerDOM();
     actualizarHUD();
     actualizarTooltipsRecursos();
+}
+
+/**
+ * Se ejecuta exactamente cuando inicia el turno real del juego.
+ * Reinicia timer visual y actualiza número de turno sin esperar el resto del procesamiento.
+ * @param {number} numeroTurno
+ */
+export function onInicioTurnoReal(numeroTurno) {
+    timerEstado.inicioTurnoMs = Date.now();
+    timerEstado.tiempoTranscurrido = 0;
+    if (elTurnoNum) elTurnoNum.textContent = numeroTurno;
+    actualizarTimerDOM(0);
 }
 
 /* ================================================================

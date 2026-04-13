@@ -57,13 +57,6 @@ export function obtenerDimensionesSlider() {
 }
 
 /**
- * Limpia el mapa TXT cargado.
- */
-export function limpiarMapaCargado() {
-    mapaTextoCargado = null;
-}
-
-/**
  * Reinicia la sección de mapa al estado inicial (manual).
  */
 export function reiniciarConfigurador() {

@@ -93,7 +93,7 @@ export function mostrarErrorForm(msg) {
 /**
  * Oculta el mensaje de error del formulario.
  */
-export function ocultarErrorForm() {
+function ocultarErrorForm() {
     formError.classList.add('oculto');
     formError.textContent = '';
 }

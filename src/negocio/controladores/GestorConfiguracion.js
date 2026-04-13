@@ -52,6 +52,111 @@ function setModal(modal, visible) {
     modal.dataset.visible = visible ? 'true' : 'false';
 }
 
+const REGLAS_CONFIG = [
+    {
+        inputId: 'cfg-duracion-turno',
+        errorId: 'cfg-duracion-error',
+        min: 10,
+        max: 300,
+        mensaje: 'La duración debe estar entre 10 y 300 segundos'
+    },
+    {
+        inputId: 'cfg-agua-ciudadano',
+        errorId: 'cfg-agua-ciudadano-error',
+        min: 0,
+        max: 50,
+        mensaje: 'El consumo de agua debe estar entre 0 y 50'
+    },
+    {
+        inputId: 'cfg-elec-ciudadano',
+        errorId: 'cfg-elec-ciudadano-error',
+        min: 0,
+        max: 50,
+        mensaje: 'El consumo de electricidad debe estar entre 0 y 50'
+    },
+    {
+        inputId: 'cfg-comida-ciudadano',
+        errorId: 'cfg-comida-ciudadano-error',
+        min: 0,
+        max: 50,
+        mensaje: 'El consumo de comida debe estar entre 0 y 50'
+    },
+    {
+        inputId: 'cfg-energia-total',
+        errorId: 'cfg-energia-total-error',
+        min: 0,
+        max: 999999,
+        mensaje: 'La energia total debe estar entre 0 y 999999'
+    },
+    {
+        inputId: 'cfg-agua-total',
+        errorId: 'cfg-agua-total-error',
+        min: 0,
+        max: 999999,
+        mensaje: 'El agua total debe estar entre 0 y 999999'
+    },
+    {
+        inputId: 'cfg-comida-total',
+        errorId: 'cfg-comida-total-error',
+        min: 0,
+        max: 999999,
+        mensaje: 'La comida total debe estar entre 0 y 999999'
+    },
+    {
+        inputId: 'cfg-beneficio-servicio',
+        errorId: 'cfg-beneficio-servicio-error',
+        min: 1,
+        max: 50,
+        mensaje: 'El beneficio de servicio debe estar entre 1 y 50'
+    },
+    {
+        inputId: 'cfg-tasa-crecimiento',
+        errorId: 'cfg-tasa-crecimiento-error',
+        min: 1,
+        max: 3,
+        mensaje: 'La tasa debe estar entre 1 y 3'
+    }
+];
+
+function limpiarErroresConfig() {
+    REGLAS_CONFIG.forEach(({ errorId }) => {
+        const errorEl = document.getElementById(errorId);
+        if (!errorEl) return;
+        errorEl.textContent = '';
+        errorEl.classList.add('oculto');
+    });
+}
+
+function validarCamposConfig() {
+    const valores = {};
+    let hayErrores = false;
+
+    REGLAS_CONFIG.forEach(({ inputId, errorId, min, max, mensaje }) => {
+        const inputEl = document.getElementById(inputId);
+        const errorEl = document.getElementById(errorId);
+        if (!inputEl || !errorEl) return;
+
+        const valor = Number.parseInt(inputEl.value, 10);
+        const esValido = Number.isInteger(valor) && valor >= min && valor <= max;
+
+        if (!esValido) {
+            errorEl.textContent = `⚠ ${mensaje}`;
+            errorEl.classList.remove('oculto');
+            hayErrores = true;
+            return;
+        }
+
+        errorEl.textContent = '';
+        errorEl.classList.add('oculto');
+        valores[inputId] = valor;
+    });
+
+    return {
+        hayErrores,
+        valores
+    };
+}
+
 /* ================================================================
    CONFIGURACIONES
 ================================================================ */
@@ -83,6 +188,8 @@ export function abrirConfig() {
         document.getElementById('cfg-agua-total').value = config.aguaActual;
         document.getElementById('cfg-comida-total').value = config.comidaActual;
     }
+
+    limpiarErroresConfig();
 }
 
 /**
@@ -95,17 +202,21 @@ export function guardarConfig() {
         return;
     }
 
-    // ===== LEER DEL DOM =====
-    const nuevaDuracion = Math.max(5,
-        parseInt(document.getElementById('cfg-duracion-turno').value) || 10);
-    const electricidadPorCiudadano = Math.max(0, parseInt(document.getElementById('cfg-elec-ciudadano').value) || 0);
-    const aguaPorCiudadano = Math.max(0, parseInt(document.getElementById('cfg-agua-ciudadano').value) || 0);
-    const comidaPorCiudadano = Math.max(0, parseInt(document.getElementById('cfg-comida-ciudadano').value) || 0);
-    const beneficioServicio = Math.max(1, parseInt(document.getElementById('cfg-beneficio-servicio').value) || 10);
-    const tasaCrecimiento = Math.min(3, Math.max(1, parseInt(document.getElementById('cfg-tasa-crecimiento').value) || 3));
-    const energiaTotal = Math.max(0, parseInt(document.getElementById('cfg-energia-total').value) || 0);
-    const aguaTotal = Math.max(0, parseInt(document.getElementById('cfg-agua-total').value) || 0);
-    const comidaTotal = Math.max(0, parseInt(document.getElementById('cfg-comida-total').value) || 0);
+    const { hayErrores, valores } = validarCamposConfig();
+    if (hayErrores) {
+        return;
+    }
+
+    // ===== LEER DEL DOM (solo valores validados) =====
+    const nuevaDuracion = valores['cfg-duracion-turno'];
+    const aguaPorCiudadano = valores['cfg-agua-ciudadano'];
+    const electricidadPorCiudadano = valores['cfg-elec-ciudadano'];
+    const comidaPorCiudadano = valores['cfg-comida-ciudadano'];
+    const energiaTotal = valores['cfg-energia-total'];
+    const aguaTotal = valores['cfg-agua-total'];
+    const comidaTotal = valores['cfg-comida-total'];
+    const beneficioServicio = valores['cfg-beneficio-servicio'];
+    const tasaCrecimiento = valores['cfg-tasa-crecimiento'];
 
     // ===== ACTUALIZAR OBJETO CONFIG Local =====
     config.electricidadPorCiudadano = electricidadPorCiudadano;

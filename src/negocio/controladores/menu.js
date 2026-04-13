@@ -24,13 +24,11 @@ import {
     obtenerMapaTextoCargado, 
     obtenerDimensionesSlider,
     inicializarConfigurador, 
-    reiniciarConfigurador, 
-    limpiarMapaCargado 
+    reiniciarConfigurador
 } from './MapaConfiguradorManager.js';
 import { 
     validarFormulario, 
-    limpiarFormulario, 
-    ocultarErrorForm 
+    limpiarFormulario
 } from './FormularioValidator.js';
 import { 
     leerPartidaDesdeArchivoJSON 
@@ -43,8 +41,6 @@ const CLAVE_PARTIDA        = 'partida';          // usada por StorageManager / J
 const CLAVE_CONFIG_NUEVA   = 'config-nueva-partida';
 const CLAVE_ACCION         = 'accion-inicio';
 const RUTA_JUEGO           = './index.html';     // relativa desde presentacion/vistas/
-
-const MAPA_MIN = 15;
 
 /* ================================================================
    REFERENCIAS AL DOM

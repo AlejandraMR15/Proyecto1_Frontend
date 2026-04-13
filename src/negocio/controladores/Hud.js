@@ -18,6 +18,7 @@ import {
     actualizarTimerDOM,
     iniciarTimerTurno,
     detenerTimerTurno,
+  onInicioTurnoReal,
     onNuevoTurno,
     observarSidebar,
     configurarTooltipsRecursos,
@@ -103,10 +104,15 @@ function initHUD() {
     /* ----------------------------------------------------------
        5. Interceptar ejecutarTurno para refrescar el HUD
     ---------------------------------------------------------- */
+    window.onInicioTurnoReal = onInicioTurnoReal;
+
     const ejecutarTurnoOriginal = juego.ejecutarTurno.bind(juego);
     juego.ejecutarTurno = function () {
+      const turnoAntes = juego.numeroTurno;
         ejecutarTurnoOriginal();
+      if (juego.numeroTurno !== turnoAntes) {
         onNuevoTurno();
+      }
     };
 
     /* ----------------------------------------------------------

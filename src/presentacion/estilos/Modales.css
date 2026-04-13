@@ -258,6 +258,16 @@
     border-color: #5a9abf;
 }
 
+.campo-error {
+    font-size: 0.72rem;
+    color: #ff5f5f;
+    line-height: 1.3;
+}
+
+.oculto {
+    display: none !important;
+}
+
 /* ---- RANKING — tabla ---- */
 #ranking-tabla-wrap {
     overflow-x: auto;

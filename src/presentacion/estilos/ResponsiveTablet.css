@@ -242,26 +242,26 @@
     /* ── BOTÓN RUTA: encima del botón clima (stack derecho) ── */
     #btn-calcular-ruta {
         position: fixed !important;
-        bottom: calc(16px + 48px + 6px + 48px + 6px) !important;
-        right: 8px !important;
-        left: auto !important;
-        top: auto !important;
+        top: 6px !important;
+        left: calc(var(--sb-width) + 112px) !important;
+        right: auto !important;
+        bottom: auto !important;
         width: 48px !important;
         height: 48px !important;
         font-size: 0.46rem !important;
-        transition: none !important;
+        transition: left 0.14s steps(4) !important;
     }
 
     body.sidebar-cerrado #btn-calcular-ruta {
-        right: 8px !important;
+        left: 112px !important;
     }
 
     body.sidebar-construccion-abierto #btn-calcular-ruta {
-        bottom: calc(16px + 48px + 6px + 48px + 6px) !important;
+        top: 6px !important;
     }
 
     body.panel-noticias-abierto #btn-calcular-ruta {
-        right: calc(var(--sb-width) + 16px) !important;
+        left: calc(var(--sb-width) + 112px) !important;
     }
 
     /* ── RECURSOS: aún más hacia la derecha ── */

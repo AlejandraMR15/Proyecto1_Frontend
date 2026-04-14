@@ -7,8 +7,8 @@
 /* ---- Botón "Calcular ruta" ---- */
 #btn-calcular-ruta {
     position: fixed;
-    top: 12px;
-    left: 494px; /* 280px sidebar + 190px perfil + 12px gap + 12px margen */
+    top: 86px;
+    left: 280px;
     z-index: 210;
 
     display: flex;
@@ -37,9 +37,9 @@
                 left 0.14s steps(4);
 }
 
-/* Cuando el sidebar está cerrado, mover igual que el perfil */
+/* Cuando el sidebar está cerrado, alinear con el perfil pero debajo de él */
 body.sidebar-cerrado #btn-calcular-ruta {
-    left: 226px; /* 12px margen + 190px perfil + 12px gap + 12px margen */
+    left: 12px;
 }
 
 #btn-calcular-ruta:hover {

@@ -293,8 +293,8 @@
     /* ── BOTÓN RUTA: encima del botón clima (stack derecho) ── */
     #btn-calcular-ruta {
         position: fixed !important;
-        /* widgets: bottom=8px, noticias=36px, gap=4px, clima=36px, gap=4px, ruta=36px */
-        bottom: calc(8px + 36px + 4px + 36px + 4px) !important;
+        /* Subirlo para que no se cruce con el panel de turno en landscape */
+        bottom: 132px !important;
         right: 6px !important;
         left: auto !important;
         top: auto !important;
@@ -310,12 +310,11 @@
     /* Mantener alineación exacta con widgets también cuando el sidebar está cerrado */
     body.sidebar-cerrado #btn-calcular-ruta {
         right: 6px !important;
-        left: auto !important;
     }
 
     /* Landscape móvil: al abrir construcción NO se mueve nada (override sobre tablet) */
     body.sidebar-construccion-abierto:not(.panel-noticias-abierto) #btn-calcular-ruta {
-        bottom: calc(8px + 36px + 4px + 36px + 4px) !important;
+        bottom: 132px !important;
         right: 6px !important;
         left: auto !important;
         top: auto !important;

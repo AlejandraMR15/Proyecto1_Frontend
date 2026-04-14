@@ -1,56 +1,119 @@
-# Proyecto1_Frontend
+# Ciudad Virtual — City Builder Game
 
-## Estado Actual Del Juego
+Simulador urbano desarrollado como proyecto del curso de Desarrollo Frontend. El jugador asume el rol de alcalde de una ciudad virtual, con la responsabilidad de construir infraestructura, gestionar recursos, atender a los ciudadanos y hacer crecer su ciudad turno a turno.
 
-El proyecto se encuentra en una etapa avanzada de implementación. La base del juego ya está construida, no se identifican errores mayores, y gran parte de los requerimientos de historias de usuario ya están cubiertos. Lo que falta es terminar de conectar y ajustar funcionalidades que ya existen parcialmente.
+## Tecnologías
 
-En resumen: el sistema está bastante completo y estable para seguir cerrando detalles finales.
+- HTML5, CSS3 y JavaScript puro (sin frameworks ni librerías externas)
+- Arquitectura por capas: `acceso_datos`, `modelos`, `negocio`, `presentacion`
+- Persistencia con `localStorage` a través de `StorageManager`
 
-## Qué Hay Implementado
+## Requisitos
 
-- Estructura por capas (`acceso_datos`, `modelos`, `negocio`, `presentacion`).
-- Lógica principal del juego con control de estado, ejecución de turnos y pausa/reanudación.
-- Modelado de ciudad, mapa, construcciones, recursos y ciudadanos.
-- Tipos de edificios y procesamiento base de efectos por turno.
-- Renderizado de grilla y vista de juego en frontend.
-- Menú principal con flujo de nueva partida / continuar.
-- Persistencia base con `localStorage` (guardar/cargar datos del juego).
-- Integración inicial con APIs externas (clima, noticias, región, ruta).
-- Base de ranking y puntuación ya creada para su integración completa.
+- Navegador moderno con soporte para ES Modules
+- Python 3.x con `flask` y `flask-cors` instalados
+- Conexión a internet para las APIs externas (clima, noticias, región)
 
-## Funcionalidades Disponibles
+## Cómo ejecutar
 
-- Crear ciudad y configurar parámetros iniciales.
-- Simulación por turnos con actualización de estado de ciudad y recursos.
-- Construcciones con costos, consumo y efectos básicos.
-- Gestión inicial de población/ciudadanos y cálculos asociados.
-- Guardado y carga de partida en su versión actual.
-- Interacción visual del mapa y elementos de la ciudad.
+Ejecutar el archivo `iniciar.bat`. Esto levanta el microservicio de rutas y el servidor HTTP del frontend, y abre automáticamente el navegador en el menú principal.
 
-## Observaciones Importantes
+También se puede iniciar manualmente:
 
-- Hay que tener muy en cuenta los métodos de serialización porque puede que hayan errores.
-- No hay errores mayores; lo principal pendiente es terminar de implementar/conectar algunas funcionalidades que ya existen, pero aún no están completamente integradas.
+```bash
+# Microservicio de rutas (en /ms_smart_city)
+py main.py
 
-## Pendientes Principales
+# Servidor frontend
+py -m http.server 8080 --bind 0.0.0.0
+```
 
-Falta organizar y cerrar de forma integral:
+Luego abrir `http://localhost:8080/src/presentacion/vistas/menu.html`.
 
-- Flujo de construir y demoler construcciones.
-- Manejo completo del turno.
-- Manejo completo del ranking y la puntuación.
-- Exportaciones e importaciones de la ciudad y el mapa a JSON.
-- Guardar y cargar partida (cubriendo todos los casos).
-- Cargar mapa desde JSON.
-- Desglose detallado de recursos.
-- Casos de GameOver.
+## Estructura del proyecto
 
-## Historias De Usuario Pendientes
+```
+src/
+├── acceso_datos/          # Acceso a localStorage, APIs externas e importación de mapas
+│   ├── API/               # ApiClima, ApiNoticias, ApiRegion, ApiDijkstra
+│   ├── StorageManager.js  # Único punto de acceso a localStorage
+│   ├── CiudadMapper.js    # Reconstrucción de ciudad desde JSON
+│   ├── ImportadorCiudad.js
+│   └── MapImporter.js     # Carga y validación de mapas desde TXT
+├── modelos/               # Entidades del dominio
+│   ├── api/               # Noticia, Clima, Ruta, CiudadRegion
+│   ├── ciudad.js
+│   ├── Ciudadano.js
+│   ├── Mapa.js
+│   ├── recursos.js
+│   └── construccion/      # Edificio, Residencial, Comercial, Industrial, etc.
+├── negocio/               # Lógica de negocio y controladores
+│   ├── logica/            # Juego, SistemaTurnos, GestorCiudadanos, LogicaDeTurnos, Puntuacion...
+│   └── controladores/     # HUD, menús, renderizado, rutas, widgets...
+└── presentacion/
+    ├── estilos/            # Archivos CSS por componente y responsive
+    └── vistas/             # index.html (juego) y menu.html
+```
 
-En términos de cobertura funcional, falta terminar de incorporar/ajustar las historias de usuario:
+## Funcionalidades implementadas
 
-- `2 - 10` - construcción
-- `14 - 20` - visualización recursos y apis
-- Las de visualización en móvil, tablet y pc 
+**Gestión de ciudad**
+- Creación de ciudad con nombre, alcalde, región geográfica de Colombia y tamaño de mapa (15×15 a 30×30)
+- Carga de mapa prediseñado desde archivo TXT
+- Exportación e importación de ciudad a/desde JSON
+- Guardado automático cada 30 segundos y guardado manual
 
-Nota: en general, los requerimientos de las historias ya están muy completos; lo que resta son ajustes de condiciones específicas y detalles de cierre para dejarlas al 100%.
+**Construcción**
+- Vías, edificios residenciales, comerciales, industriales, de servicio, plantas de utilidad y parques
+- Validación de celda vacía, presupuesto disponible y vía adyacente obligatoria
+- Demolición con reembolso del 50% y gestión de ciudadanos afectados
+- Modal de información de cada edificio con estadísticas en tiempo real
+
+**Recursos y economía**
+- Ciclo de producción y consumo por turno: dinero, electricidad, agua y comida
+- Desglose de recursos con producción, consumo y balance neto por turno
+- Historial de recursos de los últimos 20 turnos
+- Game Over por dinero, electricidad o agua negativos
+
+**Ciudadanos**
+- Creación automática por turno con condiciones de vivienda, empleo y felicidad
+- Asignación automática de vivienda y empleo
+- Cálculo individual de felicidad según condiciones de vida y servicios
+- Eliminación de ciudadanos con felicidad crítica sostenida
+- Animación visual de ciudadanos moviéndose por las vías del mapa
+
+**Sistema de rutas**
+- Cálculo de ruta óptima entre dos edificios mediante algoritmo Dijkstra (microservicio Python)
+- Visualización animada de la ruta sobre el mapa isométrico
+
+**Puntuación y ranking**
+- Fórmula de puntuación con base, bonificaciones y penalizaciones
+- Desglose detallado visible en el HUD
+- Ranking persistente con top 10, exportable a JSON
+
+**APIs externas**
+- Clima en tiempo real de la ciudad geográfica seleccionada (OpenWeatherMap)
+- Noticias actuales de Colombia (NewsAPI)
+- Listado de ciudades colombianas (api-colombia.com)
+
+**Interfaz y experiencia**
+- Vista isométrica con cuadrícula generada por CSS y SVG
+- Diseño responsive para móvil (portrait y landscape), tablet y desktop
+- Atajos de teclado: `B` construir, `R` vías, `D` demoler, `Space` pausa, `S` guardar, `ESC` cancelar
+- Modal de pausa con configuraciones ajustables en tiempo real
+
+## APIs utilizadas
+
+[OpenWeatherMap](https://openweathermap.org/api): Clima actual de la región de la ciudad
+[NewsAPI](https://newsapi.org/): Noticias recientes
+[api-colombia.com](https://api-colombia.com/): Listado de ciudades colombianas
+Microservicio (Flask): Cálculo de rutas con Dijkstra
+
+## Claves de API
+
+Las claves se configuran en un archivo `keys.js` en la raíz del proyecto:
+
+```js
+export const NEWS_KEY = 'tu_clave_newsapi';
+export const OPENWEATHER_KEY = 'tu_clave_openweather';
+```

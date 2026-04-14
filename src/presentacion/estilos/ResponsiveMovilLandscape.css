@@ -114,8 +114,13 @@
     /* ── CATEGORÍAS: sin acordeón, siempre visibles ── */
     .sidebar .cat-arrow { display: none !important; }
 
+    /* Anular override de tablet en estados normal / abierto / cerrado */
     .sidebar > .sidebar-body .cat-items,
-    .sidebar .cat-items {
+    .sidebar .cat-items,
+    .sidebar .category[data-open="false"] .cat-items,
+    .sidebar > .sidebar-body .category[data-open="false"] .cat-items,
+    .sidebar .category[data-open="true"] .cat-items,
+    .sidebar > .sidebar-body .category[data-open="true"] .cat-items {
         display: block !important;
         max-height: 9999px !important;
         height: auto !important;
@@ -124,26 +129,6 @@
         padding: 2px 0 !important;
         opacity: 1 !important;
         visibility: visible !important;
-    }
-
-    /* Anular override de tablet en data-open=false */
-    .sidebar .category[data-open="false"] .cat-items,
-    .sidebar > .sidebar-body .category[data-open="false"] .cat-items {
-        display: block !important;
-        max-height: 9999px !important;
-        height: auto !important;
-        overflow: visible !important;
-        transition: none !important;
-        opacity: 1 !important;
-        visibility: visible !important;
-    }
-
-    /* Anular override de tablet en data-open=true */
-    .sidebar .category[data-open="true"] .cat-items,
-    .sidebar > .sidebar-body .category[data-open="true"] .cat-items {
-        max-height: 9999px !important;
-        overflow: visible !important;
-        transition: none !important;
     }
 
     /* ── BUILD ITEMS ── */
@@ -290,39 +275,46 @@
     .desglose-total-valor { font-size: 0.50rem !important; }
     .desglose-total-wrap  { padding: 5px 6px !important; }
 
-    /* ── BOTÓN RUTA: encima del botón clima (stack derecho) ── */
+    /* ── BOTÓN RUTA: encima del turno (bloque inferior izquierdo) ── */
     #btn-calcular-ruta {
         position: fixed !important;
-        /* Subirlo para que no se cruce con el panel de turno en landscape */
-        bottom: 132px !important;
-        right: 6px !important;
-        left: auto !important;
+        bottom: 100px !important;
+        left: calc(var(--sb-width) + 92px) !important;
+        right: auto !important;
         top: auto !important;
         width: 36px !important;
         height: 36px !important;
         font-size: 0.36rem !important;
         padding: 0 !important;
-        transition: right 0.25s ease,
+        transition: left 0.14s steps(4),
             background var(--transition, 0.14s steps(4)),
             border-color var(--transition, 0.14s steps(4)) !important;
     }
 
-    /* Mantener alineación exacta con widgets también cuando el sidebar está cerrado */
+    /* Al cerrar sidebar, desplazar exactamente igual que el bloque del turno */
     body.sidebar-cerrado #btn-calcular-ruta {
-        right: 6px !important;
+        left: 92px !important;
     }
 
-    /* Landscape móvil: al abrir construcción NO se mueve nada (override sobre tablet) */
+    /* Landscape móvil: con construcción abierto conservar la misma lógica del turno */
     body.sidebar-construccion-abierto:not(.panel-noticias-abierto) #btn-calcular-ruta {
-        bottom: 132px !important;
-        right: 6px !important;
-        left: auto !important;
+        bottom: 100px !important;
+        left: calc(var(--sb-width) + 92px) !important;
+        right: auto !important;
         top: auto !important;
     }
 
-    /* Cuando noticias está abierto, mover igual que los widgets */
+    /* Cuando noticias está abierto, NO mover el botón de ruta */
     body.panel-noticias-abierto #btn-calcular-ruta {
-        right: var(--noticias-shift-right) !important;
+        bottom: 100px !important;
+        left: calc(var(--sb-width) + 92px) !important;
+        right: auto !important;
+        top: auto !important;
+    }
+
+    /* Si noticias se abre con sidebar cerrado, mantener la misma posición cerrada */
+    body.panel-noticias-abierto.sidebar-cerrado #btn-calcular-ruta {
+        left: 92px !important;
     }
 
     /* ── RECURSOS: aún más hacia la derecha ── */
@@ -420,7 +412,7 @@
     /* Con el btn-ruta encima, los botones quedan (de abajo a arriba):
        btn-noticias: bottom=8, h=36 → top=44
        btn-clima:    bottom=48, h=36 → top=84, centro=66px
-       btn-ruta:     bottom=92, h=36
+    btn-ruta:     bottom=100, h=36
        Infobox: right = 6+36+8=50px, ancho=160px, bottom=8px */
     .clima-infobox {
         right: calc(6px + 36px + 8px) !important;

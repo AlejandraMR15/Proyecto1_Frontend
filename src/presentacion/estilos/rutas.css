@@ -42,6 +42,18 @@ body.sidebar-cerrado #btn-calcular-ruta {
     left: 12px;
 }
 
+/* Desktop: botón de ruta al costado derecho del perfil */
+@media (min-width: 1025px) {
+    #btn-calcular-ruta {
+        top: 12px;
+        left: 486px;
+    }
+
+    body.sidebar-cerrado #btn-calcular-ruta {
+        left: 218px;
+    }
+}
+
 #btn-calcular-ruta:hover {
     background: var(--bg-cat-hover, #2e4460);
     border-color: var(--border-hi, #5a9abf);

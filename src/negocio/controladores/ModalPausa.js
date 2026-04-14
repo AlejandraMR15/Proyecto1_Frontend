@@ -80,7 +80,7 @@ export function reanudarJuego() {
     if (juego.EstadoDeJuego.estadoActual === 'game_over') return;
 
     juego.reanudarJuego();
-    btnPausa.textContent = '';
+    btnPausa.textContent = '⏸';
     btnPausa.classList.remove('pausado');
     if (window.movimientoCiudadanos) window.movimientoCiudadanos.iniciar();
     document.getElementById('viewport')?.classList.remove('bloqueado');

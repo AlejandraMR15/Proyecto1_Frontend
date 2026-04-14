@@ -291,20 +291,8 @@
             border-color var(--transition, 0.14s steps(4)) !important;
     }
 
-    /* Al cerrar sidebar, desplazar exactamente igual que el bloque del turno */
-    body.sidebar-cerrado #btn-calcular-ruta {
-        left: 92px !important;
-    }
-
-    /* Landscape móvil: con construcción abierto conservar la misma lógica del turno */
-    body.sidebar-construccion-abierto:not(.panel-noticias-abierto) #btn-calcular-ruta {
-        bottom: 100px !important;
-        left: calc(var(--sb-width) + 92px) !important;
-        right: auto !important;
-        top: auto !important;
-    }
-
-    /* Cuando noticias está abierto, NO mover el botón de ruta */
+    /* En estados abiertos (construcción/noticias), mantener el mismo anclaje base */
+    body.sidebar-construccion-abierto:not(.panel-noticias-abierto) #btn-calcular-ruta,
     body.panel-noticias-abierto #btn-calcular-ruta {
         bottom: 100px !important;
         left: calc(var(--sb-width) + 92px) !important;
@@ -312,7 +300,8 @@
         top: auto !important;
     }
 
-    /* Si noticias se abre con sidebar cerrado, mantener la misma posición cerrada */
+    /* En sidebar cerrado, mantener posición cerrada incluso si noticias está abierto */
+    body.sidebar-cerrado #btn-calcular-ruta,
     body.panel-noticias-abierto.sidebar-cerrado #btn-calcular-ruta {
         left: 92px !important;
     }

@@ -432,28 +432,43 @@ body.menu-body {
 
     body.menu-body {
         display: block;
-        min-height: 100dvh;
         height: 100dvh;
-        overflow: hidden !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        -webkit-overflow-scrolling: touch !important;
+        padding: 0;
+        margin: 0;
     }
 
     .pantalla {
-        min-height: 100dvh;
-        height: 100dvh;
+        width: 100%;
+        height: auto;
         padding: 12px;
         background-attachment: scroll;
+        display: none;
+    }
+
+    .pantalla.activa {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: auto;
+        min-height: 100dvh;
+        padding: 12px;
     }
 
     #pantalla-menu {
         align-items: center;
-        overflow: hidden;
+        overflow: visible;
     }
 
     #pantalla-formulario {
         align-items: flex-start;
-        overflow-y: auto;
-        overflow-x: hidden;
-        -webkit-overflow-scrolling: touch;
+        justify-content: flex-start;
+        padding-top: 12px;
+        padding-bottom: 12px;
     }
 
     .menu-contenedor,

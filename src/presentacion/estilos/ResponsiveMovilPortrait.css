@@ -437,4 +437,23 @@
 
     /* Ocultar badges de desktop */
     #btn-pausa::after, #sidebarTab::after { display: none; }
+
+    /* ── RANKING: scroll horizontal en mobile portrait ── */
+    .ranking-panel-body {
+        overflow-x: auto !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+    }
+
+    #ranking-tabla {
+        table-layout: auto !important;
+        min-width: 100%;
+        width: max-content;
+    }
+
+    #ranking-tabla th,
+    #ranking-tabla td {
+        min-width: 50px;
+        white-space: nowrap;
+    }
 }

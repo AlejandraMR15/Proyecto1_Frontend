@@ -243,17 +243,18 @@
     #btn-calcular-ruta {
         position: fixed !important;
         top: 6px !important;
-        left: calc(var(--sb-width) + 112px) !important;
+        left: calc(var(--sb-width) + 96px) !important;
         right: auto !important;
         bottom: auto !important;
         width: 48px !important;
         height: 48px !important;
         font-size: 0.46rem !important;
+        z-index: 410 !important;
         transition: left 0.14s steps(4) !important;
     }
 
     body.sidebar-cerrado #btn-calcular-ruta {
-        left: 112px !important;
+        left: 96px !important;
     }
 
     body.sidebar-construccion-abierto #btn-calcular-ruta {
@@ -261,7 +262,7 @@
     }
 
     body.panel-noticias-abierto #btn-calcular-ruta {
-        left: calc(var(--sb-width) + 112px) !important;
+        left: calc(var(--sb-width) + 96px) !important;
     }
 
     /* ── RECURSOS: aún más hacia la derecha ── */
